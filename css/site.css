@@ -1,0 +1,326 @@
+
+.container-fluid{
+	margin-left: 200px;
+    /*padding-left:15%;
+    padding-right:5%;*/
+    padding-bottom:20px;
+}
+
+.spacersm {
+    margin-top:10px;
+}
+
+/* The sidenav */
+.sidenav {
+  height: 100%;
+  width: 200px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #111; /*#7BA5F0;*/
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+
+#dash_title{
+	/*display: inline-block;*/
+	font: 20px sans-serif;
+	font-weight: bold;
+	text-align: left;
+	margin-top: 8px;
+	margin-left: 20px;
+	margin-bottom: 4px;
+}
+.dash_subtitle{
+	display: block;
+	font: 12px sans-serif;
+	/*font-weight: bold; */
+	font-style: italic;
+	text-align: left;
+	margin-top: 0px;
+	margin-left: 20px;
+	margin-bottom: 0px;
+}
+
+p span{
+	display: block;
+}
+
+.logo{
+	margin-top: 5px;
+	margin-left: 10px;
+	width: 80px;  
+	height: 35px;
+	display: inline-block;
+}
+
+.more_info {
+	font: 11px sans-serif;
+	text-align: right;
+	margin-top: 0px;
+	margin-right: 0px;
+}
+
+#menu_title {
+	margin-top: 40px;
+	font: 16px sans-serif;
+	color: white;
+	text-align: center;
+}
+
+#map-container {
+	margin-left: 20px;
+	margin-top: 20px;
+}
+
+#map {
+	height: 480px;  /*90%*/
+	width: 100%;  /*90%*/
+	margin-left: 0px;
+	margin-right: 0px;   
+	margin-top: 0px;
+	/* float: right; */  
+}
+
+.map_title {
+	font: 14px sans-serif;
+	font-weight: bold;
+	margin-top: 10px;
+	margin-left: 0px;
+	margin-bottom: 3px;
+}
+
+/*.map_subtitle{
+	font: 14px sans-serif;
+	margin-top: 0px;
+	margin-left: 0px;
+	margin-bottom: 5px;
+	font-weight: bold; 
+}*/
+
+.mapinfo {
+    padding: 5px 6px;
+    font: 11px/11px Arial, Helvetica, sans-serif;
+    background-color:white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+ }
+
+.mapinfo h4 {
+    margin: 0 0 5px;
+    color: #777;
+}
+ 
+/*.mapinfo_title {
+	font-size: 12px;
+	font-weight: bold;
+	text-align: right;
+	margin-top: 0px;
+	margin-bottom: 3px;
+ } */
+
+/*.mapinfo_stat{
+	font-size: 11px;
+	text-align: right;
+	margin-top: 0px;
+	margin-bottom: 2px;
+ }*/
+ 
+.maplegend {
+ 	width: 100%;
+	/*min-width: 160px;
+	max-width: 200px;*/
+    padding:5px;
+    background-color:white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 4px;
+ }
+ 
+/*.maplegend_title {
+	font-size: 14px;
+	font-weight: bold;
+	text-align: left;
+	margin-bottom: 10px;
+ } */
+/*.maplegend_cat{
+	height: 10px;
+	font-size: 12px;
+	text-align: left;
+	margin-top: 0px; 	
+	white-space: nowrap;
+	/* display: inline;  
+ }*/
+ 
+/*.mapLegend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+	margin-left: 5px;
+    margin-right: 10px;
+    opacity: 1;
+}*/
+
+#map-legend {
+    vertical-align: top;
+    font: 11px sans-serif;
+}
+.legend-axis path, .legend-axis tick, .legend-axis line {
+  	fill: none;
+  	stroke: none;
+}
+
+.legend-title {
+  	font-size: 12px;
+  	fill: #666666; /*#4F4F4F;*/
+  	font-weight: 300;
+}
+
+
+
+
+/* Drop-down disease list */
+.select {
+  margin-top: 80px;
+  margin-left: 14px;
+  background: url(../images/dropdown.png) no-repeat 92% center;  
+  height: 25px;
+  overflow: hidden;
+  width: 160px;
+}
+
+.select select {
+   background: transparent;
+   border: none;
+   font-size: 11px;
+   height: 25px;
+   padding: 5px; /* If you add too much padding here, the options won't show in IE */
+   width: 200px;
+}
+
+.rounded {
+   -webkit-border-radius: 20px;
+   -moz-border-radius: 20px;
+   border-radius: 20px;
+}
+.yellow {background-color: #eec111;}
+.yellow select {color: #000;}
+.blue {background-color: #3b8ec2;}
+.blue select {color: #fff;}
+
+
+#btn_reset {
+	margin-top: 420px;
+  	margin-left: 0px;
+  	height: 25px;
+  	width: 200px;
+  	overflow: hidden;
+}
+
+/*.sprite { background: url('sprite.png') no-repeat top left; width: 189px;  } 
+.sprite.dropdown { background-position: 0 0; width: 22px; height: 30px; } 
+.sprite.extent_lg { background-position: 0 -40px; width: 128px; height: 128px; } 
+.sprite.extent_sm { background-position: 0 -178px; width: 28px; height: 28px; } 
+.sprite.msf-logo { background-position: 0 -216px; width: 320px; height: 147px; } 
+.sprite.msf-logo2 { background-position: 0 -373px; width: 283px; height: 213px; } 
+.sprite.pause { background-position: 0 -596px; height: 187px; } 
+.sprite.play { background-position: 0 -793px; height: 184px; } */
+
+ 
+.button {
+    background-color: #cccccc; /* #3160b2; */
+    border: none;
+	border-radius: 8px;
+	outline: none;
+	/*outline-color: #ffff00;*/
+    color: black; /* white; */
+    padding: 4px 11px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 11px;
+    width: 160px;
+    /*margin: 4px 2px;*/
+	margin-left: 14px;
+	margin-bottom: 6px;
+    cursor: pointer;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+}
+
+.button:hover {
+	box-shadow: 0 11px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+	background-color: #E50000;
+	color: white;
+}
+
+.button:active {
+  border-radius: 8px;
+  background-color: #3b8ec2; /* #264b8b; */
+  color: white;   /* #ffff00; */
+  box-shadow: 0 4px #666;
+  transform: translateY(3px); 
+  /* border: 1px solid #979797;  */
+}
+
+/*.button_sm {
+    background-color: #cccccc; /* #3160b2; 
+    border: none;
+	border-radius: 8px;
+	outline: none;
+	/*outline-color: #ffff00;
+    color: black; /* white; 
+    padding: 4px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 11px;
+    /*margin: 4px 2px;
+	margin-left: 0px;
+	margin-right: 0px;
+	margin-bottom: 8px;
+    cursor: pointer;
+    -webkit-transition-duration: 0.4s; /* Safari 
+    transition-duration: 0.4s;
+}*/
+
+/*.button_sm:hover {
+	box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+	/* background-color: #264b8b 
+}
+
+.button_sm:active {
+  border-radius: 8px;
+  background-color: #89457c; /* #264b8b; 
+  color: white;   /* #ffff00; 
+  box-shadow: 0 4px #666;
+  transform: translateY(3px); 
+  /* border: 1px solid #979797;  
+}*/
+
+/*.button.play{
+    float: left; 
+    width: 40px;
+    height: 40px;
+	margin-top: 0px;
+    margin-left: 0px;
+	background: url(../images/play.png);
+	background-size: 30px 30px;
+	background-position:center;
+	background-repeat:no-repeat; 
+}
+
+.button.pause{
+	width: 40px;
+    height: 40px;
+	margin-top: 0px;
+    margin-left: 0px;
+	background: url(../images/pause.png);
+	background-size: 30px 30px;
+	background-position:center;
+	background-repeat:no-repeat; 
+}*/
+
