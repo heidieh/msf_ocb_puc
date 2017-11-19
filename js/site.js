@@ -1,15 +1,36 @@
 ///////////////////////////////////////////////////
 //Next dev steps:
 // - use sprite to load png imgs
+// - make zone/prov buttons more aesthetic
 // - add prov overlay to zones view 
-//		- use topojson neighborhoods? (if neighbour has diff prov then make thicker)
 // - add composite line series
 // - add time range selector
 // - add play/pause functionality
 //
 // Recommendations from others:
 // - add prov overlay to zones view
+// - Help Intro.js
 ///////////////////////////////////////////////////
+
+// - examples online: http://techslides.com/over-2000-d3-js-examples-and-demos
+// - brush handles: https://bl.ocks.org/mbostock/4349545
+// - brush snapping: https://bl.ocks.org/mbostock/6232537
+// - vertical bar chart brush (nbremer): http://bl.ocks.org/nbremer/d8dff2fa37345d54f9e58eb74db460d0
+// - https://bl.ocks.org/misanuk/fc39ecc400eed9a3300d807783ef7607
+// - brush snapping: http://bl.ocks.org/emeeks/8899a3e8c31d4c5e7cfd
+
+// - leaflet overlay: http://jsfiddle.net/FH9VF/11/
+
+
+
+/***********************/
+/*****  DATA PREP  *****/
+/***********************/
+//Global namespace
+var g = {};
+var date_extent = [0,100];
+[data,date_extent] = addEpitime(data,g);
+console.log(g);
 
 /*************************/
 /*****  CROSSFILTER  *****/
@@ -17,12 +38,18 @@
 var cf = crossfilter(data);
 console.log(data);
 
-cf.epiWkDim = cf.dimension(function(d) {return d.epiwk;});
-cf.malDim = cf.dimension(function(d){if (d.mal!='') {return d.mal;}});
+//cf.epiWkDim = cf.dimension(function(d) {return d.epiwk;});
+cf.epiDateDim = cf.dimension(function(d) {return d.epidate});
+cf.malDim = cf.dimension(function(d){if (d.mal!='') {return d.mal}});
 cf.provDim = cf.dimension(function(d) {if (d.prov=='') {return 'cod300xxx';} else {return d.prov_pc}});  
 cf.provDim2 = cf.dimension(function(d) {if (d.prov=='') {return 'cod300xxx';} else {return d.prov_pc}});  //to filter on only
 cf.zsDim = cf.dimension(function(d) {if (d.zs_pc=='') {return 'cod200xxx';} else {return d.zs_pc}});
 cf.zsDim2 = cf.dimension(function(d) {if (d.zs_pc=='') {return 'cod200xxx';} else {return d.zs_pc}});  //to filter on only
+
+cf.casesByEpiDateGroup = cf.epiDateDim.group().reduceSum(function (d) {return d.cas;});
+console.log("Cases by EpiDate: ", cf.casesByEpiDateGroup.top(Infinity));
+cf.deathsByEpiDateGroup = cf.epiDateDim.group().reduceSum(function (d) {return d.dec;});
+console.log("Deaths by EpiDate: ", cf.deathsByEpiDateGroup.top(Infinity));
 
 cf.casesByZsGroup = cf.zsDim.group().reduceSum(function (d) {return d.cas;});
 console.log("Cases by Zone: ", cf.casesByZsGroup.top(Infinity));
@@ -40,7 +67,7 @@ console.log("Deaths by Province: ", cf.deathsByZsGroup.top(Infinity));
 /********************************/
 
 //Global namespace
-var g = {};
+//var g = {};
 
 //Create list of diseases in data
 var lookup = {};
@@ -63,6 +90,7 @@ g.mapcolors.color_scale.YlBr = {color_min: '#ffffcc', color_max: '#800026'};
 g.mapcolors.color_scale.Red = {color_min: '#fee0d2', color_max: '#a50f15'};
 g.mapcolors.color_zero = '#a8a8a8'; //'#d3d3d3';
 g.mapcolors.color_boundary = '#2f4f4f';  //dark slate grey    //'#6495ED';
+g.mapcolors.color_rivers = '#1673ae'; //'#3b8ec2';
 
 //Declare 'current' variables
 g.currentvars = {};
@@ -74,34 +102,30 @@ g.currentvars.currentMapLyr = 'prov';    //'prov' or 'zone'
 g.currentvars.currentSum;
 g.currentvars.currentZones = {pcodes: [], names: []};
 g.currentvars.currentProvs = {pcodes: [], names: []};
+g.currentvars.currentEpiDates = {};
+g.currentvars.currentEpiDates.min_default = new Date(2015,7,31);
+g.currentvars.currentEpiDates.max_default = new Date(2015,10,30);
+g.currentvars.currentEpiDates.min = g.currentvars.currentEpiDates.min_default; //new Date(2015,7,31);
+g.currentvars.currentEpiDates.max = g.currentvars.currentEpiDates.max_default; //new Date(2015,10,30);
+g.currentvars.currentEpiDates.all = []; //[new Date(2015,2,2), new Date(2015,2,9)];
+g.currentvars.currentEpiWeek = {};
+g.currentvars.currentEpiWeek.min = getEpiWeek(g.currentvars.currentEpiDates.min);
+g.currentvars.currentEpiWeek.max = getEpiWeek(g.currentvars.currentEpiDates.max);
+
 
 
 /***************/
 /****  MAP  ****/
 /***************/
-/*function colorAllGeoms(data) {
-	data.features.forEach(function(d,i) {
-		d3.selectAll('.dashgeom'+d.properties.pcode);  
-	});
-}*/
-
-/*function colorAllGeoms() {
-	//console.log("in colorAllGeoms: ", data)
-	casesByZsGroup.top(Infinity).forEach(function(d,i) {    //d=pcode, i=count
-		//console.log(d,i);
-		color = getFillColor(d.key);   
-		d3.selectAll('.dashgeom'+d.key)
-			.attr('fill', color);
-			//.attr('weight', 2)
-			//.attr('dashArray', '2')
-			//.attr('fillOpacity', 0.5); 
-	});
-}
-*/
 
 function getCurrentPolyVars() {
 	//console.log("current layer = ", g.currentvars.currentMapLyr);
 	var currentValues = [];
+
+	cf.epiDateDim.filterAll();
+    //HEIDI - do we need to consider .filterRange for exceptions, e.g. min==max or min>max?
+	cf.epiDateDim.filterRange([g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max]);
+	
 	if (g.currentvars.currentMapLyr=='zone') {
 		if (g.currentvars.currentStat.abrv=='cas') {
 			currentValues = cf.casesByZsGroup.top(Infinity);
@@ -129,7 +153,7 @@ function getCurrentPolyVars() {
 	//console.log("min - max: ", g.currentvars.currentMinVal, g.currentvars.currentMaxVal);
 
 	//console.log("g.mapcolors: ", g.mapcolors.color_scale, g.currentvars.currentStat);
-	var color = d3.scale.linear().domain([0,g.currentvars.currentMaxVal])
+	var color = d3.scaleLinear().domain([0,g.currentvars.currentMaxVal])
     	.interpolate(d3.interpolateHcl)
     	//.range([d3.rgb(g.mapcolors.color_min), d3.rgb(g.mapcolors.color_max)]);
     	.range([d3.rgb(g.mapcolors.color_scale[g.currentvars.currentStat.color_scale].color_min), d3.rgb(g.mapcolors.color_scale[g.currentvars.currentStat.color_scale].color_max)]);
@@ -142,6 +166,7 @@ function getCurrentPolyVars() {
 		currentPolyVars[currentValues[i].key]['value'] = currentValues[i].value;
 		currentValues[i].value==0? currentPolyVars[currentValues[i].key]['color'] = g.mapcolors.color_zero : currentPolyVars[currentValues[i].key]['color'] = color(currentValues[i].value); 
 	}
+
     return currentPolyVars;
 }
 
@@ -267,7 +292,7 @@ function updateMapLegend(min, max) {
 		.attr("transform", "translate(" + (margin.left + width/2) + "," + (margin.top + height/2) + ")");
 
 	//console.log('current color scale: ', g.currentvars.currentStat.color_scale);
-	var colorScale = d3.scale.linear()
+	var colorScale = d3.scaleLinear()
 		.domain([0,g.currentvars.currentMaxVal])
     	.interpolate(d3.interpolateHcl)
     	//.range([d3.rgb(g.mapcolors.color_min), d3.rgb(g.mapcolors.color_max)]);
@@ -276,7 +301,7 @@ function updateMapLegend(min, max) {
 	
 
 	//Extra scale since color scale is interpolated
-	var tempScale = d3.scale.linear()
+	var tempScale = d3.scaleLinear()
 		.domain([0, max])
 		.range([0, width]);   
 
@@ -338,13 +363,13 @@ function updateMapLegend(min, max) {
 		.text(g.currentvars.currentStat.full);
 
 	//Set scale for x-axis
-	var xScale = d3.scale.linear()
+	var xScale = d3.scaleLinear()
 		.range([-legendWidth/2, legendWidth/2])
 		.domain([0, max]);
 
 	//Define x-axis
-	var xAxis = d3.svg.axis()
-		.orient("bottom")
+	var xAxis = d3.axisBottom()
+		//.orient("bottom")
 		.ticks(numTicks)
 		.tickFormat(function(d) {if (d==0) {return '';} else {return d3.format(",.0f")(d);} })
 		.scale(xScale);
@@ -369,7 +394,7 @@ function updateMapLegend(min, max) {
 
 
 
-function generateMap(id, data, responseText_zs, responseText_prov) { 		
+function generateMap(id, data, responseText_zs, responseText_prov, responseText_riv) { 		
 	//console.log("in generateMap");
 
 	currentMapData = getCurrentPolyVars();
@@ -389,13 +414,13 @@ function generateMap(id, data, responseText_zs, responseText_prov) {
             	}
     }
 
-    /*function style_prov_outline(feat, i){
+    function style_prov_outline(feat, i){
         return {fillOpacity: 0,
-                weight: 3,
-                color: g.mapcolors.color_boundary, 
-            	className: 'dashgeom dashgeom'+feat.properties.pcode
+                weight: 1.8,
+                color: 'black', //g.mapcolors.color_boundary, 
+            	//className: 'dashgeom dashgeom'+feat.properties.pcode
             	}
-    }*/
+    }
 
     /*function style_prov(feat, i){
         return {fillColor: 'pink',
@@ -405,6 +430,14 @@ function generateMap(id, data, responseText_zs, responseText_prov) {
             	className: 'dashgeom dashgeom'+feat.properties.pcode
             	}
     }*/
+
+    function style_riv(feat, i){
+        return {fillOpacity: 0,
+                weight: 1,
+                color: g.mapcolors.color_rivers, 
+            	className: 'dashgeom rivers'
+            	}
+    }
 
     var baselayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution:'&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -424,9 +457,11 @@ function generateMap(id, data, responseText_zs, responseText_prov) {
     try {
         topoob = JSON.parse(responseText_zs)
         geozs = topojson.feature(topoob, topoob.objects.rdc_zs)
+        //geozs_neighbors = topojson.neighbors(topoob.objects.rdc_zs.geometries);
+                    
         geozs.features = geozs.features.map(function(fm,i){
             var ret = fm;
-            //ret.indie = i;
+            ret.indie = i;
             return ret
         });
         /*geojson_zone = L.geoJson(geozs, {style:style, onEachFeature: onEachFeature})
@@ -438,32 +473,55 @@ function generateMap(id, data, responseText_zs, responseText_prov) {
         geojson_zone = {};
         console.log(e)
     }
+    //console.log('zone neighbors: ', geozs_neighbors);
     //console.log(geozs)
 
 
- //try/catch json parsing of responseText
-    try {
-        topoob2 = JSON.parse(responseText_prov)
-        geoprov = topojson.feature(topoob2, topoob2.objects.rdc_prov)
-        geoprov.features = geoprov.features.map(function(fm,i){
-            var ret = fm;
-            //ret.indie = i;
-            return ret
-        });
-        /*geojson_prov = L.geoJson(geoprov, {style:style_prov, onEachFeature: onEachFeature})
+ 	//try/catch json parsing of responseText
+	try {
+	    topoob2 = JSON.parse(responseText_prov)
+	    geoprov = topojson.feature(topoob2, topoob2.objects.rdc_prov)
+	    geoprov.features = geoprov.features.map(function(fm,i){
+	        var ret = fm;
+	        //ret.indie = i;
+	        return ret
+	    });
+	    /*geojson_prov = L.geoJson(geoprov, {style:style_prov, onEachFeature: onEachFeature})
 					.addTo(map);*/
-        /*geojson_prov = L.geoJson(geoprov, {style:style_prov_outline})
-					.addTo(map);
-        }*/
-        //geojson_prov = L.geoJson(geoprov, {style:style_prov});
-        geojson_prov = L.geoJson(geoprov, {style:style, onEachFeature: onEachFeature});
+	    //geojson_prov_outline = L.geoJson(geoprov, {style:style_prov_outline});
+	    //geojson_prov = L.geoJson(geoprov, {style:style_prov});
+	    geojson_prov = L.geoJson(geoprov, {style:style, onEachFeature: onEachFeature});
 		geojson_prov.addTo(map);
-    }
-    catch(e){
-        geojson_prov = {};
-        console.log(e)
-    }
-    //console.log(geoprov)
+	}
+	catch(e){
+	    geojson_prov = {};
+	    console.log(e)
+	}
+	//console.log(geoprov)
+
+	//try/catch json parsing of responseText
+	try {
+	    topoob3 = JSON.parse(responseText_riv)
+	    georiv = topojson.feature(topoob3, topoob3.objects.rdc_rivers)
+	    georiv.features = georiv.features.map(function(fm,i){
+	        var ret = fm;
+	        //ret.indie = i;
+	        return ret
+	    });
+	    /*geojson_prov = L.geoJson(geoprov, {style:style_prov, onEachFeature: onEachFeature})
+					.addTo(map);*/
+	    /*geojson_prov = L.geoJson(geoprov, {style:style_prov_outline})
+					.addTo(map);
+	    }*/
+	    //geojson_prov = L.geoJson(geoprov, {style:style_prov});
+	    geojson_riv = L.geoJson(georiv, {style:style_riv});
+		geojson_riv.addTo(map);
+	}
+	catch(e){
+	    geojson_riv = {};
+	    console.log(e)
+	}
+	//console.log(geoprov)
   
 
 	/*geojson2.on('click', function (e) {
@@ -517,14 +575,15 @@ function generateMap(id, data, responseText_zs, responseText_prov) {
 			fillColor: coco,	//polygon fill color
 			fillOpacity: 0.8	//polygon fill opacity
 		})
-	    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+	    /*if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
             layer.bringToFront();
-        }
+        }*/
         if (g.currentvars.currentMapLyr=='prov') {
         	updateMapInfo('','', layer.feature.properties.name, layer.feature.properties.pcode);
         } else if (g.currentvars.currentMapLyr=='zone') {
 			updateMapInfo(layer.feature.properties.name, layer.feature.properties.pcode, layer.feature.properties.lvl3_name, '');
 		}
+    	
 	}
 
 	function resetHighlight(e){
@@ -552,21 +611,6 @@ function generateMap(id, data, responseText_zs, responseText_prov) {
 		map.fitBounds(e.target.getBounds());
 	}
 
-	/*function selectFeature(e) {
-		console.log("filter by: ", e.target.feature.properties.pcode);
-		var pcode = e.target.feature.properties.pcode;
-		cf.zsDim2.filterAll();
-		cf.provDim2.filterAll();
-		if (g.currentvars.currentMapLyr=='zone') {
-			cf.zsDim2.filter(pcode);
-			//console.log(cf.casesByZsGroup.top(Infinity))
-		} else if (g.currentvars.currentMapLyr=='prov') {
-			cf.provDim2.filter(pcode);
-			//console.log(cf.casesByProvGroup.top(Infinity))
-		};
-		//colorMap();
-		updateAll();
-	}*/
 
 	function selectFeature(e) {
 		//console.log("filter by: ", e.target.feature.properties.pcode);
@@ -615,6 +659,46 @@ function generateMap(id, data, responseText_zs, responseText_prov) {
 		updateAll();
 	}
 
+	/*function selectZone(e) {
+		console.log(e);
+		var clickBounds = L.latLngBounds(e.latlng, e.latlng);
+
+        var intersectingFeatures = [];
+        for (var l in map._layers) {
+          var overlay = map._layers[l];
+          if (overlay._layers) {
+            for (var f in overlay._layers) {
+              var feature = overlay._layers[f];
+              var bounds;
+              if (feature.getBounds) bounds = feature.getBounds();
+              else if (feature._latlng) {
+                bounds = L.latLngBounds(feature._latlng, feature._latlng);
+              }
+              if (bounds && clickBounds.intersects(bounds)) {
+                intersectingFeatures.push(feature);
+                console.log("feature: ", feature)
+              }
+              if (bounds)
+            }
+          }
+          //console.log("overlay: ", overlay);
+        }
+        var html = "Found features: " + intersectingFeatures.length + "<br/>" + intersectingFeatures.map(function(o) {
+          //return o.properties.type
+          //console.log(o);
+          if (o.feature.properties.pcode) {
+          	return o.feature.properties.pcode;
+          } else {
+          	return 'RIVER'
+          }
+        }).join('<br/>');
+
+        map.openPopup(html, e.latlng, {
+          offset: L.point(0, -24)
+        });
+
+	}*/
+
 	function onEachFeature(feature, layer){
 		layer.on({
 			mouseover: highlightFeature,
@@ -623,6 +707,15 @@ function generateMap(id, data, responseText_zs, responseText_prov) {
 			dblclick: zoomToFeature
 		})
 	}
+
+	/*function onZoneFeature(feature, layer){
+		layer.on({
+			//mouseover: highlightZone,
+			//mouseout: resetZoneHighlight, 
+			click: selectZone, 
+			dblclick: zoomToFeature
+		})
+	}*/
 
 	/* function onEachFeature(feature, layer) {	
 		layer.on("mouseover", function(f,l) {
@@ -654,6 +747,16 @@ function generateMap(id, data, responseText_zs, responseText_prov) {
 	return map;
 }
 
+function btn_rivers() {
+	if ($('#btnRiv').hasClass('on')) {   //turn rivers off
+		map.removeLayer(geojson_riv);
+		$('#btnRiv').removeClass('on');
+	} else {							 //turn rivers on
+		geojson_riv.addTo(map);
+		geojson_riv.bringToFront();
+		$('#btnRiv').addClass('on');
+	}
+};
 
 function btn_change_lyr(lyr) {
 	//console.log("change map level to ", lyr);
@@ -664,7 +767,9 @@ function btn_change_lyr(lyr) {
 		$('#btnProv').addClass('on');
 		g.currentvars.currentMapLyr = 'prov'; 
 		map.removeLayer(geojson_zone);		//remove zone layer
+		//map.removeLayer(geojson_prov_outline);
 		geojson_prov.addTo(map);
+		geojson_prov.bringToBack();
 		switchLayerPolys('prov');			//switch to prov layer
 		//updateMap('#map', data);		//should be updateAll here - in case geometries don't match up?
 	} else if ((lyr=='zone') && ($('#btnProv').hasClass('on'))) {	//switch from province to zone
@@ -674,6 +779,9 @@ function btn_change_lyr(lyr) {
 		g.currentvars.currentMapLyr = 'zone'; 
 		map.removeLayer(geojson_prov);		//remove prov layer
 		geojson_zone.addTo(map);
+		geojson_zone.bringToBack();
+		//geojson_prov_outline.addTo(map);
+		//geojson_prov_outline.bringToFront();
 		switchLayerPolys('zone');			//switch to zone layer
 		//updateMap('#map', data);		//should be updateAll here - in case geometries don't match up?
 	}
@@ -750,11 +858,6 @@ function selectManyFeatures(lyr) {
 }
 
 
-function updateMap(id,data) { 
- 	//console.log("In updateMap, map object = ", id, data);
-	colorMap();
-}
-
 
 function getName(pcode, lyr) {
 	var name = '';
@@ -772,19 +875,519 @@ function getName(pcode, lyr) {
 	return name;
 }
 
+
+/*******************************/
+/****  CREATE OTHER CHARTS  ****/
+/*******************************/
+
+// - brush snapping - https://bl.ocks.org/mbostock/6232537
+// - brush handles - https://bl.ocks.org/mbostock/4349545    https://bl.ocks.org/Fil/2d43867ba1f36a05459c7113c7f6f98a
+// - fix issue with weeks 2015-50 and -51
+// - fix issue with blank pcodes (have one way of dealing with them)
+// * tooltip on bars
+// - y-axis dynamic title
+// * update in filter summary window
+// * change data input on cases/deaths/disease selection
+// * update rest of dashboard
+
+function getCurrentTimeSeriesData() {
+	var timeSeries = [];
+
+	if (g.currentvars.currentStat.abrv=='cas') {
+		timeSeries = cf.casesByEpiDateGroup.top(Infinity);
+	} else if (g.currentvars.currentStat.abrv=='dec') {
+		timeSeries = cf.deathsByEpiDateGroup.top(Infinity);
+	};
+	//console.log("timeSeries: ", timeSeries);
+	return timeSeries;
+}
+
+
+function createTimeSeriesCharts(id1, id2) {
+	//console.log("IN CREATE CHARTS");
+
+	var margin = {top: 10, right: 20, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
+	    margin2 = {top: 10, right: 20, bottom: 20, left: 60}, 
+	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
+	    width2 = $(id2).width() - margin2.left - margin2.right,
+	    height = $(id1).height() - margin.top - margin.bottom,		//height of main svg
+	    height2 = $(id2).height() - margin2.top - margin2.bottom;
+
+	//Render main SVGs
+	svg1 = d3.select(id1)         
+		.append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom);
+
+	svg2 = d3.select(id2)         
+		.append("svg")
+		.attr("width", width2 + margin2.left + margin2.right)
+		.attr("height", height2 + margin2.top + margin2.bottom);
+
+	var x = d3.scaleTime().range([0, width]),   		//x-axis width, accounting for specified margins
+		x2 = d3.scaleTime().range([0, width2]),
+	    y = d3.scaleLinear().range([height, 0]),
+	    y2 = d3.scaleLinear().range([height2, 0]);
+
+	var xAxis = d3.axisBottom(x),
+	    xAxis2 = d3.axisBottom(x2),
+	    yAxis = d3.axisLeft(y).ticks(5);
+
+	svg1.append("defs").append("clipPath")
+	    .attr("id", "clip")
+	  	.append("rect")
+	    .attr("width", width)
+	    .attr("height", height);
+
+	/*svg2.append("defs").append("clipPath")
+	    .attr("id", "clip")
+	  	.append("rect")
+	    .attr("width", width2)
+	    .attr("height", height2);*/
+
+	var focus = svg1.append("g")
+	    .attr("class", "focus")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	var context = svg2.append("g")
+	    .attr("class", "context")
+	    .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+	var time_data = getCurrentTimeSeriesData();
+	x.domain(d3.extent(time_data, function(d) { return d.key; }));
+	y.domain([0, d3.max(time_data, function(d) { return d.value; })]);
+	x2.domain(x.domain());
+	y2.domain(y.domain());
+
+	var orig_bar_width = (width/time_data.length-2);
+	var bar_width = (width/time_data.length-2);			//changing bar width only for focus chart
+
+	focus.selectAll(".bar")
+	    .data(time_data)
+	    .enter().append("rect")
+	    .attr("class", "bar")
+	    .attr("x", function(d) { return x(d.key); })
+	    .attr("y", function(d) { return y(d.value); })
+	    .attr("width", bar_width)
+	    .attr("height", function(d) { return height - y(d.value); });
+
+  	focus.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  	focus.append("g")
+      .attr("class", "axis axis--y")
+      .call(yAxis);
+
+	context.selectAll(".bar2")
+	    .data(time_data)
+	    .enter().append("rect")
+	    .attr("class", "bar2")
+	    .attr("x", function(d) { return x2(d.key); })
+	    .attr("y", function(d) { return y2(d.value); })
+	    .attr("width", orig_bar_width)
+	    .attr("height", function(d) { return height2 - y2(d.value); });
+
+	context.append("g")
+	      .attr("class", "axis axis--x")
+	      .attr("transform", "translate(0," + height2 + ")")
+	      .call(xAxis2);
+
+
+	//add y-axis title
+	focus
+		.append("text")
+		.attr("class", "axis-title")
+		//.attr("transform", "translate(-15," +  (height+margin.bottom)/2 + ") rotate(-90)")
+		.attr("transform", "translate(-40," + (80) + ") rotate(-90)")
+		.text(" ");
+
+
+		//Render grey line showing current year
+	/*	lineGraph.append("line")
+			.attr("class", "year_line")
+			.attr("x1", margin.left + timeScale(currentYr))  
+			.attr("y1", margin.top)    			//+ve value moves down from top
+			.attr("x2", margin.left + timeScale(currentYr))  
+			.attr("y2", height + margin.top)			//-ve value moves up from bottom
+			.attr('stroke', '#c7c9c9')  //light grey
+			//.attr('stroke-dasharray', '5, 5')
+			.attr("stroke-width", 1);	*/
+			
+			
+	 	//Add intro text to linegraph to explain how to add/remove country, regional, and global lines	
+	/*	var g2 = lineGraph.append('text')				//create a group 'g2' in the main svg/'lineGraph' 
+			.attr("class","linegraph_intro")
+			.attr("x", 55)
+			.attr("y", 30)
+			//.attr('font-size', '12px')
+			.style('fill', 'darkOrange')
+			.html('Click on country in map or barchart to add');
+		var g2 = lineGraph.append('text')				 
+			.attr("class","linegraph_intro")
+			.attr("x", 120)
+			.attr("y", 50)
+			.style('fill', 'darkOrange')
+			.html('country line here');
+			.html('double-click any line here to remove'); */
+
+	//return [svg1, svg2];
+
+}
+
+	
+
+
+
+function updateTimeSeriesCharts(id1, id2, time_data) {
+	//console.log("IN UPDATE CHARTS");
+
+	var margin = {top: 10, right: 20, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
+	    margin2 = {top: 10, right: 20, bottom: 20, left: 60}, 
+	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
+	    width2 = $(id2).width() - margin2.left - margin2.right,
+	    height = $(id1).height() - margin.top - margin.bottom,		//height of main svg
+	    height2 = $(id2).height() - margin2.top - margin2.bottom;
+
+	var x = d3.scaleTime().range([0, width]),   		//x-axis width, accounting for specified margins
+		x2 = d3.scaleTime().range([0, width2]),
+	    y = d3.scaleLinear().range([height, 0]),
+	    y2 = d3.scaleLinear().range([height2, 0]);
+
+	//set domains
+	x.domain(d3.extent(time_data, function(d) { return d.key; }));
+	y.domain([0, d3.max(time_data, function(d) { return d.value; })]);
+	x2.domain(x.domain());
+	y2.domain(y.domain());
+	
+	var xAxis = d3.axisBottom(x),
+	    xAxis2 = d3.axisBottom(x2),
+	    yAxis = d3.axisLeft(y).ticks(5);
+
+	//get the width of each bar 
+	var orig_bar_width = (width/time_data.length-2);
+	var bar_width = (width/time_data.length-2);
+	//var barWidth = width / data.length;
+	
+	//select all bars, take them out, and exit previous data set
+	//then add/enter new data set
+	var bar = svg1.select('g').selectAll(".bar")
+					.remove()
+					.exit()
+					.data(time_data)	
+
+	var tooltip = d3.select("body").append("div").attr("class", "toolTip");
+
+	//now give each rectangle corresponding data
+	bar.enter()
+		.append("rect")
+	    .attr("class", "bar")
+	    .attr("x", function(d) { return x(d.key); })
+	    .attr("y", function(d) { return y(d.value); })
+	    .attr("width", bar_width)
+	    .attr("height", function(d) { return height - y(d.value); })
+	    .on("mousemove", function(d){
+            tooltip
+              .style("left", d3.event.pageX - 50 + "px")
+              .style("top", d3.event.pageY - 70 + "px")
+              .style("display", "inline-block")
+              .html("Semaine epi: <b>" + getEpiWeek(d.key) + "</b><br>Semaine du: <b>" + dateFormat(d.key) + "</b><br>Total: <b>" + d.value + "</b>");
+        })
+    	.on("mouseout", function(d){ tooltip.style("display", "none");});
+
+	
+	//left axis
+	svg1.select('.axis--y')
+		.call(yAxis)
+	//bottom axis
+	svg1.select('.axis--x')
+		//.attr("class", "axis axis--x")
+		.call(xAxis)
+		/*.selectAll("text")
+			.style("text-anchor", "end")
+			.attr("dx", "-.8em")
+			.attr("dy", ".15em")
+			.attr("transform", function(d){
+				return "rotate(-65)";
+			});*/
+
+	svg1.select(".axis-title")
+		.text(g.currentvars.currentStat.full);
+
+	
+
+	var bar2 = svg2.select('g').selectAll(".bar2")
+					.remove()
+					.exit()
+					.data(time_data)	
+
+	bar2.enter()
+		.append("rect")
+		.attr("class", "bar2")
+	    .attr("x", function(d) { return x2(d.key); })
+	    .attr("y", function(d) { return y2(d.value); })
+	    .attr("width", orig_bar_width)
+	    .attr("height", function(d) { return height2 - y2(d.value); });
+
+
+	var zoom = d3.zoom()
+	    .scaleExtent([1, Infinity])
+	    .translateExtent([[0, 0], [width, height]])
+	    .extent([[0, 0], [width, height]])
+	    .on("zoom", zoomed);
+
+	var brush = d3.brushX()
+	    .extent([[0, 0], [width2, height2]])
+	    .on("brush", brushmoved)
+	    .on("end", brushend);
+
+
+	if (svg2.selectAll('g.brush').empty()) {
+		//console.log("APPENDING NEW BRUSH");
+		var gBrush = svg2.append("g")
+					    .attr("class", "brush")
+					    .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")")
+				        .call(brush);
+		gBrush.call(brush.move, [g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max].map(x));		
+		//console.log("APPENDING NEW BRUSH - DONE");   
+	} else {
+		//console.log("SELECTING BRUSH")
+		var gBrush = svg2.select('g.brush');
+		brushupdate();
+		//console.log("SELECTING BRUSH - DONE")
+	}
+
+
+	// style brush resize handle
+	// https://github.com/crossfilter/crossfilter/blob/gh-pages/index.html#L466
+/*	var brushResizePath = function(d) {
+		//console.log(d, height, height2)
+	    var e = +(d.type == "e"),
+	        x = e ? 1 : -1,
+	        y = (height2 + margin2.bottom) / 2;
+	    return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
+	}
+
+	var handle = gBrush.selectAll(".handle--custom")
+	  .data([{type: "w"}, {type: "e"}])
+	  .enter().append("path")
+	    .attr("class", "handle--custom")
+	    .attr("stroke", "#000")
+	    .attr("cursor", "ew-resize")
+	    .attr("d", brushResizePath);*/
+
+	/*var handle = gBrush.selectAll(".handle--custom")
+	  .data([{type: "w"}, {type: "e"}])
+	  .enter().append("path")
+	    .attr("class", "handle--custom")
+	    .attr("fill", "#666")
+	    .attr("fill-opacity", 0.8)
+	    .attr("stroke", "#000")
+	    .attr("stroke-width", 1.5)
+	    .attr("cursor", "ew-resize")
+	    .attr("transform", "translate(" + (0) + "," + (20) + ")")
+	    .attr("d", d3.arc()
+	        .innerRadius(0)
+	        .outerRadius((height2 + margin2.bottom) / 3)
+	        .startAngle(0)
+	        .endAngle(function(d, i) { return i ? Math.PI : -Math.PI; }));*/
+
+
+
+	//gBrush.call(brush.move, [new Date(2015,8,1), new Date(2015,11,1)].map(x));    //inital handle positions - 01 Sep 15 - 01 Dec 15
+
+	function brushmoved() {
+		//console.log("IN BRUSHMOVED");
+
+		if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+	    
+	    //var s = d3.event.selection;
+	    var s = d3.event.selection || x2.range();   //range selected or entire range
+	    //console.log(d3.event.selection, x2.range());
+	    //console.log("s: ", s, x2.range());
+	    //console.log("s: ", s);
+	    //console.log("width: ", width);
+	    //console.log("x range, domain: ", x.range(), x.domain());
+	    //console.log("x2 range, domain: ", x2.range(), x2.domain());
+
+	    bar_width = (orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0]);
+	    //console.log("bar_width: ", bar_width)
+	    g.currentvars.currentEpiDates.all = [];
+	    g.currentvars.currentEpiDates.s = s;
+
+
+	    //if (s == x2.range()) {
+	    if ((s[0]==x2.range()[0]) && (s[1]==x2.range()[1])) {  //if full extent
+	    	//console.log("s==x2.range()")
+	        //handle.attr("display", "none");
+	        //svg2.selectAll(".bar2").classed("active", true);
+	        //bar2.classed("active", true);
+
+	        for (var i=0; i<=g.epitime.all.length-1; i++) {
+				g.currentvars.currentEpiDates.all.push(g.epitime.all[i].epiDate);
+			}
+
+	    } else {	        
+	        var sx = s.map(x2.invert);
+	        svg2.selectAll(".bar2").classed("active", function(d) {
+	        	if (sx[0] <= d.key && d.key <= sx[1]) {  	//if bar date is in selected range
+	        		//console.log("ACTIVE: ", sx[0] <= d.key && d.key <= sx[1], d.key);
+	        		g.currentvars.currentEpiDates.all.push(d.key);
+	        	} else {
+	        		//console.log("NOT ACTIVE: ", sx[0] <= d.key && d.key <= sx[1], d.key);
+	        	};
+	        	return sx[0] <= d.key && d.key <= sx[1]; 
+	        });
+	        //handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [ s[i], - height / 4] + ")"; });
+
+	    	x.domain(s.map(x2.invert, x2));
+	    	svg1.select("g").selectAll(".bar")
+	    		.attr("x", function(d) { return x(d.key); })
+	    		.attr("width", bar_width);
+		    svg1.select("g").select(".axis--x").call(xAxis);
+		    svg1.select(".zoom").call(zoom.transform, d3.zoomIdentity
+		        .scale(width / (s[1] - s[0]))
+		        .translate(-s[0], 0));
+	    }
+	    g.currentvars.currentEpiDates.min = new Date(Math.min.apply(null,g.currentvars.currentEpiDates.all));
+	    g.currentvars.currentEpiDates.max = new Date(Math.max.apply(null,g.currentvars.currentEpiDates.all));
+	    g.currentvars.currentEpiWeek.min = getEpiWeek(g.currentvars.currentEpiDates.min);
+		g.currentvars.currentEpiWeek.max = getEpiWeek(g.currentvars.currentEpiDates.max);
+		//console.log("IN BRUSHMOVED - DONE");
+	}
+
+	function brushupdate() {  //called when updating through code, not mousemove
+		//console.log("IN BRUSHUPDATE ", g.currentvars.currentEpiDates);
+		
+		gBrush.call(brush.move, [g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max].map(x));	
+
+		//console.log("IN BRUSHUPDATE ", g.currentvars.currentEpiDates);
+		if ((g.currentvars.currentEpiDates.s[0]==x2.range()[0]) && (g.currentvars.currentEpiDates.s[1]==x2.range()[1])) {  //full extent
+			svg2.selectAll(".bar2").classed("active", true);
+		} else {
+			svg2.selectAll(".bar2").classed("active", function(d) {				
+				/*if (g.currentvars.currentEpiDates.all.indexOf(d.key) != -1) {  	//if bar date is in selected range
+	        		//console.log("ACTIVE: ", g.currentvars.currentEpiDates.all.indexOf(d.key) != -1, d.key);
+	        		//g.currentvars.currentEpiDastes.all.push(d.key);
+	        	} else {
+	        		//console.log("NOT ACTIVE: ", g.currentvars.currentEpiDates.all.indexOf(d.key) != -1, d.key);
+	        	};*/
+	        	return g.currentvars.currentEpiDates.all.indexOf(d.key) != -1;
+	        });
+	    }
+        
+		x.domain([g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max]);
+        var s = [x2(g.currentvars.currentEpiDates.min), x2(g.currentvars.currentEpiDates.max)];
+        //console.log(s);
+
+        bar_width = (orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0]);
+    	//handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [ s[i], - height / 4] + ")"; });
+	
+    	svg1.select("g").selectAll(".bar")
+    		.attr("x", function(d) { return x(d.key); })
+    		.attr("width", bar_width);
+	    svg1.select("g").select(".axis--x").call(xAxis);
+	    svg1.select(".zoom").call(zoom.transform, d3.zoomIdentity
+	        .scale(width / (s[1] - s[0]))
+	        .translate(-s[0], 0));
+	    //console.log("IN BRUSHUPDATE - DONE");
+	}
+
+	function brushend() {
+		//console.log("******** IN BRUSH END *********");
+		//console.log(d3.event.sourceEvent);
+		if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+	    var s = d3.event.selection || x2.range();   //range selected or entire range
+	    //console.log("s: ", s, x2.range());
+	    if ((s[0]==x2.range()[0]) && (s[1]==x2.range()[1])){
+	    	//console.log("FULL EXTENT HERE");
+	    	g.currentvars.currentEpiDates.min = g.epitime.date_extent[0];
+			g.currentvars.currentEpiDates.max = g.epitime.date_extent[1];
+			g.currentvars.currentEpiWeek.min = getEpiWeek(g.currentvars.currentEpiDates.min);
+			g.currentvars.currentEpiWeek.max = getEpiWeek(g.currentvars.currentEpiDates.max);
+			g.currentvars.currentEpiDates.all = [];
+
+			//populate g.currentvars.currentEpiDates.all with all weeks from min to max
+			for (var i=0; i<=g.epitime.all.length-1; i++) {
+				g.currentvars.currentEpiDates.all.push(g.epitime.all[i].epiDate);
+			}
+
+			/*svg2.selectAll(".bar2").classed("active", function(d) {
+				console.log(d.key, g.currentvars.currentEpiDates.all.indexOf(d.key) == -1);
+	        	return g.currentvars.currentEpiDates.all.indexOf(d.key) == -1;
+	        });*/
+	        svg2.selectAll(".bar2").classed("active", true);
+			
+			x.domain([g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max]);
+	        var s = [x2(g.currentvars.currentEpiDates.min), x2(g.currentvars.currentEpiDates.max)];
+	        //console.log(s);
+
+	        bar_width = (orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0]);
+	    	//handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [ s[i], - height / 4] + ")"; });
+		
+	    	svg1.select("g").selectAll(".bar")
+	    		.attr("x", function(d) { return x(d.key); })
+	    		.attr("width", bar_width);
+		    svg1.select("g").select(".axis--x").call(xAxis);
+		    svg1.select(".zoom").call(zoom.transform, d3.zoomIdentity
+		        .scale(width / (s[1] - s[0]))
+		        .translate(-s[0], 0));
+			
+	    }
+
+    	updateMap();
+
+	    //console.log("******** BRUSH END *********");
+	}
+
+	function zoomed() {
+		//console.log("IN ZOOMED");
+	    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+	    var t = d3.event.transform;
+	    x.domain(t.rescaleX(x2).domain());
+	    console.log(t, t.rescaleX(x2).domain(), x.range().map(t.invertX, t));
+	    //focus.select(".area").attr("d", area);
+	    svg1.select("g").selectAll(".bar").attr("x", function(d) { return x(d.key); });
+	    svg1.select("g").selectAll(".bar")
+	    svg1.select("g").select(".axis--x").call(xAxis);
+	    svg2.select("g").select(".brush").call(brush.move, x.range().map(t.invertX, t));
+	    //console.log("IN ZOOMED - DONE");
+	}	
+
+	//console.log("UPDATE CHARTS - DONE");	
+
+};
+
+
+
 /***********************************/
 /****  UPDATE DATA & DASHBOARD  ****/
 /***********************************/	
 
-function updateAll(){
+function updateMap() {
+	currentMapData = getCurrentPolyVars();
+	updateHeadline();
+	updateFiltSum();
+	colorMap();
+}
+
+function updateAll() {
 	//console.log("In updateAll, map object before update: ", map);
 	//console.log("currentMapData: ", currentMapData);
-	currentMapData = getCurrentPolyVars();
+	/*currentMapData = getCurrentPolyVars();
 	//console.log("currentMapData: ", currentMapData);
+	
 	//map = updateMap('#map', data);
 	updateHeadline();
 	updateFiltSum();
-	updateMap('#map', data);
+	//updateMap('#map', data);
+	colorMap();*/
+	updateMap();
+
+	currentTimeSeriesData = getCurrentTimeSeriesData();
+	//console.log("currentTimeSeriesData: ", currentTimeSeriesData);
+	updateTimeSeriesCharts('#timeseries', '#timeseriesbrush', currentTimeSeriesData);
 	//console.log("In updateAll, map object after update: ", map);
 
 	//update map_title & map_subtitle here?
@@ -803,8 +1406,14 @@ var zs_geoms;
 //var geozs = {};
 var geojson_zone;
 var geojson_prov;
+//var geojson_prov_outline;
+var geojson_riv;
 var currentMapData;
+var currentTimeSeriesData;
+//var timeSeriesCharts;
 var legendSvg;
+var svg1, svg2;
+var dateFormat = d3.timeFormat("%d %b %y");
 
 window.onload = function () {
 	//console.log("onload");
@@ -816,6 +1425,7 @@ window.onload = function () {
         req.send();
     var topoob = {};
     geozs = {};
+    //geozs_neighbors = {};
 
     var prov_geoms;
 	var req2 = new XMLHttpRequest();
@@ -826,14 +1436,23 @@ window.onload = function () {
     var topoob2 = {};
     geoprov = {};
 
-    function handler(){
+    var riv_geoms;
+	var req3 = new XMLHttpRequest();
+    var url_riv = 'data/rdc_rivers.json'   
+        req3.open('GET', url_riv, true);
+        req3.onreadystatechange = handler;
+        req3.send();
+    var topoob3 = {};
+    georiv = {};
 
-        if ((req.readyState === XMLHttpRequest.DONE) && (req2.readyState === XMLHttpRequest.DONE))  {
+    function handler(){
+        if ((req.readyState === XMLHttpRequest.DONE) && (req2.readyState === XMLHttpRequest.DONE) && (req3.readyState === XMLHttpRequest.DONE))  {
         	//btn_change_lyr(g.currentvars.currentMapLyr);
-        	map = generateMap('#map', [], req.responseText, req2.responseText);
+        	map = generateMap('#map', [], req.responseText, req2.responseText, req3.responseText);
 			//$('#map').width($('#map').width());  
+			createTimeSeriesCharts('#timeseries', '#timeseriesbrush');
+			//console.log(timeSeriesCharts);
 			updateMapInfo('', '', '', '');
-			//var svg = initMapLegend();
 			updateMapLegend(g.currentvars.currentMinVal, g.currentvars.currentMaxVal);
 			changeDiseaseSelection();
 			changeStatSelection();
@@ -841,32 +1460,6 @@ window.onload = function () {
         }
 
     }
-
-    /*var URL = new Array();
-	URL[0] = 'data/rdc_zs.json';
-	URL[1] = 'data/rdc_zs.json';
-
-	var nRequest = new Array();
-    for (var i=0; i<2; i++){
-	    (function(i) {
-	        nRequest[i] = new XMLHttpRequest();
-	        nRequest[i].open("GET", URL[i], true);
-	        nRequest[i].onreadystatechange = function (oEvent) {
-	            if (nRequest[i].readyState === 4) {
-	                if (nRequest[i].status === 200) {
-	                    //console.log(nRequest[i].responseText);
-	                    //alert(nRequest[i].responseText);
-		            } else {
-		              console.log("Error", nRequest[i].statusText);
-		            }
-	         	}
-	        };
-	        nRequest[i].send(null);
-	    })(i);
-	}
-
-    console.log("nRequest: ", nRequest);*/
-
 
 }
 	
@@ -936,9 +1529,10 @@ function updateFiltSum() {
 		loc_html += '</b>';
 	};
 
+
 	filtSum.innerHTML='<p class="filt-sum-title">Resumé d\'options choisies:</p><i>Pathologie: </i><b>' + g.currentvars.currentDisease + '</b><br/>' + 
 	'<i>Statistique: </i><b>' + g.currentvars.currentStat.full + '</b><br/>' + 
-	'<i>Semaines: </i><b>NA</b><br/>' + loc_html;
+	'<i>Semaines epi: </i><b>' + g.currentvars.currentEpiWeek.min + ' - ' + g.currentvars.currentEpiWeek.max + ' </b><i>(Dates: ' + dateFormat(g.currentvars.currentEpiDates.min) +' - '+ dateFormat(g.currentvars.currentEpiDates.max) + ')</i><br/>' + loc_html;
 }
 
 function btn_filt_sum() {
@@ -961,5 +1555,24 @@ function btn_reset() {
 	cf.provDim2.filterAll();
 	g.currentvars.currentZones = {pcodes: [], names: []};
 	g.currentvars.currentProvs = {pcodes: [], names: []};
+	cf.epiDateDim.filterAll();
+	g.currentvars.currentEpiDates.min = g.currentvars.currentEpiDates.min_default; //new Date(2015,7,31);
+	g.currentvars.currentEpiDates.max = g.currentvars.currentEpiDates.max_default; //new Date(2015,10,30);
 	updateAll();
+}
+
+function btn_selectDates() {
+	g.currentvars.currentEpiDates.min = new Date(2015,2,2);
+	g.currentvars.currentEpiDates.max = new Date(2015,2,31);
+	g.currentvars.currentEpiWeek.min = getEpiWeek(g.currentvars.currentEpiDates.min);
+	g.currentvars.currentEpiWeek.max = getEpiWeek(g.currentvars.currentEpiDates.max);
+	g.currentvars.currentEpiDates.all = [];
+
+	//populate g.currentvars.currentEpiDates.all with all weeks from min to max
+	for (var i=0; i<=g.epitime.all.length-1; i++) {
+		if ((g.currentvars.currentEpiDates.min <= g.epitime.all[i].epiDate) && (g.epitime.all[i].epiDate <= g.currentvars.currentEpiDates.max)) {
+			g.currentvars.currentEpiDates.all.push(g.epitime.all[i].epiDate);
+		}
+	}
+	updateTimeSeriesCharts('#timeseries', '#timeseriesbrush', currentTimeSeriesData);
 }

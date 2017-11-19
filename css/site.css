@@ -6,9 +6,9 @@
     padding-bottom:20px;
 }
 
-.spacersm {
+/*.spacersm {
     margin-top:10px;
-}
+}*/
 
 /* The sidenav */
 .sidenav {
@@ -72,12 +72,12 @@ p span{
 }
 
 #map-container {
-	margin-left: 20px;
-	margin-top: 20px;
+	margin-left: 0px;
+	margin-top: 5px;
 }
 
 #map {
-	height: 480px;  /*90%*/
+	height: 440px;  /*450%*/
 	width: 100%;  /*90%*/
 	margin-left: 0px;
 	margin-right: 0px;   
@@ -86,7 +86,7 @@ p span{
 }
 
 .map_title {
-	font: 14px sans-serif;
+	font: 16px sans-serif;
 	font-weight: bold;
 	margin-top: 10px;
 	margin-left: 0px;
@@ -239,13 +239,13 @@ p span{
   margin-top: 12px;
   padding-left: 14px;
   display: none;
-  max-height: 250px;
+  max-height: 350px;
   overflow: auto;
 }
 
 #btn_reset {
   position: fixed;
-	top: 620px;
+	top: 730px;
 	margin-left: 0px;
 	height: 25px;
 	width: 200px;
@@ -303,15 +303,127 @@ p span{
   margin-left: 14px;
 }
 
-.btn-lyr {
+.btn-lyr, .btn-riv{
   width: 80px;
-  margin-left: 6px;
+  margin-left: 0px;
   float: right;
 }
-.btn-lyr.on, .btn-filt-sum.on {
+
+.btn-lyr.on, .btn-filt-sum.on, .btn-riv.on {
   background-color: #3b8ec2; /* #264b8b; */
   color: white;   /* #ffff00; */
 }
+
+#timeseries{
+  margin-top: 20px;
+  margin-left: 20px;
+  margin-right: 0px;
+  height: 120px;
+  width: 90%; 
+  display: inline-block;
+}
+#timeseriesbrush{
+  margin-top: 20px;
+  margin-left: 20px;
+  margin-right: 0px;
+  height: 60px;
+  width: 90%; 
+  display: inline-block;
+}
+
+.axis text {
+  font: 11px sans-serif;
+}
+  
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis-title {
+  font: 11px sans-serif;
+}
+/*.area {
+  fill: steelblue;
+  clip-path: url(#clip);
+}*/
+
+rect {
+  /*fill-opacity: 0.2;*/
+  transition: fill-opacity 250ms linear;
+}
+
+rect.active {
+  fill-opacity: 1;
+  fill: steelblue;
+  /*stroke: #f00;*/
+}
+
+rect.selection {
+  fill-opacity: 0.4;
+  fill: darkgrey; /*yellow;*/
+}
+
+.bar {
+  fill: steelblue;
+  clip-path: url(#clip);
+}
+.bar2 {
+  fill-opacity: 1;
+  fill: lightgrey;
+  clip-path: url(#clip);
+}
+
+.bar2.active {
+  fill-opacity: 1;
+  fill: steelblue;
+}
+
+
+.context {
+  fill: grey;
+  clip-path: url(#clip);
+}
+
+.context.active {
+  fill: green;
+}
+
+.toolTip {
+  font: 11px sans-serif;
+  border-radius: 8px;
+  /*background-color: white;*/
+  opacity: 0.9;
+  position: absolute;
+  display: none;
+  min-width: 80px;
+  height: auto;
+  background: none repeat scroll 0 0 #ffffff;
+  border: none; /*1px solid #6F257F;*/
+  padding: 6px; /*14px;*/
+  box-shadow: 0 11px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+}
+
+/*.brush rect.extent {
+  fill: steelblue;
+  fill-opacity: 0.125;
+}
+/*Color for the brush resize path 
+.brush .resize path {
+  fill: yellow;  /*#eee;
+  stroke: #666;
+}
+
+.zoom {
+  cursor: move;
+  fill: none;
+  pointer-events: all;
+}*/
+
+
+
+
 
 /*.button_sm {
     background-color: #cccccc; /* #3160b2; 

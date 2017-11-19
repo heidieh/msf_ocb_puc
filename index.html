@@ -18,9 +18,9 @@
         <script src="js/jquery.js"></script>
 		<script src="js/jquery-ui.min.js"></script>
 
-		<!-- <script src="js/d3.v4.min.js" charset="utf-8"></script>  -->
-        <script src="js/d3.js" charset="utf-8"></script>
-		<script src="js/d3-tip.js" charset="utf-8"></script> 
+		<script src="js/d3.v4.min.js" charset="utf-8"></script> 
+        <!-- <script src="js/d3.js" charset="utf-8"></script> -->
+		<!-- <script src="js/d3-tip.js" charset="utf-8"></script>  -->
         <script src="js/crossfilter.v1.min.js" charset="utf-8"></script> 
 		<!-- <script src="js/intro.js"></script>  -->
 
@@ -30,6 +30,8 @@
 		<script src="data/data.js"></script>
 		<script src="data/cod_zs.json"></script>
 		<script src="data/geonames.js"></script>
+
+		<script src="js/epitime.js"></script>
 
 		<!-- <script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -83,48 +85,37 @@
             </div>  
 			
 			
-            <div class="row spacersm" >
-			
-                <!-- <div class="col-md-5"> -->
-					<!-- <div id="statbuttons">
-						<button title="<-2 standard deviations from median weight-for-height of the WHO Child Growth Standards" id="btnWast" class="button on" onclick="btn_currentStatCat('wast');">Wasting</button> 
-						<button title="<-3 standard deviations from median weight-for-height of the WHO Child Growth Standards" id="btnSevWast" class="button" onclick="btn_currentStatCat('sevwast');">Severe wasting</button>
-						<button title="<-2 standard deviations from median height-for-age of the WHO Child Growth Standards" id="btnStunt" class="button" onclick="btn_currentStatCat('stunt');">Stunting</button><br/>
-						<button title="Percentage of children aged 0-59 months" id="btnPrev" class="button button_newrow on" onclick="btn_currentStatType('prev');">Prevalence</button>
-						<button title="Total number of children aged 0-59 months" id="btnBurd" class="button button_newrow" onclick="btn_currentStatType('burd');">Burden</button>
-					</div> -->
-										
-					<!-- <div id = "timeline">
-						<button id="btnPlay" class="button play"></button>
-						<div id="slider-range-max" class="timeslider"> 
-						</div>
-					</div> -->
-		
-                <!-- </div> -->
+            <div class="row" >
 			
 				<div class="col-md-12"> 
-					<div id="sticky-anchor"></div>	
+					<!-- <div id="sticky-anchor"></div>	 -->
+					
 					<div id = "map-container">	
-						<div class = "row">					
+						<div class="row">					
 							<div class="col-md-6">
 								<p class="map_title" id="map_title"></p>
 								<!-- <p class="map_subtitle" id="map_subtitle"></p>  -->
 							</div>											
-							 <div class="col-md-6">
-								<div id="btn_lvls"> 
-									<button id="btnZone" class="btn-lyr button" onclick="btn_change_lyr('zone');">Zones</button>	
-									<button id="btnProv" class="btn-lyr button on" onclick="btn_change_lyr('prov');">Provinces</button>	
-									<!-- <button title="Reset all dashboard settings" id="btnReset" class="button" onclick="btn_reset();" href="#" data-zoom="5" data-position="-4.0,22.0">Réinitialiser</button>  -->					
-								</div> 
-							</div>	
-						</div>
+							 <div class="col-md-3">
+									<button id="btnRiv" class="btn-riv button on" onclick="btn_rivers();">Rivers</button>
+							</div>
+							<div class="col-md-3" id="btn_lvls" class="btn-group btn-group-sm"> 
+								<button id="btnZone" class="btn-lyr button" onclick="btn_change_lyr('zone');">Zones</button>
+								<button id="btnProv" class="btn-lyr button on" onclick="btn_change_lyr('prov');">Provinces</button>	
+							</div>
+								
+						</div>	
 						
 						<div class="row"> 	
-							<div class="col-md-12">
-								<div id="map"></div>
-							</div>
+							<div id="map"></div>
 						</div> 
 						
+					</div>
+
+					<div class="row">
+						<div id="timeseries"></div>
+						<div id="timeseriesbrush"></div>
+						<!-- <button id="btnDates" class="btn-dates button" onclick="btn_selectDates();">March</button> -->
 					</div>
 			
 				</div>  
