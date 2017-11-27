@@ -484,10 +484,10 @@ rect.selection {
   display: none;
   font: 11px sans-serif;
   font-style: italic;
-  width: 115px;
+  width: 110px;
   color: red;
-  margin-top: 70px;
-  margin-left: -15px;
+  margin-top: 2px;
+  margin-left: -5px;
   /*height: 100px;*/
   /*overflow: auto;*/
 }
