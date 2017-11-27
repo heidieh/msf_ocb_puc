@@ -1351,7 +1351,7 @@ $(function() {
     		currentDate = new Date (g.currentvars.currentEpiDates.min);
     	} ;
     	$('#btnStop').css('display','block');   //display Stop button
-    	$('#playMode_text').css('display','block');   //display play mode text under stop button
+    	$('#playMode_text').css('display','inline-block');   //display play mode text under stop button
 		if (playInterval != undefined) {    //in Pause mode (playInterval defined when button is playing)
 			//console.log("PAUSE")
             clearInterval(playInterval);
