@@ -96,8 +96,8 @@
 								<p class="map_title" id="map_title"></p>
 								<!-- <p class="map_subtitle" id="map_subtitle"></p>  -->
 							</div>											
-							 <div class="col-md-3">
-									<button id="btnRiv" class="btn-riv button on" onclick="btn_rivers();">Rivers</button>
+							<div class="col-md-3">
+								<button id="btnRiv" class="btn-riv button on" onclick="btn_rivers();">Rivers</button>
 							</div>
 							<div class="col-md-3" id="btn_lvls" class="btn-group btn-group-sm"> 
 								<button id="btnZone" class="btn-lyr button" onclick="btn_change_lyr('zone');">Zones</button>
@@ -113,9 +113,17 @@
 					</div>
 
 					<div class="row">
-						<div id="timeseries"></div>
-						<div id="timeseriesbrush"></div>
-						<!-- <button id="btnDates" class="btn-dates button" onclick="btn_selectDates();">March</button> -->
+						<div class="col-md-1">
+							<!-- <button id="btnPlayMode" class="button playmode">Enter Play Mode</button> -->
+							<button id="btnPlayPause" class="button play"></button>
+							<button id="btnStop" class="button stop"></button>
+							<p id="playMode_text">Pour réactiver les principales fonctions du dashboard, appuyez sur le bouton ‘stop’</p>
+						</div>
+						<div class="col-md-11">
+							<div id="timeseries"></div>
+							<div id="timeseriesbrush"></div>
+							<!-- <button id="btnDates" class="btn-dates button" onclick="btn_selectDates();">March</button> -->
+						</div>
 					</div>
 			
 				</div>  

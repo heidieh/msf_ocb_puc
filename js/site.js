@@ -3,22 +3,23 @@
 // - use sprite to load png imgs
 // - make zone/prov buttons more aesthetic
 // - add prov overlay to zones view 
-// - add composite line series
-// - add time range selector
-// - add play/pause functionality
+// - add lethality line to Cases chart
+// - add lethality layer in map?
 //
 // Recommendations from others:
 // - add prov overlay to zones view
 // - Help Intro.js
+// - bar chart 
+//     * - epiweek on x-axis, not date
+//		- brush chart default time selection - last 3 months (relative time)
 ///////////////////////////////////////////////////
 
 // - examples online: http://techslides.com/over-2000-d3-js-examples-and-demos
 // - brush handles: https://bl.ocks.org/mbostock/4349545
 // - brush snapping: https://bl.ocks.org/mbostock/6232537
+// - brush snapping: http://bl.ocks.org/emeeks/8899a3e8c31d4c5e7cfd
 // - vertical bar chart brush (nbremer): http://bl.ocks.org/nbremer/d8dff2fa37345d54f9e58eb74db460d0
 // - https://bl.ocks.org/misanuk/fc39ecc400eed9a3300d807783ef7607
-// - brush snapping: http://bl.ocks.org/emeeks/8899a3e8c31d4c5e7cfd
-
 // - leaflet overlay: http://jsfiddle.net/FH9VF/11/
 
 
@@ -28,8 +29,8 @@
 /***********************/
 //Global namespace
 var g = {};
-var date_extent = [0,100];
 [data,date_extent] = addEpitime(data,g);
+//console.log("date_extent: ", date_extent);
 console.log(g);
 
 /*************************/
@@ -111,6 +112,13 @@ g.currentvars.currentEpiDates.all = []; //[new Date(2015,2,2), new Date(2015,2,9
 g.currentvars.currentEpiWeek = {};
 g.currentvars.currentEpiWeek.min = getEpiWeek(g.currentvars.currentEpiDates.min);
 g.currentvars.currentEpiWeek.max = getEpiWeek(g.currentvars.currentEpiDates.max);
+g.currentvars.currentTimeSeries = [];
+g.currentvars.currentAnimation = {};
+g.currentvars.currentAnimation.playMode = 'stop'; //'play', 'pause', or 'stop'
+g.currentvars.currentAnimation.currentEpiDate;
+//g.currentvars.currentAnimation.currentEpiWeek = getEpiWeek(g.currentvars.currentAnimation.currentEpiDate);
+g.currentvars.currentAnimation.maxLegendVal;
+
 
 
 
@@ -123,8 +131,16 @@ function getCurrentPolyVars() {
 	var currentValues = [];
 
 	cf.epiDateDim.filterAll();
-    //HEIDI - do we need to consider .filterRange for exceptions, e.g. min==max or min>max?
-	cf.epiDateDim.filterRange([g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max]);
+    //console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
+    if (g.currentvars.currentAnimation.playMode=='play') {
+    	cf.epiDateDim.filterExact(g.currentvars.currentAnimation.currentEpiDate);
+    } else if (sameDay(g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)) {
+    	console.log("same day ok");
+    	cf.epiDateDim.filterExact(g.currentvars.currentEpiDates.min);
+	} else {  //filter from min date to max date + 1 (+1 is so that it includes max date)
+    	cf.epiDateDim.filterRange([g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 1)]); 
+    };
+	
 	
 	if (g.currentvars.currentMapLyr=='zone') {
 		if (g.currentvars.currentStat.abrv=='cas') {
@@ -143,11 +159,20 @@ function getCurrentPolyVars() {
 	g.currentvars.currentMinVal = 0;
 	g.currentvars.currentMaxVal = 0;
 	g.currentvars.currentSum = 0;
-	for (var i=0; i<=currentValues.length-1; i++) {
-		if (currentValues[i].key != 'cod200xxx') {
-			if (g.currentvars.currentMinVal > currentValues[i].value) {g.currentvars.currentMinVal = currentValues[i].value};
-			if (g.currentvars.currentMaxVal < currentValues[i].value) {g.currentvars.currentMaxVal = currentValues[i].value};
-			g.currentvars.currentSum += currentValues[i].value;
+	if (g.currentvars.currentAnimation.playMode=='play') {
+		g.currentvars.currentMaxVal = g.currentvars.currentAnimation.maxLegendVal;
+		for (var i=0; i<=currentValues.length-1; i++) {
+			if (currentValues[i].key != 'cod200xxx') {
+				g.currentvars.currentSum += currentValues[i].value;
+			}
+		}
+	} else {
+		for (var i=0; i<=currentValues.length-1; i++) {
+			if (currentValues[i].key != 'cod200xxx') {
+				//if (g.currentvars.currentMinVal > currentValues[i].value) {g.currentvars.currentMinVal = currentValues[i].value};
+				if (g.currentvars.currentMaxVal < currentValues[i].value) {g.currentvars.currentMaxVal = currentValues[i].value};
+				g.currentvars.currentSum += currentValues[i].value;
+			}
 		}
 	}
 	//console.log("min - max: ", g.currentvars.currentMinVal, g.currentvars.currentMaxVal);
@@ -166,8 +191,44 @@ function getCurrentPolyVars() {
 		currentPolyVars[currentValues[i].key]['value'] = currentValues[i].value;
 		currentValues[i].value==0? currentPolyVars[currentValues[i].key]['color'] = g.mapcolors.color_zero : currentPolyVars[currentValues[i].key]['color'] = color(currentValues[i].value); 
 	}
-
+	//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
     return currentPolyVars;
+}
+
+
+function getMaxLegendVal() {
+	var maxValue = 0;
+	var values = [];
+
+	for (var i=0; i<=g.currentvars.currentEpiDates.all.length-1; i++) {
+		cf.epiDateDim.filterAll();
+		cf.epiDateDim.filterExact(g.currentvars.currentEpiDates.all[i]).top(Infinity);
+
+		if (g.currentvars.currentMapLyr=='zone') {
+			if (g.currentvars.currentStat.abrv=='cas') {
+				values = cf.casesByZsGroup.top(Infinity);
+			} else if (g.currentvars.currentStat.abrv=='dec') {
+				values = cf.deathsByZsGroup.top(Infinity);
+			};
+		} else if (g.currentvars.currentMapLyr=='prov') {
+			if (g.currentvars.currentStat.abrv=='cas') {
+				values = cf.casesByProvGroup.top(Infinity);
+			} else if (g.currentvars.currentStat.abrv=='dec') {
+				values = cf.deathsByProvGroup.top(Infinity);
+			};
+		};
+
+		//console.log("values, ", g.currentvars.currentEpiDates.all[i], values);
+		for (var j=0; j<=values.length-1; j++) {
+			if (maxValue<values[j].value) {maxValue=values[j].value};
+		}
+
+	}
+
+	//filter dates from min to max+1 (+1 in order to include max date itself)
+	cf.epiDateDim.filterRange([g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 1)]);
+	//console.log("Max Legend Value = ", maxValue);
+	return maxValue;
 }
 
 
@@ -295,9 +356,7 @@ function updateMapLegend(min, max) {
 	var colorScale = d3.scaleLinear()
 		.domain([0,g.currentvars.currentMaxVal])
     	.interpolate(d3.interpolateHcl)
-    	//.range([d3.rgb(g.mapcolors.color_min), d3.rgb(g.mapcolors.color_max)]);
-    	//.range([d3.rgb(g.mapcolors.color_scale[g.currentvars.currentStat.color_scale].color_min), d3.rgb(g.mapcolors.color_scale[g.currentvars.currentStat.color_scale].color_max)]);
-		.range([d3.rgb(g.mapcolors.color_scale[g.currentvars.currentStat.color_scale].color_min), d3.rgb(g.mapcolors.color_scale[g.currentvars.currentStat.color_scale].color_max)]);
+    	.range([d3.rgb(g.mapcolors.color_scale[g.currentvars.currentStat.color_scale].color_min), d3.rgb(g.mapcolors.color_scale[g.currentvars.currentStat.color_scale].color_max)]);
 	
 
 	//Extra scale since color scale is interpolated
@@ -336,7 +395,6 @@ function updateMapLegend(min, max) {
 
 	//Draw zero rectangle
 	legendsvg.append("rect")
-		//.attr("class", "legendZero")
 		.attr("x", -legendWidth/2)
 		.attr("y", 0)
 		.attr("rx", 8/2)
@@ -392,8 +450,6 @@ function updateMapLegend(min, max) {
 
 
 
-
-
 function generateMap(id, data, responseText_zs, responseText_prov, responseText_riv) { 		
 	//console.log("in generateMap");
 
@@ -443,7 +499,7 @@ function generateMap(id, data, responseText_zs, responseText_prov, responseText_
         attribution:'&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }); 
 
-    var map = L.map('map', {
+    map = L.map('map', {
         center: [-4.0,22.0],  
         zoom: 5,
         minZoom: 2,
@@ -613,91 +669,53 @@ function generateMap(id, data, responseText_zs, responseText_prov, responseText_
 
 
 	function selectFeature(e) {
-		//console.log("filter by: ", e.target.feature.properties.pcode);
-		var pcode = e.target.feature.properties.pcode;
-		if (g.currentvars.currentMapLyr=='zone') {
-			if (g.currentvars.currentZones.pcodes.indexOf(pcode) == -1) {  //if not selected in map
-				g.currentvars.currentZones.pcodes.push(pcode);
-				g.currentvars.currentZones.names.push(getName(pcode,'zone'));
-				cf.zsDim2.filterAll();
-				cf.zsDim2.filterFunction(function (d) {
-					return (g.currentvars.currentZones.pcodes.indexOf(d)!=-1);
-				});
-			} else {	//if already selected them remove it
-				g.currentvars.currentZones.pcodes.splice(g.currentvars.currentZones.pcodes.indexOf(pcode), 1);  //find pcode and remove it
-				g.currentvars.currentZones.names.splice(g.currentvars.currentZones.names.indexOf(getName(pcode,'zone')), 1); 
-				if (g.currentvars.currentZones.pcodes.length==0) {		//if it had been the only zone
-					cf.zsDim2.filterAll();
-				} else {
+		if (g.currentvars.currentAnimation.playMode == 'stop') {
+			//console.log("filter by: ", e.target.feature.properties.pcode);
+			var pcode = e.target.feature.properties.pcode;
+			if (g.currentvars.currentMapLyr=='zone') {
+				if (g.currentvars.currentZones.pcodes.indexOf(pcode) == -1) {  //if not selected in map
+					g.currentvars.currentZones.pcodes.push(pcode);
+					g.currentvars.currentZones.names.push(getName(pcode,'zone'));
 					cf.zsDim2.filterAll();
 					cf.zsDim2.filterFunction(function (d) {
 						return (g.currentvars.currentZones.pcodes.indexOf(d)!=-1);
 					});
-				}
-			};
-		} else if (g.currentvars.currentMapLyr=='prov') {
-			if (g.currentvars.currentProvs.pcodes.indexOf(pcode) == -1) {  //if not selected in map
-				g.currentvars.currentProvs.pcodes.push(pcode);
-				g.currentvars.currentProvs.names.push(getName(pcode,'prov'));
-				cf.provDim2.filterAll();
-				cf.provDim2.filterFunction(function (d) {
-					return (g.currentvars.currentProvs.pcodes.indexOf(d)!=-1);
-				});
-			} else {	//if already selected them remove it
-				g.currentvars.currentProvs.pcodes.splice(g.currentvars.currentProvs.pcodes.indexOf(pcode), 1);  //find pcode and remove it
-				g.currentvars.currentProvs.names.splice(g.currentvars.currentProvs.names.indexOf(getName(pcode,'prov')), 1); 
-				if (g.currentvars.currentProvs.pcodes.length==0) {		//if it had been the only province
-					cf.provDim2.filterAll();
-				} else {
+				} else {	//if already selected them remove it
+					g.currentvars.currentZones.pcodes.splice(g.currentvars.currentZones.pcodes.indexOf(pcode), 1);  //find pcode and remove it
+					g.currentvars.currentZones.names.splice(g.currentvars.currentZones.names.indexOf(getName(pcode,'zone')), 1); 
+					if (g.currentvars.currentZones.pcodes.length==0) {		//if it had been the only zone
+						cf.zsDim2.filterAll();
+					} else {
+						cf.zsDim2.filterAll();
+						cf.zsDim2.filterFunction(function (d) {
+							return (g.currentvars.currentZones.pcodes.indexOf(d)!=-1);
+						});
+					}
+				};
+			} else if (g.currentvars.currentMapLyr=='prov') {
+				if (g.currentvars.currentProvs.pcodes.indexOf(pcode) == -1) {  //if not selected in map
+					g.currentvars.currentProvs.pcodes.push(pcode);
+					g.currentvars.currentProvs.names.push(getName(pcode,'prov'));
 					cf.provDim2.filterAll();
 					cf.provDim2.filterFunction(function (d) {
 						return (g.currentvars.currentProvs.pcodes.indexOf(d)!=-1);
 					});
-				}
+				} else {	//if already selected them remove it
+					g.currentvars.currentProvs.pcodes.splice(g.currentvars.currentProvs.pcodes.indexOf(pcode), 1);  //find pcode and remove it
+					g.currentvars.currentProvs.names.splice(g.currentvars.currentProvs.names.indexOf(getName(pcode,'prov')), 1); 
+					if (g.currentvars.currentProvs.pcodes.length==0) {		//if it had been the only province
+						cf.provDim2.filterAll();
+					} else {
+						cf.provDim2.filterAll();
+						cf.provDim2.filterFunction(function (d) {
+							return (g.currentvars.currentProvs.pcodes.indexOf(d)!=-1);
+						});
+					}
+				};
 			};
-		};
-		updateAll();
+			updateAll();
+		}
 	}
-
-	/*function selectZone(e) {
-		console.log(e);
-		var clickBounds = L.latLngBounds(e.latlng, e.latlng);
-
-        var intersectingFeatures = [];
-        for (var l in map._layers) {
-          var overlay = map._layers[l];
-          if (overlay._layers) {
-            for (var f in overlay._layers) {
-              var feature = overlay._layers[f];
-              var bounds;
-              if (feature.getBounds) bounds = feature.getBounds();
-              else if (feature._latlng) {
-                bounds = L.latLngBounds(feature._latlng, feature._latlng);
-              }
-              if (bounds && clickBounds.intersects(bounds)) {
-                intersectingFeatures.push(feature);
-                console.log("feature: ", feature)
-              }
-              if (bounds)
-            }
-          }
-          //console.log("overlay: ", overlay);
-        }
-        var html = "Found features: " + intersectingFeatures.length + "<br/>" + intersectingFeatures.map(function(o) {
-          //return o.properties.type
-          //console.log(o);
-          if (o.feature.properties.pcode) {
-          	return o.feature.properties.pcode;
-          } else {
-          	return 'RIVER'
-          }
-        }).join('<br/>');
-
-        map.openPopup(html, e.latlng, {
-          offset: L.point(0, -24)
-        });
-
-	}*/
 
 	function onEachFeature(feature, layer){
 		layer.on({
@@ -707,42 +725,6 @@ function generateMap(id, data, responseText_zs, responseText_prov, responseText_
 			dblclick: zoomToFeature
 		})
 	}
-
-	/*function onZoneFeature(feature, layer){
-		layer.on({
-			//mouseover: highlightZone,
-			//mouseout: resetZoneHighlight, 
-			click: selectZone, 
-			dblclick: zoomToFeature
-		})
-	}*/
-
-	/* function onEachFeature(feature, layer) {	
-		layer.on("mouseover", function(f,l) {
-      //console.log("MOUSEOVER: ", f.target.feature.properties.name)
-			//infodata = [f.target.feature.properties.name, '2015','HA', 'HOOO']; //getInfoData(f.target.feature.properties.adm0_iso);
-			/*if (infodata[0]=='') {
-				infodata[0] = f.target.feature.properties.name_eng,
-				infodata[1] = currentYr
-			}; 
-			updateInfo(f.target.feature.properties.name + ', ' + f.target.feature.properties.lvl3_name, getValue(f.target.feature.properties.pcode));
-		});
-		layer.on("mouseout", function(f,l) {
-      //console.log("MOUSEOUT: ", f.target.feature.properties.name)
-			updateInfo('','');
-		}); 
-		layer.on("click", function(f,l) {
-			if (getInfoData(f.target.feature.properties.adm0_iso)[0] != '') {		//if there exists data for this feature
-				addCountryLine('#linegraph', f.target.feature.properties.adm0_iso, 'perm');
-			};
-		}); 
-		layer.on("dblclick", function(f,l) {			
-			if (getInfoData(f.target.feature.properties.adm0_iso)[0] != '') {		//if there exists data for this feature
-				removeCountryLine('#linegraph', f.target.feature.properties.adm0_iso, 'perm');
-			};
-			//zoomToFeature;
-		}); 
-	} */
 
 	return map;
 }
@@ -876,19 +858,10 @@ function getName(pcode, lyr) {
 }
 
 
+
 /*******************************/
 /****  CREATE OTHER CHARTS  ****/
 /*******************************/
-
-// - brush snapping - https://bl.ocks.org/mbostock/6232537
-// - brush handles - https://bl.ocks.org/mbostock/4349545    https://bl.ocks.org/Fil/2d43867ba1f36a05459c7113c7f6f98a
-// - fix issue with weeks 2015-50 and -51
-// - fix issue with blank pcodes (have one way of dealing with them)
-// * tooltip on bars
-// - y-axis dynamic title
-// * update in filter summary window
-// * change data input on cases/deaths/disease selection
-// * update rest of dashboard
 
 function getCurrentTimeSeriesData() {
 	var timeSeries = [];
@@ -899,6 +872,7 @@ function getCurrentTimeSeriesData() {
 		timeSeries = cf.deathsByEpiDateGroup.top(Infinity);
 	};
 	//console.log("timeSeries: ", timeSeries);
+	g.currentvars.currentTimeSeries = timeSeries;
 	return timeSeries;
 }
 
@@ -954,13 +928,15 @@ function createTimeSeriesCharts(id1, id2) {
 	    .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
 	var time_data = getCurrentTimeSeriesData();
-	x.domain(d3.extent(time_data, function(d) { return d.key; }));
+	console.log("time_data: ", time_data);
+	//x.domain(d3.extent(time_data, function(d) { return d.key; }));
+	x.domain([g.epitime.date_extent[0], d3.timeDay.offset(g.epitime.date_extent[1], 7)]);
 	y.domain([0, d3.max(time_data, function(d) { return d.value; })]);
 	x2.domain(x.domain());
 	y2.domain(y.domain());
 
-	var orig_bar_width = (width/time_data.length-2);
-	var bar_width = (width/time_data.length-2);			//changing bar width only for focus chart
+	var orig_bar_width = (width/time_data.length);
+	var bar_width = (width/time_data.length)-0.5;		//changing bar width only for focus chart  //0.5 for bar spacing
 
 	focus.selectAll(".bar")
 	    .data(time_data)
@@ -1000,39 +976,13 @@ function createTimeSeriesCharts(id1, id2) {
 		.append("text")
 		.attr("class", "axis-title")
 		//.attr("transform", "translate(-15," +  (height+margin.bottom)/2 + ") rotate(-90)")
-		.attr("transform", "translate(-40," + (80) + ") rotate(-90)")
+		.attr("transform", "translate(-45," + (87) + ") rotate(-90)")
 		.text(" ");
 
 
-		//Render grey line showing current year
-	/*	lineGraph.append("line")
-			.attr("class", "year_line")
-			.attr("x1", margin.left + timeScale(currentYr))  
-			.attr("y1", margin.top)    			//+ve value moves down from top
-			.attr("x2", margin.left + timeScale(currentYr))  
-			.attr("y2", height + margin.top)			//-ve value moves up from bottom
-			.attr('stroke', '#c7c9c9')  //light grey
-			//.attr('stroke-dasharray', '5, 5')
-			.attr("stroke-width", 1);	*/
-			
-			
-	 	//Add intro text to linegraph to explain how to add/remove country, regional, and global lines	
-	/*	var g2 = lineGraph.append('text')				//create a group 'g2' in the main svg/'lineGraph' 
-			.attr("class","linegraph_intro")
-			.attr("x", 55)
-			.attr("y", 30)
-			//.attr('font-size', '12px')
-			.style('fill', 'darkOrange')
-			.html('Click on country in map or barchart to add');
-		var g2 = lineGraph.append('text')				 
-			.attr("class","linegraph_intro")
-			.attr("x", 120)
-			.attr("y", 50)
-			.style('fill', 'darkOrange')
-			.html('country line here');
-			.html('double-click any line here to remove'); */
-
-	//return [svg1, svg2];
+	//Render vertical line overlapping current bar in play mode
+	svg1.append("line")
+		.attr("class", "playBar_line");
 
 }
 
@@ -1056,7 +1006,8 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	    y2 = d3.scaleLinear().range([height2, 0]);
 
 	//set domains
-	x.domain(d3.extent(time_data, function(d) { return d.key; }));
+	//x.domain(d3.extent(time_data, function(d) { return d.key; }));
+	x.domain([g.epitime.date_extent[0], d3.timeDay.offset(g.epitime.date_extent[1], 7)]);
 	y.domain([0, d3.max(time_data, function(d) { return d.value; })]);
 	x2.domain(x.domain());
 	y2.domain(y.domain());
@@ -1066,9 +1017,8 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	    yAxis = d3.axisLeft(y).ticks(5);
 
 	//get the width of each bar 
-	var orig_bar_width = (width/time_data.length-2);
-	var bar_width = (width/time_data.length-2);
-	//var barWidth = width / data.length;
+	var orig_bar_width = (width/time_data.length);
+	var bar_width = (width/time_data.length) - 0.5;		//0.5 for bar spacing
 	
 	//select all bars, take them out, and exit previous data set
 	//then add/enter new data set
@@ -1115,12 +1065,13 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	svg1.select(".axis-title")
 		.text(g.currentvars.currentStat.full);
 
-	
-
 	var bar2 = svg2.select('g').selectAll(".bar2")
 					.remove()
 					.exit()
-					.data(time_data)	
+					.data(time_data)
+
+	svg2.select('.axis--x2')
+		.call(xAxis2)	
 
 	bar2.enter()
 		.append("rect")
@@ -1143,75 +1094,61 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	    .on("end", brushend);
 
 
+
+	//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
 	if (svg2.selectAll('g.brush').empty()) {
 		//console.log("APPENDING NEW BRUSH");
 		var gBrush = svg2.append("g")
 					    .attr("class", "brush")
 					    .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")")
 				        .call(brush);
-		gBrush.call(brush.move, [g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max].map(x));		
-		//console.log("APPENDING NEW BRUSH - DONE");   
+
+
+
+		var handle = gBrush.selectAll(".handle--custom")
+			  .data([{type: "w"}, {type: "e"}])
+			  .enter().append("path")
+			    .attr("class", "handle--custom")
+			    .attr("fill", "#666")
+			    .attr("fill-opacity", 0.8)
+			    .attr("stroke", "#000")
+			    .attr("stroke-width", 1.5)
+			    .attr("cursor", "ew-resize")
+			    .attr("transform", "translate(" + (0) + "," + (14) + ")")
+			    .attr("d", d3.arc()
+			        .innerRadius(0)
+			        .outerRadius(16) //(height2 + margin2.bottom)/4) // + margin2.bottom) / 3)
+			        .startAngle(0)
+			        .endAngle(function(d, i) { return i ? Math.PI : -Math.PI; }));
+		//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)	
+		gBrush.call(brush.move, [g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7)].map(x)); 
 	} else {
 		//console.log("SELECTING BRUSH")
 		var gBrush = svg2.select('g.brush');
+		var handle = gBrush.selectAll(".handle--custom");
 		brushupdate();
-		//console.log("SELECTING BRUSH - DONE")
 	}
+	//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
 
-
-	// style brush resize handle
-	// https://github.com/crossfilter/crossfilter/blob/gh-pages/index.html#L466
-/*	var brushResizePath = function(d) {
-		//console.log(d, height, height2)
+	// style brush handle
+	var brushResizePath = function(d) {
 	    var e = +(d.type == "e"),
 	        x = e ? 1 : -1,
-	        y = (height2 + margin2.bottom) / 2;
+	        y = height / 2;
 	    return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
 	}
 
-	var handle = gBrush.selectAll(".handle--custom")
-	  .data([{type: "w"}, {type: "e"}])
-	  .enter().append("path")
-	    .attr("class", "handle--custom")
-	    .attr("stroke", "#000")
-	    .attr("cursor", "ew-resize")
-	    .attr("d", brushResizePath);*/
-
-	/*var handle = gBrush.selectAll(".handle--custom")
-	  .data([{type: "w"}, {type: "e"}])
-	  .enter().append("path")
-	    .attr("class", "handle--custom")
-	    .attr("fill", "#666")
-	    .attr("fill-opacity", 0.8)
-	    .attr("stroke", "#000")
-	    .attr("stroke-width", 1.5)
-	    .attr("cursor", "ew-resize")
-	    .attr("transform", "translate(" + (0) + "," + (20) + ")")
-	    .attr("d", d3.arc()
-	        .innerRadius(0)
-	        .outerRadius((height2 + margin2.bottom) / 3)
-	        .startAngle(0)
-	        .endAngle(function(d, i) { return i ? Math.PI : -Math.PI; }));*/
-
-
-
-	//gBrush.call(brush.move, [new Date(2015,8,1), new Date(2015,11,1)].map(x));    //inital handle positions - 01 Sep 15 - 01 Dec 15
-
 	function brushmoved() {
-		//console.log("IN BRUSHMOVED");
-
+		//console.log("IN BRUSHMOVED", g.currentvars.currentEpiDates);
+		//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max);
+		//console.log("PROBLEM Current epidates ALL: ", g.currentvars.currentEpiDates.all);
 		if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
 	    
 	    //var s = d3.event.selection;
 	    var s = d3.event.selection || x2.range();   //range selected or entire range
-	    //console.log(d3.event.selection, x2.range());
-	    //console.log("s: ", s, x2.range());
-	    //console.log("s: ", s);
-	    //console.log("width: ", width);
-	    //console.log("x range, domain: ", x.range(), x.domain());
-	    //console.log("x2 range, domain: ", x2.range(), x2.domain());
+	    //console.log(d3.event.selection, x2.range(), s);
 
-	    bar_width = (orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0]);
+	    bar_width = ((orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0])) - 0.5;   //0.5 for bar spacing
 	    //console.log("bar_width: ", bar_width)
 	    g.currentvars.currentEpiDates.all = [];
 	    g.currentvars.currentEpiDates.s = s;
@@ -1219,27 +1156,31 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 
 	    //if (s == x2.range()) {
 	    if ((s[0]==x2.range()[0]) && (s[1]==x2.range()[1])) {  //if full extent
-	    	//console.log("s==x2.range()")
+	    	//console.log("FULL EXTENT ", s, x2.range());
 	        //handle.attr("display", "none");
-	        //svg2.selectAll(".bar2").classed("active", true);
-	        //bar2.classed("active", true);
+	        svg2.selectAll(".bar2").classed("active", true);
 
 	        for (var i=0; i<=g.epitime.all.length-1; i++) {
 				g.currentvars.currentEpiDates.all.push(g.epitime.all[i].epiDate);
 			}
 
-	    } else {	        
+	    } else {	  
+	    	//console.log("PROBLEM Current epidates ALL: ", g.currentvars.currentEpiDates.all);
+	    	//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)      
 	        var sx = s.map(x2.invert);
+	        //console.log("s, sx: ", s, sx);
 	        svg2.selectAll(".bar2").classed("active", function(d) {
-	        	if (sx[0] <= d.key && d.key <= sx[1]) {  	//if bar date is in selected range
-	        		//console.log("ACTIVE: ", sx[0] <= d.key && d.key <= sx[1], d.key);
+	        	if (sx[0] <= d.key && d.key < sx[1]) {  	
 	        		g.currentvars.currentEpiDates.all.push(d.key);
 	        	} else {
 	        		//console.log("NOT ACTIVE: ", sx[0] <= d.key && d.key <= sx[1], d.key);
 	        	};
-	        	return sx[0] <= d.key && d.key <= sx[1]; 
+	        	return sx[0] <= d.key && d.key < sx[1]; 
 	        });
-	        //handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [ s[i], - height / 4] + ")"; });
+	        //console.log("PROBLEM Current epidates ALL: ", g.currentvars.currentEpiDates.all);
+	        //console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
+	        handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [ s[i], 14] + ")"; });
+	        //handle.attr("display", null).attr("transform", function(d, i) {"translate(" + [ s[i], (- height / 4) + 14] + ")"});
 
 	    	x.domain(s.map(x2.invert, x2));
 	    	svg1.select("g").selectAll(".bar")
@@ -1250,39 +1191,39 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 		        .scale(width / (s[1] - s[0]))
 		        .translate(-s[0], 0));
 	    }
+	    //console.log("PROBLEM Current epidates ALL: ", g.currentvars.currentEpiDates.all);
+	    //console.log("PROBLEM Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
 	    g.currentvars.currentEpiDates.min = new Date(Math.min.apply(null,g.currentvars.currentEpiDates.all));
 	    g.currentvars.currentEpiDates.max = new Date(Math.max.apply(null,g.currentvars.currentEpiDates.all));
 	    g.currentvars.currentEpiWeek.min = getEpiWeek(g.currentvars.currentEpiDates.min);
 		g.currentvars.currentEpiWeek.max = getEpiWeek(g.currentvars.currentEpiDates.max);
+
+		//console.log("PROBLEM Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
 		//console.log("IN BRUSHMOVED - DONE");
 	}
 
 	function brushupdate() {  //called when updating through code, not mousemove
 		//console.log("IN BRUSHUPDATE ", g.currentvars.currentEpiDates);
-		
-		gBrush.call(brush.move, [g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max].map(x));	
+
+		gBrush.call(brush.move, [g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7)].map(x));	
 
 		//console.log("IN BRUSHUPDATE ", g.currentvars.currentEpiDates);
 		if ((g.currentvars.currentEpiDates.s[0]==x2.range()[0]) && (g.currentvars.currentEpiDates.s[1]==x2.range()[1])) {  //full extent
+			//console.log("FULL EXTENT ", s, x2.range());
 			svg2.selectAll(".bar2").classed("active", true);
 		} else {
 			svg2.selectAll(".bar2").classed("active", function(d) {				
-				/*if (g.currentvars.currentEpiDates.all.indexOf(d.key) != -1) {  	//if bar date is in selected range
-	        		//console.log("ACTIVE: ", g.currentvars.currentEpiDates.all.indexOf(d.key) != -1, d.key);
-	        		//g.currentvars.currentEpiDastes.all.push(d.key);
-	        	} else {
-	        		//console.log("NOT ACTIVE: ", g.currentvars.currentEpiDates.all.indexOf(d.key) != -1, d.key);
-	        	};*/
 	        	return g.currentvars.currentEpiDates.all.indexOf(d.key) != -1;
 	        });
 	    }
         
-		x.domain([g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max]);
-        var s = [x2(g.currentvars.currentEpiDates.min), x2(g.currentvars.currentEpiDates.max)];
-        //console.log(s);
+		//x.domain([g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max]);
+		x.domain([g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7)]);
+        //var s = [x2(g.currentvars.currentEpiDates.min), x2(g.currentvars.currentEpiDates.max)];
+        var s = [x2(g.currentvars.currentEpiDates.min), x2(d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7))];
 
-        bar_width = (orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0]);
-    	//handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [ s[i], - height / 4] + ")"; });
+        bar_width = ((orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0])) - 0.5;   //0.5 for bar spacing
+    	handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [g.currentvars.currentEpiDates.s[i], 14] + ")"; });
 	
     	svg1.select("g").selectAll(".bar")
     		.attr("x", function(d) { return x(d.key); })
@@ -1295,13 +1236,22 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	}
 
 	function brushend() {
-		//console.log("******** IN BRUSH END *********");
+
+		//console.log("******** IN BRUSH END ********* ", g.currentvars.currentEpiDates);
 		//console.log(d3.event.sourceEvent);
+		//console.log(g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max);
+		
 		if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
 	    var s = d3.event.selection || x2.range();   //range selected or entire range
-	    //console.log("s: ", s, x2.range());
-	    if ((s[0]==x2.range()[0]) && (s[1]==x2.range()[1])){
-	    	//console.log("FULL EXTENT HERE");
+	    var clicked_on = d3.event.sourceEvent? d3.event.sourceEvent.path[0].tagName : 'NA';
+	    //console.log("s: ", s, d3.event.selection, x2.range());
+
+	    if (d3.event.sourceEvent==null) {  //brush change in program
+	    	//console.log("BRUSH UPDATE IN PROGRAM ", g.currentvars.currentEpiDates.s[0], g.currentvars.currentEpiDates.s[1]);
+	    	handle.attr("display", null).attr("transform", function(d, i) {return "translate(" + [g.currentvars.currentEpiDates.s[i], 14] + ")"; });
+		
+	    } else if ((s[0]==x2.range()[0]) && (s[1]==x2.range()[1])){  //full extent selected - manually by user
+	    	//console.log("FULL EXTENT HERE ", s, x2.range());
 	    	g.currentvars.currentEpiDates.min = g.epitime.date_extent[0];
 			g.currentvars.currentEpiDates.max = g.epitime.date_extent[1];
 			g.currentvars.currentEpiWeek.min = getEpiWeek(g.currentvars.currentEpiDates.min);
@@ -1313,19 +1263,23 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 				g.currentvars.currentEpiDates.all.push(g.epitime.all[i].epiDate);
 			}
 
-			/*svg2.selectAll(".bar2").classed("active", function(d) {
-				console.log(d.key, g.currentvars.currentEpiDates.all.indexOf(d.key) == -1);
-	        	return g.currentvars.currentEpiDates.all.indexOf(d.key) == -1;
-	        });*/
 	        svg2.selectAll(".bar2").classed("active", true);
 			
-			x.domain([g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max]);
-	        var s = [x2(g.currentvars.currentEpiDates.min), x2(g.currentvars.currentEpiDates.max)];
-	        //console.log(s);
+			x.domain([g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7)]);
+	        var s = [x2(g.currentvars.currentEpiDates.min), x2(d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7))];
 
-	        bar_width = (orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0]);
-	    	//handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [ s[i], - height / 4] + ")"; });
-		
+	        bar_width = ((orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0])) - 0.5;   //0.5 for bar spacing
+
+	        if (clicked_on=='rect') {
+	        	//console.log(d3.event.sourceEvent);
+	        	if (!((g.currentvars.currentEpiDates.s[0]==x2.range()[0]) && (g.currentvars.currentEpiDates.s[1]==x2.range()[1]))){ 
+	        		handle.attr("display", "none");
+	        	};
+	        } else {
+	        	handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [g.currentvars.currentEpiDates.s[i], 14] + ")"; });
+	        	//handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4);*/ return "translate(" + [ s[i], - height / 4] + ")"; });
+	        }
+	    	
 	    	svg1.select("g").selectAll(".bar")
 	    		.attr("x", function(d) { return x(d.key); })
 	    		.attr("width", bar_width);
@@ -1334,7 +1288,25 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 		        .scale(width / (s[1] - s[0]))
 		        .translate(-s[0], 0));
 			
+	    } else {
+	    	//console.log("BRUSH CHANGED MANUALLY BUT NOT TO FULL EXTENT / SNAP");
+
+	    	var d0 = d3.event.selection.map(x2.invert),
+			    d1 = d0.map(d3.timeMonday.round);
+			//console.log("d0, d1 = ", d0, d1);
+
+			  // If empty when rounded, use floor & ceil instead.
+			  if (d1[0] >= d1[1]) {
+			    d1[0] = d3.timeMonday.floor(d0[0]);
+			    d1[1] = d3.timeMonday.offset(d1[0]);
+			    //temp = new Date(d3.timeMonday.offset(d1[0]));
+			    //d1[1] = d3.timeMonday.offset(d1[0], 7);
+			  }
+
+			  d3.select(this).transition().call(d3.event.target.move, d1.map(x2));
+			  //console.log("d0, d1 = ", d0, d1);
 	    }
+
 
     	updateMap();
 
@@ -1346,7 +1318,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
 	    var t = d3.event.transform;
 	    x.domain(t.rescaleX(x2).domain());
-	    console.log(t, t.rescaleX(x2).domain(), x.range().map(t.invertX, t));
+	    //console.log(t, t.rescaleX(x2).domain(), x.range().map(t.invertX, t));
 	    //focus.select(".area").attr("d", area);
 	    svg1.select("g").selectAll(".bar").attr("x", function(d) { return x(d.key); });
 	    svg1.select("g").selectAll(".bar")
@@ -1361,40 +1333,184 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 
 
 
+/************************************/
+/******  PLAY/PAUSE ANIMATION  ******/
+/************************************/	
+
+var playInterval;
+var slideDuration = 1200; //in milliseconds
+var autoRewind = false;   //automatically repeat from beginning
+var currentDate = new Date (g.currentvars.currentEpiDates.min);
+g.currentvars.currentAnimation.currentEpiDate = currentDate;
+
+$(function() {
+
+    $("#btnPlayPause").on("click", function() {	   
+    	//console.log("PLAYPAUSE")			//Play/Pause button clicked
+    	if (g.currentvars.currentAnimation.playMode =='stop') {
+    		currentDate = new Date (g.currentvars.currentEpiDates.min);
+    	} ;
+    	$('#btnStop').css('display','block');   //display Stop button
+    	$('#playMode_text').css('display','block');   //display play mode text under stop button
+		if (playInterval != undefined) {    //in Pause mode (playInterval defined when button is playing)
+			//console.log("PAUSE")
+            clearInterval(playInterval);
+            playInterval = undefined;
+            $("#btnPlayPause").removeClass('pause'); 
+            togglePlayMode('pause');
+            return;
+        }
+		$("#btnPlayPause").addClass('pause');  //in Play mode 
+			//console.log("PLAY")
+			if (currentDate > g.currentvars.currentEpiDates.max) {
+				currentDate = new Date (g.currentvars.currentEpiDates.min);
+				g.currentvars.currentAnimation.currentEpiDate = currentDate;
+			}
+
+			togglePlayMode('play');
+
+			playInterval = setInterval(function () {
+
+	            if (currentDate > g.currentvars.currentEpiDates.max) {		//if we reach the final timestep
+	                if (autoRewind) {				//if we loop (autoRewind) then go back to beginning
+	                    currentDate = new Date (g.currentvars.currentEpiDates.min);
+	                    g.currentvars.currentAnimation.currentEpiDate = currentDate;
+	                }
+	                else {							//if we don't loop (autoRewind) then stop and clear 
+						currentDate = new Date (g.currentvars.currentEpiDates.min);
+						g.currentvars.currentAnimation.currentEpiDate = currentDate;
+	                    clearInterval(playInterval);
+						playInterval = undefined;
+						$("#btnPlayPause").removeClass('pause');  
+			            togglePlayMode('pause');
+	                    return;
+	                }
+	            } else {
+	            	g.currentvars.currentAnimation.currentEpiDate = currentDate;
+	            }
+
+				svg1.selectAll(".bar").classed("playBar", function(d) {		
+					if (sameDay(d.key,currentDate)) {
+						updateMap();
+						addPlayLine();
+						return true;
+					} else {
+						return false;
+					}
+				})
+				
+				currentDate.setDate(currentDate.getDate() + 7);
+				
+	    	}, slideDuration);
+
+    });
+
+    $("#btnStop").on("click", function() {	
+    	togglePlayMode('stop');
+    	clearInterval(playInterval);
+        playInterval = undefined;
+        $('#btnPlayPause').removeClass('pause'); 
+    	$('#btnStop').css('display','none'); 
+    	$('#playMode_text').css('display','none');  
+    });
+    
+});
+
+
+function addPlayLine() {
+	var id1 = '#timeseries';
+	var margin = {top: 10, right: 20, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
+	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
+	    height = $(id1).height() - margin.top - margin.bottom;		//height of main svg
+
+	var x = d3.scaleTime().range([0, width])  		//x-axis width, accounting for specified margins
+						  .domain([g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7)]);
+
+	//var week_width = x(d3.timeDay.offset(g.currentvars.currentEpiDates.min, 7)) - x(g.currentvars.currentEpiDates.min);
+	var week_width = width/g.currentvars.currentEpiDates.all.length;
+	//console.log(width,'/', g.currentvars.currentEpiDates.all.length,'=', week_width);
+
+	svg1.selectAll('.playBar_line') //.transition()
+		.attr("class", "playBar_line")
+		.attr("x1", margin.left + x(g.currentvars.currentAnimation.currentEpiDate) + week_width/2)  
+		.attr("y1", margin.top)    		
+		.attr("x2", margin.left + x(g.currentvars.currentAnimation.currentEpiDate) + week_width/2)  
+		.attr("y2", height + margin.top)		
+		.attr('stroke', 'red')  
+		.attr("stroke-width", 2)
+		.attr('display', 'block');
+}
+
+
+function togglePlayMode(mode) {
+
+	if (mode =='play') {
+		g.currentvars.currentAnimation.playMode ='play';
+		g.currentvars.currentAnimation.maxLegendVal = getMaxLegendVal();
+		//map disabled in selectFeatures function
+		$('#btnZone').addClass('no-point');
+		$('#btnProv').addClass('no-point');
+		//$('.btn_lyr').addClass('no-point');
+		if ($('#btnZone').hasClass('on')) {
+			$('#btnProv').addClass('disable');
+		} else if ($('#btnProv').hasClass('on')) {
+			$('#btnZone').addClass('disable');
+		} 
+		$('#stat-select').addClass('no-point');
+		$('#disease-select').addClass('no-point');
+		$('#btn_reset').addClass('no-point');
+
+		svg2.selectAll(".bar2.active").style('fill', '#7f7f7f');
+		svg2.select('g.brush').remove();
+
+	} else if (mode =='pause') {
+		g.currentvars.currentAnimation.playMode ='pause';
+
+	} else if (mode =='stop') {
+		g.currentvars.currentAnimation.playMode ='stop';
+		g.currentvars.currentAnimation.currentEpiDate = 'NA';	
+		//map enabled in selectFeatures function
+		$('#btnZone').removeClass('no-point');
+		$('#btnProv').removeClass('no-point');
+		if ($('#btnZone').hasClass('on')) {
+			$('#btnProv').removeClass('disable');
+		} else if ($('#btnProv').hasClass('on')) {
+			$('#btnZone').removeClass('disable');
+		} 
+		$('#stat-select').removeClass('no-point');
+		$('#disease-select').removeClass('no-point');
+		$('#btn_reset').removeClass('no-point');
+
+		svg1.selectAll(".bar").classed("playBar", function(d) {return false;})
+		svg1.selectAll(".playBar_line").attr('display', 'none');
+		//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
+		updateAll();
+		//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
+
+	};
+}
+
+
+
 /***********************************/
 /****  UPDATE DATA & DASHBOARD  ****/
 /***********************************/	
 
 function updateMap() {
-	currentMapData = getCurrentPolyVars();
+	//currentMapData = getCurrentPolyVars();
+	colorMap();
 	updateHeadline();
 	updateFiltSum();
-	colorMap();
 }
 
 function updateAll() {
-	//console.log("In updateAll, map object before update: ", map);
-	//console.log("currentMapData: ", currentMapData);
-	/*currentMapData = getCurrentPolyVars();
-	//console.log("currentMapData: ", currentMapData);
-	
-	//map = updateMap('#map', data);
-	updateHeadline();
-	updateFiltSum();
-	//updateMap('#map', data);
-	colorMap();*/
 	updateMap();
-
+	//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
 	currentTimeSeriesData = getCurrentTimeSeriesData();
+	//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
 	//console.log("currentTimeSeriesData: ", currentTimeSeriesData);
 	updateTimeSeriesCharts('#timeseries', '#timeseriesbrush', currentTimeSeriesData);
-	//console.log("In updateAll, map object after update: ", map);
-
-	//update map_title & map_subtitle here?
-	//$('#map_title').html("UPDATE MAP TITLE");
-	//$('#map_subtitle').html(("UPDATE MAP SUBTITLE");
-		
-	//totalEntries = data.length;  //e.g. <-- should calculate total number of cases here?
+	//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
 }
 
 
@@ -1402,6 +1518,7 @@ function updateAll() {
 /****  GLOBAL VARIABLES & INITIALISATION  ****/
 /*********************************************/
 
+var map;
 var zs_geoms;
 //var geozs = {};
 var geojson_zone;
@@ -1414,6 +1531,12 @@ var currentTimeSeriesData;
 var legendSvg;
 var svg1, svg2;
 var dateFormat = d3.timeFormat("%d %b %y");
+
+function sameDay(d1, d2) {
+    return d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
+}
 
 window.onload = function () {
 	//console.log("onload");
@@ -1512,13 +1635,22 @@ function updateHeadline() {
 
 function updateFiltSum() {
 	var filtSum = document.getElementById("win_filt-sum");
+	var sem_html, dat_html, loc_html;
 
-	//var zones_txt, provs_txt;
-	var loc_html;
+	if (g.currentvars.currentAnimation.playMode!='stop') {
+		//sem_html = g.currentvars.currentAnimation.currentEpiWeek;
+		sem_html = getEpiWeek(g.currentvars.currentAnimation.currentEpiDate)
+		dat_html = dateFormat(g.currentvars.currentAnimation.currentEpiDate);
+	} else {
+		if (sameDay(g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)) {
+			sem_html = g.currentvars.currentEpiWeek.min;
+			dat_html = dateFormat(g.currentvars.currentEpiDates.min);
+		} else {
+			sem_html = g.currentvars.currentEpiWeek.min + ' - ' + g.currentvars.currentEpiWeek.max;
+			dat_html = dateFormat(g.currentvars.currentEpiDates.min) +' - '+ dateFormat(g.currentvars.currentEpiDates.max);
+		}
+	};
 
-	//g.currentvars.currentZones.pcodes.length==0 ? zones_txt = 'Toutes les zones' : zones_txt = g.currentvars.currentZones.names.join("; ");
-	//g.currentvars.currentProvs.pcodes.length==0 ? provs_txt = 'Toutes les provinces' : provs_txt = g.currentvars.currentProvs.names.join(", ");
-	
 	if (g.currentvars.currentMapLyr=='zone') {
 		loc_html = '<i>Zones: </i><b>';
 		g.currentvars.currentZones.pcodes.length==0 ? loc_html += 'Toutes les zones' : loc_html += g.currentvars.currentZones.names.join("; ");
@@ -1529,10 +1661,9 @@ function updateFiltSum() {
 		loc_html += '</b>';
 	};
 
-
 	filtSum.innerHTML='<p class="filt-sum-title">Resumé d\'options choisies:</p><i>Pathologie: </i><b>' + g.currentvars.currentDisease + '</b><br/>' + 
 	'<i>Statistique: </i><b>' + g.currentvars.currentStat.full + '</b><br/>' + 
-	'<i>Semaines epi: </i><b>' + g.currentvars.currentEpiWeek.min + ' - ' + g.currentvars.currentEpiWeek.max + ' </b><i>(Dates: ' + dateFormat(g.currentvars.currentEpiDates.min) +' - '+ dateFormat(g.currentvars.currentEpiDates.max) + ')</i><br/>' + loc_html;
+	'<i>Semaines epi: </i><b>' + sem_html + ' </b><br/><i>(Dates: ' + dat_html + ')</i><br/>' + loc_html;
 }
 
 function btn_filt_sum() {
@@ -1570,7 +1701,7 @@ function btn_selectDates() {
 
 	//populate g.currentvars.currentEpiDates.all with all weeks from min to max
 	for (var i=0; i<=g.epitime.all.length-1; i++) {
-		if ((g.currentvars.currentEpiDates.min <= g.epitime.all[i].epiDate) && (g.epitime.all[i].epiDate <= g.currentvars.currentEpiDates.max)) {
+		if ((g.currentvars.currentEpiDates.min <= g.epitime.all[i].epiDate) && (g.epitime.all[i].epiDate < g.currentvars.currentEpiDates.max)) {
 			g.currentvars.currentEpiDates.all.push(g.epitime.all[i].epiDate);
 		}
 	}

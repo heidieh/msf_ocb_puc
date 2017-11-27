@@ -298,6 +298,16 @@ p span{
   /* border: 1px solid #979797;  */
 }
 
+.disable {
+  /*background-color: #ffff00; */
+  color: grey;
+  font-style: italic;
+}
+
+.no-point {
+  pointer-events: none;
+}
+
 .btn-side-nav {
   width: 160px;
   margin-left: 14px;
@@ -316,7 +326,7 @@ p span{
 
 #timeseries{
   margin-top: 20px;
-  margin-left: 20px;
+  margin-left: 5px;
   margin-right: 0px;
   height: 120px;
   width: 90%; 
@@ -324,7 +334,7 @@ p span{
 }
 #timeseriesbrush{
   margin-top: 20px;
-  margin-left: 20px;
+  margin-left: 5px;
   margin-right: 0px;
   height: 60px;
   width: 90%; 
@@ -369,6 +379,13 @@ rect.selection {
   fill: steelblue;
   clip-path: url(#clip);
 }
+
+.playBar {
+  /*fill: red;
+  stroke: red;
+  stroke-width: 2px;*/
+}
+
 .bar2 {
   fill-opacity: 1;
   fill: lightgrey;
@@ -421,9 +438,59 @@ rect.selection {
   pointer-events: all;
 }*/
 
+/*.button.playMode{
+  float: center; 
+  width: 50px;
+  height: 50px;
+  margin-top: 30px;
+  margin-left: 0px;
+}*/
+
+.button.play{
+  float: right; 
+  width: 50px;
+  height: 50px;
+  margin-top: 30px;
+  margin-right: 0px;
+  margin-bottom: 0px;
+  background: url(../images/play.png);
+  background-size: 44px 44px;
+  background-position:center;
+  background-repeat:no-repeat; 
+}
+
+.button.pause{
+  background: url(../images/pause.png);
+  background-size: 44px 44px;
+  background-position:center;
+  background-repeat:no-repeat; 
+}
+
+.button.stop{
+  display: none;
+  float: right; 
+  width: 50px;
+  height: 50px;
+  margin-top: 0px;
+  margin-right: 0px;
+  background: url(../images/stop.png);
+  background-size: 44px 44px;
+  background-position:center;
+  background-repeat:no-repeat; 
+}
 
 
-
+#playMode_text {
+  display: none;
+  font: 11px sans-serif;
+  font-style: italic;
+  width: 115px;
+  color: red;
+  margin-top: 70px;
+  margin-left: -15px;
+  /*height: 100px;*/
+  /*overflow: auto;*/
+}
 
 /*.button_sm {
     background-color: #cccccc; /* #3160b2; 
@@ -459,27 +526,3 @@ rect.selection {
   transform: translateY(3px); 
   /* border: 1px solid #979797;  
 }*/
-
-/*.button.play{
-    float: left; 
-    width: 40px;
-    height: 40px;
-	margin-top: 0px;
-    margin-left: 0px;
-	background: url(../images/play.png);
-	background-size: 30px 30px;
-	background-position:center;
-	background-repeat:no-repeat; 
-}
-
-.button.pause{
-	width: 40px;
-    height: 40px;
-	margin-top: 0px;
-    margin-left: 0px;
-	background: url(../images/pause.png);
-	background-size: 30px 30px;
-	background-position:center;
-	background-repeat:no-repeat; 
-}*/
-
