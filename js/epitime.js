@@ -11,6 +11,9 @@ function addEpitime(data,g) {
     g.epitime.all = epitime_all;
 
 	for (var i=0; i<=data.length-1; i++) {
+        /*if (data[i]['epiwk']=='2015-51') {
+            console.log(data[i]['epiwk'], getEpiDate(data[i]['epiwk']));
+        }*/
 		data[i].epidate = getEpiDate(data[i]['epiwk']);
 	}
 	//console.log("global ", g);
@@ -114,7 +117,7 @@ function createEpitime(data) {      //returns array of epiTime objects in dashbo
 function getEpiDate(epiwk) {   //function accepts epiweek, returns associated date (in date format)
     var num_epiwks = epitime_all.length;
     
-    for (i=0; i<num_epiwks-1; i++) {
+    for (i=0; i<=num_epiwks-1; i++) {
         if (epitime_all[i].epi_id == epiwk) {
             var epiDate = new Date(epitime_all[i].epiDate);
             break;
@@ -132,7 +135,7 @@ function sameDay(d1, d2) {
 function getEpiWeek(epidt) {   //function accepts epidate (in date format), returns associated epiweek
     var num_epiwks = epitime_all.length;
     
-    for (i=0; i<num_epiwks-1; i++) {
+    for (i=0; i<=num_epiwks-1; i++) {
         if (sameDay(epitime_all[i].epiDate, epidt)) {
             //console.log(epitime_all[i].epiDate, epidt);
             var epiWk = epitime_all[i].epiweek + '-' + epitime_all[i].epiyear;
