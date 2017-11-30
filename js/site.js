@@ -5,6 +5,8 @@
 // - add prov overlay to zones view 
 // - add lethality line to Cases chart
 // - add lethality layer in map?
+// - remove "var data ="" from data.js
+// - redo data.js so num deaths never > num cases
 //
 // Recommendations from others:
 // - add prov overlay to zones view
@@ -42,25 +44,59 @@ console.log(data);
 //cf.epiWkDim = cf.dimension(function(d) {return d.epiwk;});
 cf.epiDateDim = cf.dimension(function(d) {return d.epidate});
 cf.malDim = cf.dimension(function(d){if (d.mal!='') {return d.mal}});
-cf.provDim = cf.dimension(function(d) {if (d.prov=='') {return 'cod300xxx';} else {return d.prov_pc}});  
+/*cf.provDim = cf.dimension(function(d) {if (d.prov=='') {return 'cod300xxx';} else {return d.prov_pc}});  
 cf.provDim2 = cf.dimension(function(d) {if (d.prov=='') {return 'cod300xxx';} else {return d.prov_pc}});  //to filter on only
 cf.zsDim = cf.dimension(function(d) {if (d.zs_pc=='') {return 'cod200xxx';} else {return d.zs_pc}});
-cf.zsDim2 = cf.dimension(function(d) {if (d.zs_pc=='') {return 'cod200xxx';} else {return d.zs_pc}});  //to filter on only
+cf.zsDim2 = cf.dimension(function(d) {if (d.zs_pc=='') {return 'cod200xxx';} else {return d.zs_pc}});  //to filter on only*/
+cf.provDim = cf.dimension(function(d) {if (d.prov=='') {return '';} else {return d.prov_pc}});  
+cf.provDim2 = cf.dimension(function(d) {if (d.prov=='') {return '';} else {return d.prov_pc}});  //to filter on only
+cf.zsDim = cf.dimension(function(d) {if (d.zs_pc=='') {return '';} else {return d.zs_pc}});
+cf.zsDim2 = cf.dimension(function(d) {if (d.zs_pc=='') {return '';} else {return d.zs_pc}});  //to filter on only
 
-cf.casesByEpiDateGroup = cf.epiDateDim.group().reduceSum(function (d) {return d.cas;});
+/*cf.casesByEpiDateGroup = cf.epiDateDim.group().reduceSum(function (d) {return d.cas;});
 console.log("Cases by EpiDate: ", cf.casesByEpiDateGroup.top(Infinity));
 cf.deathsByEpiDateGroup = cf.epiDateDim.group().reduceSum(function (d) {return d.dec;});
-console.log("Deaths by EpiDate: ", cf.deathsByEpiDateGroup.top(Infinity));
+console.log("Deaths by EpiDate: ", cf.deathsByEpiDateGroup.top(Infinity));*/
+cf.statsByEpiDateGroup = cf.epiDateDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
+console.log("Stats by EpiDate: ", cf.statsByEpiDateGroup.top(Infinity));
 
-cf.casesByZsGroup = cf.zsDim.group().reduceSum(function (d) {return d.cas;});
+/*cf.casesByZsGroup = cf.zsDim.group().reduceSum(function (d) {return d.cas;});
 console.log("Cases by Zone: ", cf.casesByZsGroup.top(Infinity));
 cf.deathsByZsGroup = cf.zsDim.group().reduceSum(function (d) {return d.dec;});
-console.log("Deaths by Zone: ", cf.deathsByZsGroup.top(Infinity));
+console.log("Deaths by Zone: ", cf.deathsByZsGroup.top(Infinity));*/
+cf.statsByZsGroup = cf.zsDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
+console.log("Stats by Zone: ", cf.statsByZsGroup.top(Infinity));
 
-cf.casesByProvGroup = cf.provDim.group().reduceSum(function (d) {return d.cas;});
+/*cf.casesByProvGroup = cf.provDim.group().reduceSum(function (d) {return d.cas;});
 console.log("Cases by Province: ", cf.casesByProvGroup.top(Infinity));
 cf.deathsByProvGroup = cf.provDim.group().reduceSum(function (d) {return d.dec;});
-console.log("Deaths by Province: ", cf.deathsByZsGroup.top(Infinity));
+console.log("Deaths by Province: ", cf.deathsByProvGroup.top(Infinity));*/
+cf.statsByProvGroup = cf.provDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
+console.log("Stats by Province: ", cf.statsByProvGroup.top(Infinity));
+
+
+function reduceAdd(p, v) {
+	//console.log("add", p,v);
+    p.cas += v.cas;
+    p.dec += v.dec;
+    p.let = p.cas!=0 ? (p.dec/p.cas) : 0;
+    return p;
+}
+function reduceRemove(p, v) {
+	//console.log("subtract", p,v);
+    p.cas -= v.cas;
+    p.dec -= v.dec;
+    p.let = p.cas!=0 ? (p.dec/p.cas) : 0;
+    return p;
+}
+function reduceInitial() {
+	//console.log("initialise");
+    return {
+        cas: 0,
+        dec: 0,
+        let: 0
+    };
+}
 
 
 /********************************/
@@ -82,16 +118,19 @@ for (var item, i=0; item = data[i++];) {
 }
 g.diseaseList.sort();
 
-g.statList = [{abrv: 'cas', full: 'Nombre de Cas', color_scale: 'YlBr'}, {abrv: 'dec', full: 'Nombre de Décès', color_scale: 'Red'}]; //later can add 'Taux d\'Incidence', 'Taux de Mortalité'
+//g.statList = [{abrv: 'cas', full: 'Nombre de Cas', color_scale: 'YlBr'}, {abrv: 'dec', full: 'Nombre de Décès', color_scale: 'Red'}, {abrv: 'let', full: 'Létalité', color_scale: 'Red'}]; //later can add 'Taux d\'Incidence', 'Taux de Mortalité'
+g.statList = [{abrv: 'cas', full: 'Nombre de Cas', color_scale: 'YlBr'}, {abrv: 'let', full: 'Létalité', color_scale: 'Red'}]; //later can add 'Taux d\'Incidence', 'Taux de Mortalité'
+
 
 //Set color variables for map
 g.mapcolors = {};
 g.mapcolors.color_scale = {};
 g.mapcolors.color_scale.YlBr = {color_min: '#ffffcc', color_max: '#800026'};
 g.mapcolors.color_scale.Red = {color_min: '#fee0d2', color_max: '#a50f15'};
-g.mapcolors.color_zero = '#a8a8a8'; //'#d3d3d3';
+g.mapcolors.color_zero = '#d3d3d3'; //'#a8a8a8';
 g.mapcolors.color_boundary = '#2f4f4f';  //dark slate grey    //'#6495ED';
 g.mapcolors.color_rivers = '#1673ae'; //'#3b8ec2';
+g.mapcolors.playbar_color = '#4d4d4d'; 
 
 //Declare 'current' variables
 g.currentvars = {};
@@ -100,7 +139,7 @@ g.currentvars.currentStat = g.statList[0];
 g.currentvars.currentMinVal;
 g.currentvars.currentMaxVal;
 g.currentvars.currentMapLyr = 'prov';    //'prov' or 'zone'
-g.currentvars.currentSum;
+g.currentvars.currentTotals = {};
 g.currentvars.currentZones = {pcodes: [], names: []};
 g.currentvars.currentProvs = {pcodes: [], names: []};
 g.currentvars.currentEpiDates = {};
@@ -135,7 +174,7 @@ function getCurrentPolyVars() {
     if (g.currentvars.currentAnimation.playMode=='play') {
     	cf.epiDateDim.filterExact(g.currentvars.currentAnimation.currentEpiDate);
     } else if (sameDay(g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)) {
-    	console.log("same day ok");
+    	//console.log("same day ok");
     	cf.epiDateDim.filterExact(g.currentvars.currentEpiDates.min);
 	} else {  //filter from min date to max date + 1 (+1 is so that it includes max date)
     	cf.epiDateDim.filterRange([g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 1)]); 
@@ -143,35 +182,53 @@ function getCurrentPolyVars() {
 	
 	
 	if (g.currentvars.currentMapLyr=='zone') {
-		if (g.currentvars.currentStat.abrv=='cas') {
-			currentValues = cf.casesByZsGroup.top(Infinity);
-		} else if (g.currentvars.currentStat.abrv=='dec') {
-			currentValues = cf.deathsByZsGroup.top(Infinity);
-		};
+		//if (g.currentvars.currentStat.abrv=='cas') {
+			//currentValues = cf.casesByZsGroup.top(Infinity);
+			currentValues = cf.statsByZsGroup.top(Infinity);
+		//} else if (g.currentvars.currentStat.abrv=='dec') {
+			//currentValues = cf.deathsByZsGroup.top(Infinity);
+			//currentValues = cf.lethalityByZsGroup.top(Infinity);
+			//currentValues = cf.statsByZsGroup.top(Infinity);
+		//};
 	} else if (g.currentvars.currentMapLyr=='prov') {
-		if (g.currentvars.currentStat.abrv=='cas') {
-			currentValues = cf.casesByProvGroup.top(Infinity);
-		} else if (g.currentvars.currentStat.abrv=='dec') {
-			currentValues = cf.deathsByProvGroup.top(Infinity);
-		};
+		//if (g.currentvars.currentStat.abrv=='cas') {
+			//currentValues = cf.casesByProvGroup.top(Infinity);
+			currentValues = cf.statsByProvGroup.top(Infinity);
+		//} else if (g.currentvars.currentStat.abrv=='dec') {
+			//currentValues = cf.deathsByProvGroup.top(Infinity);
+			//currentValues = cf.lethalityByProvGroup.top(Infinity);
+			//currentValues = cf.statsByProvGroup.top(Infinity);
+		//};
 	};
 	//console.log("currentValues: ", currentValues);
 	g.currentvars.currentMinVal = 0;
 	g.currentvars.currentMaxVal = 0;
-	g.currentvars.currentSum = 0;
+	g.currentvars.currentTotals = {'cas': 0, 'dec': 0, 'let': 0};
 	if (g.currentvars.currentAnimation.playMode=='play') {
 		g.currentvars.currentMaxVal = g.currentvars.currentAnimation.maxLegendVal;
 		for (var i=0; i<=currentValues.length-1; i++) {
-			if (currentValues[i].key != 'cod200xxx') {
-				g.currentvars.currentSum += currentValues[i].value;
+			//if ((currentValues[i].key != 'cod200xxx') && (currentValues[i].key != '')) {
+			if (currentValues[i].key != '') {
+				//g.currentvars.currentSum += currentValues[i].value;
+				/*g.currentvars.currentTotals.cas = currentValues[i].value.cas;
+				g.currentvars.currentTotals.dec = currentValues[i].value.dec;
+				g.currentvars.currentTotals.leth = currentValues[i].value.leth;*/
+					g.currentvars.currentTotals.cas += currentValues[i].value.cas;
+					g.currentvars.currentTotals.dec += currentValues[i].value.dec;
+					g.currentvars.currentTotals.let = (g.currentvars.currentTotals.cas!=0)? g.currentvars.currentTotals.dec/g.currentvars.currentTotals.cas : 0;
 			}
 		}
 	} else {
 		for (var i=0; i<=currentValues.length-1; i++) {
-			if (currentValues[i].key != 'cod200xxx') {
+			//if ((currentValues[i].key != 'cod200xxx') && (currentValues[i].key != '')){
+			if (currentValues[i].key != '') {
 				//if (g.currentvars.currentMinVal > currentValues[i].value) {g.currentvars.currentMinVal = currentValues[i].value};
-				if (g.currentvars.currentMaxVal < currentValues[i].value) {g.currentvars.currentMaxVal = currentValues[i].value};
-				g.currentvars.currentSum += currentValues[i].value;
+				//console.log(g.currentvars.currentMaxVal, currentValues[i].value[g.currentvars.currentStat.abrv], currentValues[i])
+				if (g.currentvars.currentMaxVal < currentValues[i].value[g.currentvars.currentStat.abrv]) {g.currentvars.currentMaxVal = currentValues[i].value[g.currentvars.currentStat.abrv]};
+				//g.currentvars.currentSum += currentValues[i].value;
+				g.currentvars.currentTotals.cas += currentValues[i].value.cas;
+				g.currentvars.currentTotals.dec += currentValues[i].value.dec;
+				g.currentvars.currentTotals.let = (g.currentvars.currentTotals.cas!=0)? g.currentvars.currentTotals.dec/g.currentvars.currentTotals.cas : 0;
 			}
 		}
 	}
@@ -188,15 +245,16 @@ function getCurrentPolyVars() {
 	//console.log("polysToFill: ", polysToFill);
 	for (var i=0; i<=currentValues.length-1; i++) {
 		currentPolyVars[currentValues[i].key] = {};
-		currentPolyVars[currentValues[i].key]['value'] = currentValues[i].value;
-		currentValues[i].value==0? currentPolyVars[currentValues[i].key]['color'] = g.mapcolors.color_zero : currentPolyVars[currentValues[i].key]['color'] = color(currentValues[i].value); 
+		currentPolyVars[currentValues[i].key]['value'] = currentValues[i].value[g.currentvars.currentStat.abrv];
+		currentValues[i].value[g.currentvars.currentStat.abrv]==0? currentPolyVars[currentValues[i].key]['color'] = g.mapcolors.color_zero : currentPolyVars[currentValues[i].key]['color'] = color(currentValues[i].value[g.currentvars.currentStat.abrv]); 
 	}
 	//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
+	//console.log("Current poly vars: ", currentPolyVars);
     return currentPolyVars;
 }
 
 
-function getMaxLegendVal() {
+function getMaxLegendVal() {   //if ((currentValues[i].key != 'cod200xxx') && (currentValues[i].key != '')) 
 	var maxValue = 0;
 	var values = [];
 
@@ -205,22 +263,40 @@ function getMaxLegendVal() {
 		cf.epiDateDim.filterExact(g.currentvars.currentEpiDates.all[i]).top(Infinity);
 
 		if (g.currentvars.currentMapLyr=='zone') {
-			if (g.currentvars.currentStat.abrv=='cas') {
+			/*if (g.currentvars.currentStat.abrv=='cas') {
 				values = cf.casesByZsGroup.top(Infinity);
 			} else if (g.currentvars.currentStat.abrv=='dec') {
 				values = cf.deathsByZsGroup.top(Infinity);
-			};
+				//values = cf.lethalityByZsGroup.top(Infinity);
+			} else if (g.currentvars.currentStat.abrv=='leth') {*/
+				values = cf.statsByZsGroup.top(Infinity);
+				//values = cf.lethalityByZsGroup.top(Infinity);
+			//};
 		} else if (g.currentvars.currentMapLyr=='prov') {
-			if (g.currentvars.currentStat.abrv=='cas') {
+			/*if (g.currentvars.currentStat.abrv=='cas') {
 				values = cf.casesByProvGroup.top(Infinity);
 			} else if (g.currentvars.currentStat.abrv=='dec') {
 				values = cf.deathsByProvGroup.top(Infinity);
-			};
+				//values = cf.lethalityByProvGroup.top(Infinity);
+			};*/
+			values = cf.statsByProvGroup.top(Infinity);
 		};
+
 
 		//console.log("values, ", g.currentvars.currentEpiDates.all[i], values);
 		for (var j=0; j<=values.length-1; j++) {
-			if (maxValue<values[j].value) {maxValue=values[j].value};
+			//if ((values[j].key != 'cod200xxx') && (values[j].key != '')) {
+			if (values[j].key != '') {
+				//console.log(maxValue, g.currentvars.currentStat.abrv, values[j].value[g.currentvars.currentStat.abrv])
+				if (maxValue < values[j].value[g.currentvars.currentStat.abrv]) {
+					maxValue = values[j].value[g.currentvars.currentStat.abrv]
+					if (values[j].value[g.currentvars.currentStat.abrv]==1) {
+						//console.log(values[j].key, values[j].value['let'])
+					}
+					//console.log("up a notch: ", values[j].value[g.currentvars.currentStat.abrv], values[j])
+				};
+				//console.log(maxValue, values[j].value[g.currentvars.currentStat.abrv])
+			}
 		}
 
 	}
@@ -264,22 +340,35 @@ function updateMapInfo(zs_name, zs_pcode, prov_name, prov_pcode) {
 	if (g.currentvars.currentMapLyr=='prov') {
 		try {
 			try {
-				var val = d3.format(",.0f")(currentMapData[prov_pcode].value);
+				if (g.currentvars.currentStat.abrv=='cas') {
+					var val = "Cas: " + d3.format(",.0f")(currentMapData[prov_pcode].value);
+				} else if (g.currentvars.currentStat.abrv=='dec') {
+					var val = "Décès: " + d3.format(",.0f")(currentMapData[prov_pcode].value);
+				} else if (g.currentvars.currentStat.abrv=='let') {
+					var val = "Létalité: " + d3.format(",.2%")(currentMapData[prov_pcode].value);
+				};
 			} catch(e) {
 				var val = 0;
 			}
-			infoUpdate = (prov_name && prov_pcode) ? "<h4>"+prov_name+ "</h4>Cas: " +  val : "Survolez une région"  
+			infoUpdate = (prov_name && prov_pcode) ? "<h4>"+prov_name+ "</h4>" + val : "Survolez une région"  
 		} catch(e) {
 			infoUpdate = "<p><i>ERROR</i></p>"
 		}
 	} else if (g.currentvars.currentMapLyr=='zone') {
 		try {
 			try {
-				var val = d3.format(",.0f")(currentMapData[zs_pcode].value);
+				//var val = d3.format(",.0f")(currentMapData[zs_pcode].value);
+				if (g.currentvars.currentStat.abrv=='cas') {
+					var val = "Cas: " + d3.format(",.0f")(currentMapData[zs_pcode].value);
+				} else if (g.currentvars.currentStat.abrv=='dec') {
+					var val = "Décès: " + d3.format(",.0f")(currentMapData[zs_pcode].value);
+				} else if (g.currentvars.currentStat.abrv=='let') {
+					var val = "Létalité: " + d3.format(",.2%")(currentMapData[zs_pcode].value);
+				};
 			} catch(e) {
 				var val = 0;
 			}
-			infoUpdate = (zs_name && zs_pcode && prov_name) ? "<h4>"+zs_name+", "+prov_name+ "</h4>Cas: " +  val : "Survolez une région"  
+			infoUpdate = (zs_name && zs_pcode && prov_name) ? "<h4>"+zs_name+", "+prov_name+ "</h4>" +  val : "Survolez une région"  
 		} catch(e) {
 			infoUpdate = "<p><i>ERROR</i></p>"
 		}
@@ -313,14 +402,16 @@ function initMapLegend() {
 
 function updateMapLegend(min, max) {
 	//console.log("updateMapLegend: ", min, max, currentMapData)
-	max = Math.max(1, max);
+	if ((g.currentvars.currentStat.abrv=='cas') || (g.currentvars.currentStat.abrv=='dec')) {
+		max = Math.max(1, max);
+	}
 	d3.select(".maplegend").select("svg").remove();
 	var shift_right = 25;
 
     //Create gradient for legend 
 	var margin = {
 		top: 0,
-		right: 12,
+		right: 18,
 		bottom: 0, 
 		left: 14
 	};
@@ -328,7 +419,9 @@ function updateMapLegend(min, max) {
 	var height = 50; 
 
 	function getTicks() {
-		if (max == 1) {
+		if (g.currentvars.currentStat.abrv=='let') {
+			return 3;
+		} else if (max == 1) {
 			return 1;
 		} else if (max == 2) {
 			return 2;
@@ -429,7 +522,17 @@ function updateMapLegend(min, max) {
 	var xAxis = d3.axisBottom()
 		//.orient("bottom")
 		.ticks(numTicks)
-		.tickFormat(function(d) {if (d==0) {return '';} else {return d3.format(",.0f")(d);} })
+		.tickFormat(function(d) {
+			if (d==0) {
+				return '';
+			} else {
+				if ((g.currentvars.currentStat.abrv=='cas') || (g.currentvars.currentStat.abrv=='dec')) {
+					return d3.format(",.0f")(d);
+				} else if (g.currentvars.currentStat.abrv=='let') {
+					return d3.format(",.1%")(d);
+				}
+			} 
+		})
 		.scale(xScale);
 
 	//Set up x-axis
@@ -866,12 +969,27 @@ function getName(pcode, lyr) {
 function getCurrentTimeSeriesData() {
 	var timeSeries = [];
 
-	if (g.currentvars.currentStat.abrv=='cas') {
+	/*if (g.currentvars.currentStat.abrv=='cas') {
 		timeSeries = cf.casesByEpiDateGroup.top(Infinity);
 	} else if (g.currentvars.currentStat.abrv=='dec') {
 		timeSeries = cf.deathsByEpiDateGroup.top(Infinity);
-	};
+		//timeSeries = cf.lethalityByEpiDateGroup.top(Infinity);
+	} else if (g.currentvars.currentStat.abrv=='let') {	*/			//HEIDI change here for leth
+		statsInTime = cf.statsByEpiDateGroup.top(Infinity);
+		//timeSeries = cf.lethalityByEpiDateGroup.top(Infinity);
+	//};
+	//console.log("statsInTime: ", statsInTime);
+
+	for (var i=0; i<=statsInTime.length-1; i++) {
+		timeSeries.push({'key': statsInTime[i].key, 'value': statsInTime[i].value});
+	}
+	//sort into date order
+	timeSeries.sort(function(a,b){
+		return b.key - a.key;
+	    //return new Date(b.key) - new Date(a.key);
+	});
 	//console.log("timeSeries: ", timeSeries);
+
 	g.currentvars.currentTimeSeries = timeSeries;
 	return timeSeries;
 }
@@ -880,8 +998,8 @@ function getCurrentTimeSeriesData() {
 function createTimeSeriesCharts(id1, id2) {
 	//console.log("IN CREATE CHARTS");
 
-	var margin = {top: 10, right: 20, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
-	    margin2 = {top: 10, right: 20, bottom: 20, left: 60}, 
+	var margin = {top: 10, right: 60, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
+	    margin2 = {top: 10, right: 60, bottom: 20, left: 60}, 
 	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
 	    width2 = $(id2).width() - margin2.left - margin2.right,
 	    height = $(id1).height() - margin.top - margin.bottom,		//height of main svg
@@ -901,11 +1019,14 @@ function createTimeSeriesCharts(id1, id2) {
 	var x = d3.scaleTime().range([0, width]),   		//x-axis width, accounting for specified margins
 		x2 = d3.scaleTime().range([0, width2]),
 	    y = d3.scaleLinear().range([height, 0]),
-	    y2 = d3.scaleLinear().range([height2, 0]);
+	    y2 = d3.scaleLinear().range([height2, 0]),
+	    ylet = d3.scaleLinear().range([height, 0]),
+	    ylet2 = d3.scaleLinear().range([height2, 0]);
 
 	var xAxis = d3.axisBottom(x),
 	    xAxis2 = d3.axisBottom(x2),
-	    yAxis = d3.axisLeft(y).ticks(5);
+	    yAxis = d3.axisLeft(y).ticks(5).tickFormat(function(d) {return d3.format(",.0f")(d)}),
+		yletAxis = d3.axisRight(ylet).ticks(5).tickFormat(function(d) {return d3.format(",.1%")(d)});
 
 	svg1.append("defs").append("clipPath")
 	    .attr("id", "clip")
@@ -931,21 +1052,25 @@ function createTimeSeriesCharts(id1, id2) {
 	console.log("time_data: ", time_data);
 	//x.domain(d3.extent(time_data, function(d) { return d.key; }));
 	x.domain([g.epitime.date_extent[0], d3.timeDay.offset(g.epitime.date_extent[1], 7)]);
-	y.domain([0, d3.max(time_data, function(d) { return d.value; })]);
+	y.domain([0, d3.max(time_data, function(d) { return d.value.cas; })]);
+	ylet.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
 	x2.domain(x.domain());
 	y2.domain(y.domain());
+	ylet2.domain(ylet.domain());
 
 	var orig_bar_width = (width/time_data.length);
 	var bar_width = (width/time_data.length)-0.5;		//changing bar width only for focus chart  //0.5 for bar spacing
+
+	
 
 	focus.selectAll(".bar")
 	    .data(time_data)
 	    .enter().append("rect")
 	    .attr("class", "bar")
 	    .attr("x", function(d) { return x(d.key); })
-	    .attr("y", function(d) { return y(d.value); })
+	    .attr("y", function(d) { return y(d.value.cas); })
 	    .attr("width", bar_width)
-	    .attr("height", function(d) { return height - y(d.value); });
+	    .attr("height", function(d) { return height - y(d.value.cas); });
 
   	focus.append("g")
       .attr("class", "axis axis--x")
@@ -956,27 +1081,63 @@ function createTimeSeriesCharts(id1, id2) {
       .attr("class", "axis axis--y")
       .call(yAxis);
 
+    
+    var valueline = d3.line()
+	    .x(function(d) { 		//add 3.5days here so data point drawn in middle of epiweek bar
+	    	var newdate = new Date(d.key); 
+	    	return x(newdate.setDate(newdate.getDate() + 3.5)); 
+	    })  
+	    .y(function(d) { return ylet(d.value.let); });
+
+	focus.append("path")
+	    .data([time_data])
+	    .attr("class", "line")
+	    .attr("d", valueline);
+
+	focus.append("g")
+      .attr("class", "axis axis--ylet")
+      .attr("transform", "translate( " + width + ", 0 )")
+      .call(yletAxis);
+
 	context.selectAll(".bar2")
 	    .data(time_data)
 	    .enter().append("rect")
 	    .attr("class", "bar2")
 	    .attr("x", function(d) { return x2(d.key); })
-	    .attr("y", function(d) { return y2(d.value); })
+	    .attr("y", function(d) { return y2(d.value.cas); })
 	    .attr("width", orig_bar_width)
-	    .attr("height", function(d) { return height2 - y2(d.value); });
+	    .attr("height", function(d) { return height2 - y2(d.value.cas); });
 
 	context.append("g")
 	      .attr("class", "axis axis--x")
 	      .attr("transform", "translate(0," + height2 + ")")
 	      .call(xAxis2);
 
+	var valueline2 = d3.line()
+	    .x(function(d) { 		//add 3.5days here so data point drawn in middle of epiweek bar
+	    	var newdate = new Date(d.key); 
+	    	return x(newdate.setDate(newdate.getDate() + 3.5)); 
+	    })  
+	    .y(function(d) { return ylet2(d.value.let); });
 
-	//add y-axis title
+	context.append("path")
+	    .data([time_data])
+	    .attr("class", "line2")
+	    .attr("d", valueline2);
+
+
+	//add y-axis titles
 	focus
 		.append("text")
-		.attr("class", "axis-title")
+		.attr("class", "y-axis-title")
 		//.attr("transform", "translate(-15," +  (height+margin.bottom)/2 + ") rotate(-90)")
 		.attr("transform", "translate(-45," + (87) + ") rotate(-90)")
+		.text(" ");
+	focus
+		.append("text")
+		.attr("class", "ylet-axis-title")
+		//.attr("transform", "translate(-15," +  (height+margin.bottom)/2 + ") rotate(-90)")
+		.attr("transform", "translate(" + (width+60) + "," + (66) + ") rotate(-90)")
 		.text(" ");
 
 
@@ -989,12 +1150,11 @@ function createTimeSeriesCharts(id1, id2) {
 	
 
 
-
 function updateTimeSeriesCharts(id1, id2, time_data) {
 	//console.log("IN UPDATE CHARTS");
 
-	var margin = {top: 10, right: 20, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
-	    margin2 = {top: 10, right: 20, bottom: 20, left: 60}, 
+	var margin = {top: 10, right: 60, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
+	    margin2 = {top: 10, right: 60, bottom: 20, left: 60}, 
 	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
 	    width2 = $(id2).width() - margin2.left - margin2.right,
 	    height = $(id1).height() - margin.top - margin.bottom,		//height of main svg
@@ -1003,18 +1163,32 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	var x = d3.scaleTime().range([0, width]),   		//x-axis width, accounting for specified margins
 		x2 = d3.scaleTime().range([0, width2]),
 	    y = d3.scaleLinear().range([height, 0]),
-	    y2 = d3.scaleLinear().range([height2, 0]);
+	    y2 = d3.scaleLinear().range([height2, 0]),
+	    ylet = d3.scaleLinear().range([height, 0]),
+	    ylet2 = d3.scaleLinear().range([height2, 0]);
 
 	//set domains
-	//x.domain(d3.extent(time_data, function(d) { return d.key; }));
 	x.domain([g.epitime.date_extent[0], d3.timeDay.offset(g.epitime.date_extent[1], 7)]);
-	y.domain([0, d3.max(time_data, function(d) { return d.value; })]);
+	y.domain([0, d3.max(time_data, function(d) {return d.value.cas; })]);
+	ylet.domain([0, d3.max(time_data, function(d) {return d.value.let; })]);
 	x2.domain(x.domain());
 	y2.domain(y.domain());
+	ylet2.domain(ylet.domain());
+
+	/*function numFormat(val) {
+		if ((g.currentvars.currentStat.abrv=='cas') || (g.currentvars.currentStat.abrv=='dec')) {
+			return d3.format(',.0f')(val);
+		} else if (g.currentvars.currentStat.abrv=='let') {
+			return d3.format(',.2%')(val);
+		} else {
+			return d3.format(',.0f')(val);
+		}
+	}*/
 	
 	var xAxis = d3.axisBottom(x),
 	    xAxis2 = d3.axisBottom(x2),
-	    yAxis = d3.axisLeft(y).ticks(5);
+		yAxis = d3.axisLeft(y).ticks(5).tickFormat(function(d) {return d3.format(",.0f")(d)}),
+		yletAxis = d3.axisRight(ylet).ticks(5).tickFormat(function(d) {return d3.format(",.1%")(d)});
 
 	//get the width of each bar 
 	var orig_bar_width = (width/time_data.length);
@@ -1029,24 +1203,25 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 
 	var tooltip = d3.select("body").append("div").attr("class", "toolTip");
 
+
 	//now give each rectangle corresponding data
 	bar.enter()
 		.append("rect")
 	    .attr("class", "bar")
 	    .attr("x", function(d) { return x(d.key); })
-	    .attr("y", function(d) { return y(d.value); })
+	    .attr("y", function(d) { return y(d.value.cas); })
 	    .attr("width", bar_width)
-	    .attr("height", function(d) { return height - y(d.value); })
+	    .attr("height", function(d) { return height - y(d.value.cas); })
 	    .on("mousemove", function(d){
             tooltip
               .style("left", d3.event.pageX - 50 + "px")
               .style("top", d3.event.pageY - 70 + "px")
               .style("display", "inline-block")
-              .html("Semaine epi: <b>" + getEpiWeek(d.key) + "</b><br>Semaine du: <b>" + dateFormat(d.key) + "</b><br>Total: <b>" + d.value + "</b>");
+              .html("Semaine epi: <b>" + getEpiWeek(d.key) + "</b><br>Semaine du: <b>" + dateFormat(d.key) + "</b><br>" + g.statList[0].full + ": <b>" + d3.format(',.0f')(d.value.cas) + "</b><br>" + g.statList[1].full + ": <b>" + d3.format(',.2%')(d.value.let) + "</b>")
         })
     	.on("mouseout", function(d){ tooltip.style("display", "none");});
 
-	
+   
 	//left axis
 	svg1.select('.axis--y')
 		.call(yAxis)
@@ -1062,25 +1237,67 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 				return "rotate(-65)";
 			});*/
 
-	svg1.select(".axis-title")
-		.text(g.currentvars.currentStat.full);
+	var valueline = d3.line()
+	    .x(function(d) { 		//add 3.5days here so data point drawn in middle of epiweek bar
+	    	var newdate = new Date(d.key); 
+	    	return x(newdate.setDate(newdate.getDate() + 3.5)); 
+	    })  
+	    .y(function(d) { return ylet(d.value.let); });
+
+	var letline = svg1.select('g').selectAll(".line")
+					.remove()
+					.exit()
+					.data([time_data]);
+
+	letline.enter().append('path')
+				.attr("class", "line")
+    			.attr("d", valueline);
+
+	/*svg1.select('g').selectAll(".line")
+	    .data([time_data])
+	    .attr("class", "line")
+	    .attr("d", valueline);*/
+
+	svg1.select('.axis--ylet')
+      //.attr("transform", "translate( " + width + ", 0 )")
+      .call(yletAxis);
+	svg1.select(".y-axis-title")
+		//.text(g.currentvars.currentStat.full);
+		.text(g.statList[0].full);
+	svg1.select(".ylet-axis-title")
+		.text(g.statList[1].full);
 
 	var bar2 = svg2.select('g').selectAll(".bar2")
 					.remove()
 					.exit()
 					.data(time_data)
 
-	svg2.select('.axis--x2')
-		.call(xAxis2)	
-
 	bar2.enter()
 		.append("rect")
 		.attr("class", "bar2")
 	    .attr("x", function(d) { return x2(d.key); })
-	    .attr("y", function(d) { return y2(d.value); })
+	    .attr("y", function(d) { return y2(d.value.cas); })
 	    .attr("width", orig_bar_width)
-	    .attr("height", function(d) { return height2 - y2(d.value); });
+	    .attr("height", function(d) { return height2 - y2(d.value.cas); });
 
+	var valueline2 = d3.line()
+	    .x(function(d) { 		//add 3.5days here so data point drawn in middle of epiweek bar
+	    	var newdate = new Date(d.key); 
+	    	return x(newdate.setDate(newdate.getDate() + 3.5)); 
+	    })  
+	    .y(function(d) { return ylet2(d.value.let); });
+
+	var letline2 = svg2.select('g').selectAll(".line2")
+					.remove()
+					.exit()
+					.data([time_data]);
+
+	letline2.enter().append('path')
+				.attr("class", "line2")
+    			.attr("d", valueline2);
+
+	svg2.select('.axis--x2')
+		.call(xAxis2)	
 
 	var zoom = d3.zoom()
 	    .scaleExtent([1, Infinity])
@@ -1103,14 +1320,12 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 					    .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")")
 				        .call(brush);
 
-
-
 		var handle = gBrush.selectAll(".handle--custom")
 			  .data([{type: "w"}, {type: "e"}])
 			  .enter().append("path")
 			    .attr("class", "handle--custom")
 			    .attr("fill", "#666")
-			    .attr("fill-opacity", 0.8)
+			    .attr("fill-opacity", 1)
 			    .attr("stroke", "#000")
 			    .attr("stroke-width", 1.5)
 			    .attr("cursor", "ew-resize")
@@ -1119,7 +1334,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 			        .innerRadius(0)
 			        .outerRadius(16) //(height2 + margin2.bottom)/4) // + margin2.bottom) / 3)
 			        .startAngle(0)
-			        .endAngle(function(d, i) { return i ? Math.PI : -Math.PI; }));
+			        .endAngle(function(d, i) {return i ? Math.PI : -Math.PI; }));
 		//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)	
 		gBrush.call(brush.move, [g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7)].map(x)); 
 	} else {
@@ -1131,12 +1346,12 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
 
 	// style brush handle
-	var brushResizePath = function(d) {
+	/*var brushResizePath = function(d) {
 	    var e = +(d.type == "e"),
 	        x = e ? 1 : -1,
 	        y = height / 2;
 	    return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) + "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) + "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
-	}
+	}*/
 
 	function brushmoved() {
 		//console.log("IN BRUSHMOVED", g.currentvars.currentEpiDates);
@@ -1164,8 +1379,11 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 				g.currentvars.currentEpiDates.all.push(g.epitime.all[i].epiDate);
 			}
 
+
+			//svg2.select(".line2").attr("stroke", "green");
+
 	    } else {	  
-	    	//console.log("PROBLEM Current epidates ALL: ", g.currentvars.currentEpiDates.all);
+	    	//console.log("Current epidates ALL: ", g.currentvars.currentEpiDates.all);
 	    	//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)      
 	        var sx = s.map(x2.invert);
 	        //console.log("s, sx: ", s, sx);
@@ -1177,19 +1395,43 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	        	};
 	        	return sx[0] <= d.key && d.key < sx[1]; 
 	        });
+	        //svg2.select('g').selectAll(".line2").attr("stroke", "green");
 	        //console.log("PROBLEM Current epidates ALL: ", g.currentvars.currentEpiDates.all);
 	        //console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
 	        handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [ s[i], 14] + ")"; });
 	        //handle.attr("display", null).attr("transform", function(d, i) {"translate(" + [ s[i], (- height / 4) + 14] + ")"});
 
-	    	x.domain(s.map(x2.invert, x2));
+	    	
+
+		
+
+			x.domain(s.map(x2.invert, x2));
 	    	svg1.select("g").selectAll(".bar")
 	    		.attr("x", function(d) { return x(d.key); })
 	    		.attr("width", bar_width);
 		    svg1.select("g").select(".axis--x").call(xAxis);
+
+	/*var valueline = d3.line()
+			    .x(function(d) { console.log(d.key, d3.format(',.2%')(d.value.let)); return x(d.key); })
+			    .y(function(d) { return ylet(d.value.let); }); */
+
+			//console.log('time_data max lethality = ', d3.format(',.2%')(d3.max(time_data, function(d) { return d.value.let; })));
+			//console.log(ylet.domain()[0], ' - ', d3.format(',.2%')(ylet.domain()[1]));
+			ylet.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
+			ylet2.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
+			//console.log(ylet.domain()[0], ' - ', d3.format(',.2%')(ylet.domain()[1]));
+			svg1.select("g").selectAll(".line")
+	    		.data([time_data])
+			    .attr("class", "line")
+			    .attr("d", valueline);
+
+		    //svg1.select("g").select(".axis--ylet").call(yletAxis);
+		    //svg1.select("g").select(".axis--ylet").attr("transform", "translate( " + width + ", 0 )").call(yletAxis);
+
 		    svg1.select(".zoom").call(zoom.transform, d3.zoomIdentity
 		        .scale(width / (s[1] - s[0]))
 		        .translate(-s[0], 0));
+
 	    }
 	    //console.log("PROBLEM Current epidates ALL: ", g.currentvars.currentEpiDates.all);
 	    //console.log("PROBLEM Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
@@ -1198,7 +1440,39 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	    g.currentvars.currentEpiWeek.min = getEpiWeek(g.currentvars.currentEpiDates.min);
 		g.currentvars.currentEpiWeek.max = getEpiWeek(g.currentvars.currentEpiDates.max);
 
-		//console.log("PROBLEM Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
+		active_data = [];
+		for (var i=0; i<=time_data.length-1; i++) {
+			if ((d3.timeDay.offset(g.currentvars.currentEpiDates.min, -7) <= time_data[i].key) && (time_data[i].key <= d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7))) {
+				active_data.push(time_data[i]);
+			}
+		}
+		//console.log("active data: ", active_data);
+
+		var valueline3 = d3.line()
+		    .x(function(d) { 		//add 3.5days here so data point drawn in middle of epiweek bar
+		    	var newdate = new Date(d.key); 
+		    	return x2(newdate.setDate(newdate.getDate() + 3.5)); 
+		    })  
+		    .y(function(d) { return ylet2(d.value.let); });
+
+        var letline2_active = svg2.select('g').selectAll(".line2_active")
+				.remove()
+				.exit()
+				.data([active_data]);
+
+		letline2_active.enter().append('path')
+			.attr("class", "line2_active")
+			.attr("d", valueline3)
+        	//.attr("stroke", "green")
+        	/*.attr("stroke", function (d,i) {
+        		console.log(d,i);
+	            //return (d.key > new Date(2015,7,31)) ? 'red' : 'green';
+	            return (d.y < 0.06) ? 'red' : 'green';
+	        })*/
+	        .attr("stroke", "red");
+        //svg2.selectAll(".line2").attr("stroke", "green");
+
+		//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
 		//console.log("IN BRUSHMOVED - DONE");
 	}
 
@@ -1225,18 +1499,69 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
         bar_width = ((orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0])) - 0.5;   //0.5 for bar spacing
     	handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [g.currentvars.currentEpiDates.s[i], 14] + ")"; });
 	
-    	svg1.select("g").selectAll(".bar")
+    	
+
+		active_data = [];
+		for (var i=0; i<=time_data.length-1; i++) {
+			if ((d3.timeDay.offset(g.currentvars.currentEpiDates.min, -7) <= time_data[i].key) && (time_data[i].key <= d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7))) {
+				active_data.push(time_data[i]);
+			}
+		}
+		//console.log("active data: ", active_data);
+
+		var valueline3 = d3.line()
+		    .x(function(d) { 		//add 3.5days here so data point drawn in middle of epiweek bar
+		    	var newdate = new Date(d.key); 
+		    	return x2(newdate.setDate(newdate.getDate() + 3.5)); 
+		    })  
+		    .y(function(d) { return ylet2(d.value.let); });
+
+        var letline2_active = svg2.select('g').selectAll(".line2_active")
+				.remove()
+				.exit()
+				.data([active_data]);
+
+		letline2_active.enter().append('path')
+			.attr("class", "line2_active")
+			.attr("d", valueline3)
+        	//.attr("stroke", "green")
+        	/*.attr("stroke", function (d,i) {
+        		console.log(d,i);
+	            //return (d.key > new Date(2015,7,31)) ? 'red' : 'green';
+	            return (d.y < 0.06) ? 'red' : 'green';
+	        })*/
+	        .attr("stroke", "red");
+        //svg2.selectAll(".line2").attr("stroke", "green");
+
+
+
+	    //svg1.select("g").select(".axis--ylet").call(yletAxis);
+	    //svg1.select("g").select(".axis--ylet").attr("transform", "translate( " + width + ", 0 )").call(yletAxis);
+
+		svg1.select("g").selectAll(".bar")
     		.attr("x", function(d) { return x(d.key); })
     		.attr("width", bar_width);
 	    svg1.select("g").select(".axis--x").call(xAxis);
+
+		/*var valueline = d3.line()
+			    .x(function(d) { console.log(d.key, d.value.let); return x(d.key); })
+			    .y(function(d) { return ylet(d.value.let); }); */
+
+		ylet.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
+		ylet2.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
+		//console.log(ylet.domain()[0], ' - ', d3.format(',.2%')(ylet.domain()[1]));
+		svg1.select("g").selectAll(".line")
+    		.data([time_data])
+		    .attr("class", "line")
+		    .attr("d", valueline);
+
 	    svg1.select(".zoom").call(zoom.transform, d3.zoomIdentity
 	        .scale(width / (s[1] - s[0]))
-	        .translate(-s[0], 0));
+		        .translate(-s[0], 0));
 	    //console.log("IN BRUSHUPDATE - DONE");
 	}
 
 	function brushend() {
-
 		//console.log("******** IN BRUSH END ********* ", g.currentvars.currentEpiDates);
 		//console.log(d3.event.sourceEvent);
 		//console.log(g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max);
@@ -1264,9 +1589,45 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 			}
 
 	        svg2.selectAll(".bar2").classed("active", true);
+
+	        active_data = [];
+			for (var i=0; i<=time_data.length-1; i++) {
+				if ((d3.timeDay.offset(g.currentvars.currentEpiDates.min, -7) <= time_data[i].key) && (time_data[i].key <= d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7))) {
+					active_data.push(time_data[i]);
+				}
+			}
+			//console.log("active data: ", active_data);
+
+			var valueline3 = d3.line()
+			    .x(function(d) { 		//add 3.5days here so data point drawn in middle of epiweek bar
+			    	var newdate = new Date(d.key); 
+			    	return x2(newdate.setDate(newdate.getDate() + 3.5)); 
+			    })  
+			    .y(function(d) { return ylet2(d.value.let); });
+			//console.log("valueline3: ", valueline3.x())
+
+	        var letline2_active = svg2.select('g').selectAll(".line2_active")
+					.remove()
+					.exit()
+					.data([active_data]);
+
+			letline2_active.enter().append('path')
+				.attr("class", "line2_active")
+				.attr("d", valueline3)
+	        	//.attr("stroke", "green")
+	        	/*.attr("stroke", function (d,i) {
+	        		console.log(d,i);
+		            //return (d.key > new Date(2015,7,31)) ? 'red' : 'green';
+		            //return (d.y < 0.06) ? 'red' : 'green';
+		            return 'green';
+		        });*/
+		        .attr("stroke", "red");
+	        //svg2.selectAll(".line2").attr("stroke", "green");
+
 			
 			x.domain([g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7)]);
 	        var s = [x2(g.currentvars.currentEpiDates.min), x2(d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7))];
+	        //var s = [x2(g.currentvars.currentEpiDates.min), x2(g.currentvars.currentEpiDates.max)];
 
 	        bar_width = ((orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0])) - 0.5;   //0.5 for bar spacing
 
@@ -1280,10 +1641,29 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	        	//handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4);*/ return "translate(" + [ s[i], - height / 4] + ")"; });
 	        }
 	    	
-	    	svg1.select("g").selectAll(".bar")
+	    	
+
+		    
+
+			svg1.select("g").selectAll(".bar")
 	    		.attr("x", function(d) { return x(d.key); })
 	    		.attr("width", bar_width);
 		    svg1.select("g").select(".axis--x").call(xAxis);
+
+			/*var valueline = d3.line()
+			    .x(function(d) { console.log(d.key, d.value.let); return x(d.key); })
+			    .y(function(d) { return ylet(d.value.let); });*/
+
+			ylet.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
+			//console.log(ylet.domain()[0], ' - ', d3.format(',.2%')(ylet.domain()[1]));
+			svg1.select("g").selectAll(".line")
+	    		.data([time_data])
+			    .attr("class", "line")
+			    .attr("d", valueline);
+
+		    //svg1.select("g").select(".axis--ylet").call(yletAxis);
+		    //svg1.select("g").select(".axis--ylet").attr("transform", "translate( " + width + ", 0 )").call(yletAxis);
+
 		    svg1.select(".zoom").call(zoom.transform, d3.zoomIdentity
 		        .scale(width / (s[1] - s[0]))
 		        .translate(-s[0], 0));
@@ -1314,7 +1694,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	}
 
 	function zoomed() {
-		//console.log("IN ZOOMED");
+		console.log("IN ZOOMED");
 	    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
 	    var t = d3.event.transform;
 	    x.domain(t.rescaleX(x2).domain());
@@ -1322,8 +1702,12 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	    //focus.select(".area").attr("d", area);
 	    svg1.select("g").selectAll(".bar").attr("x", function(d) { return x(d.key); });
 	    svg1.select("g").selectAll(".bar")
+	    //svg1.select("g").selectAll("path").attr("x", function(d) { return x(d.key); });
+	    //svg1.select("g").selectAll("path")
+	    //svg1.select("g").select(".axis--ylet").call(yletAxis);
 	    svg1.select("g").select(".axis--x").call(xAxis);
 	    svg2.select("g").select(".brush").call(brush.move, x.range().map(t.invertX, t));
+
 	    //console.log("IN ZOOMED - DONE");
 	}	
 
@@ -1419,7 +1803,7 @@ $(function() {
 
 function addPlayLine() {
 	var id1 = '#timeseries';
-	var margin = {top: 10, right: 20, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
+	var margin = {top: 10, right: 60, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
 	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
 	    height = $(id1).height() - margin.top - margin.bottom;		//height of main svg
 
@@ -1436,7 +1820,7 @@ function addPlayLine() {
 		.attr("y1", margin.top)    		
 		.attr("x2", margin.left + x(g.currentvars.currentAnimation.currentEpiDate) + week_width/2)  
 		.attr("y2", height + margin.top)		
-		.attr('stroke', 'red')  
+		.attr('stroke', g.mapcolors.playbar_color)  
 		.attr("stroke-width", 2)
 		.attr('display', 'block');
 }
@@ -1630,7 +2014,16 @@ function changeStatSelection() {
 
 function updateHeadline() {
 	var headline = document.getElementById("head-val");
-	headline.innerHTML = 'Total indiqué sur la carte:<br/><big>' + d3.format(",.0f")(g.currentvars.currentSum) + '</big>';
+	var total = function() {
+		if (g.currentvars.currentStat.abrv== 'cas') {
+			return d3.format(",.0f")(g.currentvars.currentTotals.cas);
+		} else if (g.currentvars.currentStat.abrv == 'dec') {
+			return d3.format(",.0f")(g.currentvars.currentTotals.dec);
+		} else if (g.currentvars.currentStat.abrv == 'let') {
+			return d3.format(",.2%")(g.currentvars.currentTotals.let);
+		}	
+	}
+	headline.innerHTML = 'Total indiqué sur la carte:<br/><big>' + total() + '</big>';
 };
 
 function updateFiltSum() {
