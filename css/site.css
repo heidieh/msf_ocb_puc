@@ -1,9 +1,11 @@
 
 .container-fluid{
 	margin-left: 200px;
+  margin-right: 10px;
     /*padding-left:15%;
     padding-right:5%;*/
     padding-bottom:20px;
+
 }
 
 /*.spacersm {
@@ -239,13 +241,13 @@ p span{
   margin-top: 12px;
   padding-left: 14px;
   display: none;
-  max-height: 350px;
+  max-height: 320px;
   overflow: auto;
 }
 
 #btn_reset {
   position: fixed;
-	top: 730px;
+	top: 690px;
 	margin-left: 0px;
 	height: 25px;
 	width: 200px;
@@ -426,12 +428,11 @@ rect.selection {
   /*clip-path: url(#clip);*/
 }
 
-.line2_active {
+/*.line2_active {
   fill: none;
   stroke: red;
   stroke-width: 2px;
-  /*clip-path: url(#clip);*/
-}
+}*/
 
 .context {
   fill: grey;
@@ -482,7 +483,7 @@ rect.selection {
 }*/
 
 .button.play{
-  float: right; 
+  float: left; 
   width: 50px;
   height: 50px;
   margin-top: 30px;
@@ -494,6 +495,11 @@ rect.selection {
   background-repeat:no-repeat; 
 }
 
+#btnPlayPause.slimline {
+  margin-top: 10px;
+  margin-left: 20px;
+}
+
 .button.pause{
   background: url(../images/pause.png);
   background-size: 44px 44px;
@@ -503,7 +509,7 @@ rect.selection {
 
 .button.stop{
   display: none;
-  float: right; 
+  float: left; 
   width: 50px;
   height: 50px;
   margin-top: 0px;
@@ -512,6 +518,11 @@ rect.selection {
   background-size: 44px 44px;
   background-position:center;
   background-repeat:no-repeat; 
+}
+
+#btnStop.slimline {
+  margin-top: 10px;
+  margin-left: 10px;
 }
 
 
@@ -525,6 +536,11 @@ rect.selection {
   margin-left: -5px;
   /*height: 100px;*/
   /*overflow: auto;*/
+}
+
+#playMode_text.slimline {
+  margin-top: 10px;
+  margin-left: 10px;
 }
 
 /*.button_sm {

@@ -1010,11 +1010,15 @@ function createTimeSeriesCharts(id1, id2) {
 		.append("svg")
 		.attr("width", width + margin.left + margin.right)
 		.attr("height", height + margin.top + margin.bottom);
+		/*.attr("width", "100%")
+		.attr("height", "100%");*/
 
 	svg2 = d3.select(id2)         
 		.append("svg")
 		.attr("width", width2 + margin2.left + margin2.right)
 		.attr("height", height2 + margin2.top + margin2.bottom);
+		/*.attr("width", "100%")
+		.attr("height", "100%");*/
 
 	var x = d3.scaleTime().range([0, width]),   		//x-axis width, accounting for specified margins
 		x2 = d3.scaleTime().range([0, width2]),
@@ -1033,6 +1037,8 @@ function createTimeSeriesCharts(id1, id2) {
 	  	.append("rect")
 	    .attr("width", width)
 	    .attr("height", height);
+	    /*.attr("width", "100%")
+		.attr("height", "100%");*/
 
 	/*svg2.append("defs").append("clipPath")
 	    .attr("id", "clip")
@@ -1049,7 +1055,7 @@ function createTimeSeriesCharts(id1, id2) {
 	    .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
 	var time_data = getCurrentTimeSeriesData();
-	console.log("time_data: ", time_data);
+	//console.log("time_data: ", time_data);
 	//x.domain(d3.extent(time_data, function(d) { return d.key; }));
 	x.domain([g.epitime.date_extent[0], d3.timeDay.offset(g.epitime.date_extent[1], 7)]);
 	y.domain([0, d3.max(time_data, function(d) { return d.value.cas; })]);
@@ -1113,7 +1119,7 @@ function createTimeSeriesCharts(id1, id2) {
 	      .attr("transform", "translate(0," + height2 + ")")
 	      .call(xAxis2);
 
-	var valueline2 = d3.line()
+	/*var valueline2 = d3.line()
 	    .x(function(d) { 		//add 3.5days here so data point drawn in middle of epiweek bar
 	    	var newdate = new Date(d.key); 
 	    	return x(newdate.setDate(newdate.getDate() + 3.5)); 
@@ -1123,7 +1129,7 @@ function createTimeSeriesCharts(id1, id2) {
 	context.append("path")
 	    .data([time_data])
 	    .attr("class", "line2")
-	    .attr("d", valueline2);
+	    .attr("d", valueline2);*/
 
 
 	//add y-axis titles
@@ -1280,7 +1286,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	    .attr("width", orig_bar_width)
 	    .attr("height", function(d) { return height2 - y2(d.value.cas); });
 
-	var valueline2 = d3.line()
+/*	var valueline2 = d3.line()
 	    .x(function(d) { 		//add 3.5days here so data point drawn in middle of epiweek bar
 	    	var newdate = new Date(d.key); 
 	    	return x(newdate.setDate(newdate.getDate() + 3.5)); 
@@ -1294,7 +1300,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 
 	letline2.enter().append('path')
 				.attr("class", "line2")
-    			.attr("d", valueline2);
+    			.attr("d", valueline2);*/
 
 	svg2.select('.axis--x2')
 		.call(xAxis2)	
@@ -1440,7 +1446,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	    g.currentvars.currentEpiWeek.min = getEpiWeek(g.currentvars.currentEpiDates.min);
 		g.currentvars.currentEpiWeek.max = getEpiWeek(g.currentvars.currentEpiDates.max);
 
-		active_data = [];
+/*		active_data = [];
 		for (var i=0; i<=time_data.length-1; i++) {
 			if ((d3.timeDay.offset(g.currentvars.currentEpiDates.min, -7) <= time_data[i].key) && (time_data[i].key <= d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7))) {
 				active_data.push(time_data[i]);
@@ -1463,13 +1469,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 		letline2_active.enter().append('path')
 			.attr("class", "line2_active")
 			.attr("d", valueline3)
-        	//.attr("stroke", "green")
-        	/*.attr("stroke", function (d,i) {
-        		console.log(d,i);
-	            //return (d.key > new Date(2015,7,31)) ? 'red' : 'green';
-	            return (d.y < 0.06) ? 'red' : 'green';
-	        })*/
-	        .attr("stroke", "red");
+	        .attr("stroke", "red");*/
         //svg2.selectAll(".line2").attr("stroke", "green");
 
 		//console.log("Current epidates: ", g.currentvars.currentEpiDates.min, g.currentvars.currentEpiDates.max)
@@ -1501,7 +1501,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	
     	
 
-		active_data = [];
+/*		active_data = [];
 		for (var i=0; i<=time_data.length-1; i++) {
 			if ((d3.timeDay.offset(g.currentvars.currentEpiDates.min, -7) <= time_data[i].key) && (time_data[i].key <= d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7))) {
 				active_data.push(time_data[i]);
@@ -1529,8 +1529,8 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
         		console.log(d,i);
 	            //return (d.key > new Date(2015,7,31)) ? 'red' : 'green';
 	            return (d.y < 0.06) ? 'red' : 'green';
-	        })*/
-	        .attr("stroke", "red");
+	        })
+	        .attr("stroke", "red");*/
         //svg2.selectAll(".line2").attr("stroke", "green");
 
 
@@ -1590,7 +1590,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 
 	        svg2.selectAll(".bar2").classed("active", true);
 
-	        active_data = [];
+	        /*active_data = [];
 			for (var i=0; i<=time_data.length-1; i++) {
 				if ((d3.timeDay.offset(g.currentvars.currentEpiDates.min, -7) <= time_data[i].key) && (time_data[i].key <= d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7))) {
 					active_data.push(time_data[i]);
@@ -1620,8 +1620,8 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 		            //return (d.key > new Date(2015,7,31)) ? 'red' : 'green';
 		            //return (d.y < 0.06) ? 'red' : 'green';
 		            return 'green';
-		        });*/
-		        .attr("stroke", "red");
+		        });
+		        .attr("stroke", "red");*/
 	        //svg2.selectAll(".line2").attr("stroke", "green");
 
 			
@@ -1964,6 +1964,7 @@ window.onload = function () {
 			changeDiseaseSelection();
 			changeStatSelection();
 			console.log("g = ", g);
+			resize();
         }
 
     }
@@ -2100,3 +2101,24 @@ function btn_selectDates() {
 	}
 	updateTimeSeriesCharts('#timeseries', '#timeseriesbrush', currentTimeSeriesData);
 }
+
+
+
+function resize() { 
+  	//console.log("RESIZE w", window.innerWidth, ' x h', window.innerHeight);
+  	if (window.innerWidth < 768) {
+  		//console.log("SLIMLINE");
+  		if (!($('#btnPlayPause').hasClass('slimline'))) {$('#btnPlayPause').addClass('slimline'); };
+    	if (!($('#btnStop').hasClass('slimline'))) {$('#btnStop').addClass('slimline'); };
+    	if (!($('#playMode_text').hasClass('slimline'))) {$('#playMode_text').addClass('slimline');  };
+  	} else {
+  		$('#btnPlayPause').removeClass('slimline'); 
+    	$('#btnStop').removeClass('slimline'); 
+    	$('#playMode_text').removeClass('slimline');  
+  	}
+    svg1.remove();
+    svg2.remove();
+    createTimeSeriesCharts('#timeseries', '#timeseriesbrush');
+    updateTimeSeriesCharts('#timeseries', '#timeseriesbrush', currentTimeSeriesData);
+}
+window.onresize = resize;
