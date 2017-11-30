@@ -351,13 +351,26 @@ p span{
   shape-rendering: crispEdges;
 }
 
-.axis-title {
-  font: 11px sans-serif;
+.y-axis-title {
+  font: 12px sans-serif;
+  font-weight: 300;
+  fill: steelblue; /*#666666; #4F4F4F;*/
+}
+.ylet-axis-title {
+  font: 12px sans-serif;
+  font-weight: 500;
+  fill: red;
 }
 /*.area {
   fill: steelblue;
   clip-path: url(#clip);
 }*/
+.axis--y text{
+  fill: steelblue;
+}
+.axis--ylet text{
+  fill: red;
+}
 
 rect {
   /*fill-opacity: 0.2;*/
@@ -386,6 +399,14 @@ rect.selection {
   stroke-width: 2px;*/
 }
 
+.line {
+  fill: none;
+  stroke: red;
+  stroke-width: 2px;
+  clip-path: url(#clip);
+}
+
+
 .bar2 {
   fill-opacity: 1;
   fill: lightgrey;
@@ -397,15 +418,29 @@ rect.selection {
   fill: steelblue;
 }
 
+.line2 {
+  fill: none;
+  stroke: #8c8c8c;
+  stroke-width: 2px;
+  opacity: 0.5;  /*HEIDI - remove later*/
+  /*clip-path: url(#clip);*/
+}
+
+.line2_active {
+  fill: none;
+  stroke: red;
+  stroke-width: 2px;
+  /*clip-path: url(#clip);*/
+}
 
 .context {
   fill: grey;
   clip-path: url(#clip);
 }
 
-.context.active {
+/*.context.active {
   fill: green;
-}
+}*/
 
 .toolTip {
   font: 11px sans-serif;
