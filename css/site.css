@@ -265,8 +265,8 @@ p span{
 
  
 .button {
-    background-color: #cccccc; /* #3160b2; */
-    border: none;
+  background-color: #cccccc; /* #3160b2; */
+  border: none;
 	border-radius: 8px;
 	outline: none;
 	/*outline-color: #ffff00;*/
@@ -313,6 +313,17 @@ p span{
 .btn-side-nav {
   width: 160px;
   margin-left: 14px;
+}
+
+#btnProv {
+  border-radius: 8px 0px 0px 8px;
+}
+#btnZone {
+  border-radius: 0px 8px 8px 0px;
+}
+
+#btnRiv {
+  
 }
 
 .btn-lyr, .btn-riv{
