@@ -185,8 +185,8 @@ p span{
 
 
 
-/* Drop-down disease list */
-.select {
+/* Drop-down disease list   http://jsfiddle.net/BB3JK/47/ */
+/*.select {
   margin-top: 20px;
   margin-left: 14px;
   background: url(../images/dropdown.png) no-repeat 92% center;  
@@ -200,15 +200,96 @@ p span{
    border: none;
    font-size: 11px;
    height: 25px;
-   padding: 5px; /* If you add too much padding here, the options won't show in IE */
+   padding: 5px; /* If you add too much padding here, the options won't show in IE 
    width: 200px;
+}*/
+
+.s-hidden {
+    visibility:hidden;
+    padding-right:10px;
+}
+.select {
+    cursor:pointer;
+    display:inline-block;
+    position:relative;
+    /*font:normal 11px/22px Arial, Sans-Serif;*/
+    color:black;
+    /*border:1px solid #ccc;*/
+    margin-top: 20px;
+    margin-left: 14px;
+    /*background: url(../images/dropdown.png) no-repeat 92% center;  */
+    height: 25px;
+    /*overflow: hidden;*/
+    width: 160px;
+    -webkit-border-radius: 8px;
+   -moz-border-radius: 8px;
+   border-radius: 8px;
+
+}
+.styledSelect {
+    position:absolute;
+    top:5;
+    right:0;
+    bottom:0;
+    left:0;
+    font: 12px sans-serif;
+  /*color: #666666; *//*#4F4F4F;*/
+  /*font-weight: 400;*/
+    background-color: #3b8ec2; 
+    color: white;
+    padding-left: 14px;
+    padding-top: 3px;
+    /*font-weight:bold;*/
+    -webkit-border-radius: 8px;
+   -moz-border-radius: 8px;
+   border-radius: 8px;
+}
+.styledSelect:after {
+    content:"";
+    width:0;
+    height:0;
+    border:5px solid transparent;
+    border-color:black transparent transparent transparent;
+    position:absolute;
+    top:9px;
+    right:16px;
+}
+.styledSelect:active, .styledSelect.active {
+    background-color: #cccccc;
+}
+.options {
+    display:none;
+    position:absolute;
+    top:100%;
+    right:0;
+    left:0;
+    z-index:999;
+    margin:0 0;
+    padding:0 0;
+    list-style:none;
+    /*border:1px solid #ccc;*/
+    background-color:white;
+    -webkit-box-shadow:0 1px 2px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow:0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow:0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.options li {
+    font: 12px sans-serif;
+    margin:4 0px;
+    padding:0 10px;
+    color: black;
+    background-color: white;
+}
+.options li:hover {
+    background-color:#3b8ec2;
+    color:white;
 }
 
-.rounded {
+/*.rounded {
    -webkit-border-radius: 20px;
    -moz-border-radius: 20px;
    border-radius: 20px;
-}
+}*/
 .yellow {background-color: #eec111;}
 .yellow select {color: #000;}
 .blue {background-color: #3b8ec2;}
@@ -323,7 +404,7 @@ p span{
 }
 
 #btnRiv {
-  
+
 }
 
 .btn-lyr, .btn-riv{
