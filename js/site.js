@@ -1054,6 +1054,7 @@ function createTimeSeriesCharts(id1, id2) {
 	    .data(time_data)
 	    .enter().append("rect")
 	    .attr("class", "bar")
+	    .attr("clip-path", "url(#clip)")
 	    .attr("x", function(d) { return x(d.key); })
 	    .attr("y", function(d) { return y(d.value.cas); })
 	    .attr("width", bar_width)
@@ -1079,6 +1080,7 @@ function createTimeSeriesCharts(id1, id2) {
 	focus.append("path")
 	    .data([time_data])
 	    .attr("class", "line")
+	    .attr("clip-path", "url(#clip)")
 	    .attr("d", valueline);
 
 	focus.append("g")
@@ -1220,6 +1222,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	bar.enter()
 		.append("rect")
 	    .attr("class", "bar")
+	    .attr("clip-path", "url(#clip)")
 	    .attr("x", function(d) { return x(d.key); })
 	    .attr("y", function(d) { return y(d.value.cas); })
 	    .attr("width", bar_width)
@@ -1263,6 +1266,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 
 	letline.enter().append('path')
 				.attr("class", "line")
+				.attr("clip-path", "url(#clip)")
     			.attr("d", valueline);
 
 	/*svg1.select('g').selectAll(".line")
@@ -1652,7 +1656,27 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 		
 		if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
 	    var s = d3.event.selection || x2.range();   //range selected or entire range
-	    var clicked_on = d3.event.sourceEvent? d3.event.sourceEvent.path[0].tagName : 'NA';
+	    //console.log(d3.event.target);
+
+	    //determines whether to hide bar handles or not (in full extent)
+	    if (d3.event.sourceEvent) {
+	    	//console.log(d3.event.sourceEvent);
+
+	    	//technique to get propagation path in both Chrome & Firefox
+	    	var path2 = [d3.event.sourceEvent.target]; 
+	    	var i = 0; 
+	    	while ((varx = path2[i++].parentElement) != null) path2.push(varx);
+	    	//console.log("path2: ", path2);
+	    	var clicked_on = path2[0].tagName;
+
+	    	//gets propagation path in Chrom eonly:
+	    	//var clicked_on = d3.event.sourceEvent.path[0].tagName;
+	    	//console.log(clicked_on)
+	    } else {
+	    	var clicked_on = 'NA';
+	    }
+	    //var clicked_on = d3.event.sourceEvent? d3.event.sourceEvent.path[0].tagName : 'NA';
+	    //console.log(clicked_on);
 	    //console.log("s: ", s, d3.event.selection, x2.range());
 
 	    if (d3.event.sourceEvent==null) {  //brush change in program
@@ -1719,7 +1743,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	        g.currentvars.currentEpiDates.tick_freq = getTickFrequency(bar_width);
 	        //console.log("bar_width: ", bar_width);
 
-	        if (clicked_on=='rect') {
+	        if (clicked_on=='rect') {    
 	        	//console.log(d3.event.sourceEvent);
 	        	if (!((g.currentvars.currentEpiDates.s[0]==x2.range()[0]) && (g.currentvars.currentEpiDates.s[1]==x2.range()[1]))){ 
 	        		handle.attr("display", "none");

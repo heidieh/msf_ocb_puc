@@ -484,7 +484,7 @@ rect.selection {
 
 .bar {
   fill: steelblue;
-  clip-path: url(#clip);
+  /*clip-path: url('#clip'); */  /*https://stackoverflow.com/questions/31768968/insane-css-clip-path-bug-on-firefox*/
 }
 
 .playBar {
@@ -497,14 +497,14 @@ rect.selection {
   fill: none;
   stroke: red;
   stroke-width: 2px;
-  clip-path: url(#clip);
+  /*clip-path: url(#clip);*/
 }
 
 
 .bar2 {
   fill-opacity: 1;
   fill: lightgrey;
-  clip-path: url(#clip);
+  /*clip-path: url(#clip);*/
 }
 
 .bar2.active {
@@ -528,7 +528,7 @@ rect.selection {
 
 .context {
   fill: grey;
-  clip-path: url(#clip);
+  /*clip-path: url(#clip);*/
 }
 
 /*.context.active {
