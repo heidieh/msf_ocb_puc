@@ -37,6 +37,7 @@ var g = {};
 [data,date_extent] = addEpitime(data,g);
 //console.log("date_extent: ", date_extent);
 console.log(g);
+console.log("updated for Firefox");
 
 /*************************/
 /*****  CROSSFILTER  *****/
