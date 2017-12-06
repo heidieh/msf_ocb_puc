@@ -1982,6 +1982,8 @@ function togglePlayMode(mode) {
 		} 
 		$('#stat-select').addClass('no-point');
 		$('#disease-select').addClass('no-point');
+		$('.styledSelect').addClass('no-point');
+		$('.select').addClass('no-point');
 		$('#btn_reset').addClass('no-point');
 
 		svg2.selectAll(".bar2.active").style('fill', '#7f7f7f');
@@ -2003,6 +2005,8 @@ function togglePlayMode(mode) {
 		} 
 		$('#stat-select').removeClass('no-point');
 		$('#disease-select').removeClass('no-point');
+		$('.styledSelect').removeClass('no-point');
+		$('.select').removeClass('no-point');
 		$('#btn_reset').removeClass('no-point');
 
 		svg1.selectAll(".bar").classed("playBar", function(d) {return false;})
@@ -2288,7 +2292,7 @@ function updateFiltSum() {
 		loc_html += '</b>';
 	};
 
-	filtSum.innerHTML='<p class="filt-sum-title">Resumé d\'options choisies:</p><i>Pathologie: </i><b>' + g.currentvars.currentDisease + '</b><br/>' + 
+	filtSum.innerHTML='<p class="filt-sum-title">Resumé des options choisies:</p><i>Pathologie: </i><b>' + g.currentvars.currentDisease + '</b><br/>' + 
 	'<i>Statistique: </i><b>' + g.currentvars.currentStat.full + '</b><br/>' + 
 	'<i>Semaines epi: </i><b>' + sem_html + ' </b><br/><i>(Dates: ' + dat_html + ')</i><br/>' + loc_html;
 }
@@ -2319,6 +2323,23 @@ function btn_reset() {
 	updateAll();
 	//console.log(g.currentvars.currentEpiDates.bar_width, g.currentvars.currentEpiDates.tick_freq);
 }
+
+$('#btnIntro').click(function(){
+ 	//console.log('CLICKED INTRO BUTTON');
+ 	helpTour();
+});
+
+/*$(function() {
+    $('#btnIntro').click(function(){
+        if ($('#btnIntro').hasClass('on') ) {
+            removeHints();
+            $('#btnIntro').removeClass('on');
+        } else {
+            addHints();
+            $('#btnIntro').addClass('on');
+        }
+    });
+});*/
 
 /*function btn_selectDates() {
 	g.currentvars.currentEpiDates.min = new Date(2015,2,2);

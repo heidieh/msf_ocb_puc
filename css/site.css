@@ -12,12 +12,12 @@
     margin-top:10px;
 }*/
 
-/* The sidenav */
-.sidenav {
+/* The side menu */
+.sidemenu {
   height: 100%;
   width: 200px;
   position: fixed;
-  z-index: 1;
+  /*z-index: 1;*/
   top: 0;
   left: 0;
   background-color: #111; /*#7BA5F0;*/
@@ -29,30 +29,81 @@
 #dash_title{
 	/*display: inline-block;*/
 	font: 20px sans-serif;
+  /*float: right;*/
 	font-weight: bold;
 	text-align: left;
 	margin-top: 8px;
-	margin-left: 20px;
+	margin-left: 25px;
 	margin-bottom: 4px;
 }
 .dash_subtitle{
-	display: block;
+	/*display: block;*/
+  /*position: absolute;*/
 	font: 12px sans-serif;
 	/*font-weight: bold; */
 	font-style: italic;
 	text-align: left;
 	margin-top: 0px;
-	margin-left: 20px;
+	margin-left: 0px;
 	margin-bottom: 0px;
 }
 
+#btnIntro{
+  /*display: inline-block;*/
+  position: absolute;
+  /*left: 20px;*/
+  margin-right: 10px;
+  /*top: 5px;*/
+  /*font: 12px sans-serif;*/
+  /*float: right;*/
+  /*text-align: center;*/
+  margin-top: 0px;
+  margin-left: 10px;
+  margin-bottom: 0px;
+}
+
+#btnIntro.on {
+  background-color: #E50000; 
+  color: white;
+}
+
+.intro-sidemenu-select {
+ /* background-color: orange;
+  opacity: 0.5;
+  border:5px solid green;*/
+}
+
+.intro-sidemenu-tooltip {
+  background-color: pink;
+  /*height: 600px;*/
+}
+
+.intro-tooltip {
+  margin-top: 0px;
+  min-width: 400px;
+  max-width: 600px;
+  font: 12px sans-serif;
+}
+.intro-map {
+  min-width: 400px;
+  max-width: 600px;
+  font: 12px sans-serif;
+}
+.intro-timeseries {
+  min-width: 400px;
+  max-width: 600px;
+  font: 12px sans-serif;
+}
+
 p span{
-	display: block;
+	display: inline-block;
+  float: right;
 }
 
 .logo{
+  /*float: right;*/
 	margin-top: 5px;
-	margin-left: 10px;
+	margin-left: 0px;
 	width: 80px;  
 	height: 35px;
 	display: inline-block;
@@ -62,7 +113,7 @@ p span{
 	font: 11px sans-serif;
 	text-align: right;
 	margin-top: 0px;
-	margin-right: 0px;
+	margin-right: 10px;
 }
 
 #menu_title {
@@ -75,16 +126,19 @@ p span{
 
 #map-container {
 	margin-left: 0px;
-	margin-top: 5px;
+  margin-right: 0px;
+	margin-top: 30px;
+  margin-bottom: 5px;
 }
 
 #map {
 	height: 440px;  /*450%*/
 	width: 100%;  /*90%*/
-	margin-left: 0px;
-	margin-right: 0px;   
+	margin-left: 15px;
+	margin-right: 25px;   
 	margin-top: 0px;
-	/* float: right; */  
+  margin-bottom: 5px;
+	float: right;  
 }
 
 .map_title {
@@ -255,12 +309,13 @@ p span{
     right:16px;
 }
 .styledSelect:active, .styledSelect.active {
-    background-color: #cccccc;
+    /*background-color: #cccccc;*/
 }
 .options {
     display:none;
     position:absolute;
-    top:100%;
+    top: 5px;
+    /*top:100%;*/
     right:0;
     left:0;
     z-index:999;
@@ -268,17 +323,21 @@ p span{
     padding:0 0;
     list-style:none;
     /*border:1px solid #ccc;*/
-    background-color:white;
+    color: black;
+    background-color:lightgrey; /*white;*/
     -webkit-box-shadow:0 1px 2px rgba(0, 0, 0, 0.2);
     -moz-box-shadow:0 1px 2px rgba(0, 0, 0, 0.2);
     box-shadow:0 1px 2px rgba(0, 0, 0, 0.2);
+    -webkit-border-radius: 8px;
+   -moz-border-radius: 8px;
+   border-radius: 8px;
 }
 .options li {
     font: 12px sans-serif;
     margin:4 0px;
     padding:0 10px;
-    color: black;
-    background-color: white;
+    /*color: black;
+    background-color: pink;*/
 }
 .options li:hover {
     background-color:#3b8ec2;
@@ -401,6 +460,7 @@ p span{
 }
 #btnZone {
   border-radius: 0px 8px 8px 0px;
+  margin-right: 10px;
 }
 
 #btnRiv {
