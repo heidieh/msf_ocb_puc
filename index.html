@@ -7,7 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="css/bootstrap-grid.min.css">
 		<!-- <link rel="stylesheet" href="css/jquery-ui.min.css"> -->
-		<!-- <link rel="stylesheet" type="text/css" href="css/introjs.css"/> -->
+		<link rel="stylesheet" type="text/css" href="css/introjs.css"/>
         <link rel="stylesheet" type="text/css" href="css/site.css"/>
 		<link rel="stylesheet" type="text/css" href="css/leaflet.css"/>    
 		<link rel="stylesheet" type="text/css" href="css/leaflet.defaultextent.css" />
@@ -22,7 +22,7 @@
         <!-- <script src="js/d3.js" charset="utf-8"></script> -->
 		<!-- <script src="js/d3-tip.js" charset="utf-8"></script>  -->
         <script src="js/crossfilter.v1.min.js" charset="utf-8"></script> 
-		<!-- <script src="js/intro.js"></script>  -->
+		<script src="js/intro.js"></script> 
 
 		<!-- <script src="http://d3js.org/topojson.v0.min.js"></script> -->
 		<script src="js/topojson-client.min.js"></script>
@@ -32,6 +32,7 @@
 		<script src="data/geonames.js"></script>
 
 		<script src="js/epitime.js"></script>
+		<script src="js/intro_tour.js"></script>
 
 		<!-- <script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -47,7 +48,8 @@
 
     <body>
 
-    	<div id="mySidenav" class="sidenav">
+    	<div id="mySideMenu" class="sidemenu">
+    		<!-- <div id='for_intro'></div> -->
     		<div id="menu_title">MENU</div>
 		    <!-- <div class="select blue rounded">
 		  		<!-- <select id="disease-select" onChange="changeDiseaseSelection();"></select> 
@@ -72,17 +74,23 @@
             	<div class="col-md-1">
             		<img class='logo' src="images/msf-logo.png" alt="MSF logo" />
             	</div>
-            	<div class="col-md-6">  
-	                <p id="dash_title">MSF OCB Pool d'Urgence Congo Dashboard</p>
-	                <p span class="dash_subtitle">! Dashboard en cours de développement</span></p>
-	                <p span class="dash_subtitle">! Note: données factices utilisées</span></p>
-					<!-- <button title="Tour the main features of this site" id="btnIntro" class="button btn">Take a Tour</button><br/> -->
-	                <!-- <div class="logo"><img src="images/msf-logo.png" alt="MSF logo" width="92" height="40"></div> -->
+            	<div class="col-md-8">  
+            		<div class="row">
+	                	<p id="dash_title">MSF OCB Pool d'Urgence Congo Dashboard</p>
+	                </div>
+	                <div class="row">
+	                	<div class="col-md-3">
+	                		<button title="Faites le tour des principales caractéristiques de ce site" id="btnIntro" class="button btn">Faire un Tour</button>
+	                	</div>
+	                	<div class="col-md-9">
+	                	<p class="dash_subtitle">! Dashboard en cours de développement</p>
+	                	<p class="dash_subtitle">! Note: données factices utilisées</p>
+	                	</div>
+	                </div>
 	            </div>
-                <div class="col-md-5">
-                    <p><span class="more_info"><i>Source: </i>Ministre de la Santé</span><span class="more_info">Pour plus d'informations concernant le projet PUC, contactez <a href="mailto:xxx" target="_top">xxx</a></span>
-					<span class="more_info">Pour plus d'informations concernant le dashboard, contactez <a href="mailto:xxx" target="_top">xxx</a></span>
-					<!-- <p class="more_info"><i>Data Sources: </i>Ministory of Health: <a href=xxx target="_blank"></a><br/></p> -->
+                <div class="col-md-3">
+                    <p><span class="more_info"><i>Source: </i><a href="http://www.minisanterdc.cd/new/index.php" target="_blank">Le Ministère de la Santé</a></span><span class="more_info">Pour plus d'informations concernant le projet PUC, contactez <a href="mailto:msfocb-rdc-puc-Coordassist@brussels.msf.org" target="_top">le coordinateur</a></span>
+					<!-- <span class="more_info">Pour plus d'informations concernant le dashboard, contactez <a href="mailto:xxx" target="_top">xxx</a></span> -->
                 </div>
             </div>  
 			
@@ -90,7 +98,6 @@
             <div class="row" >
 			
 				<div class="col-md-12"> 
-					<!-- <div id="sticky-anchor"></div>	 -->
 					
 					<div id = "map-container">	
 						<div class="row">					
@@ -99,7 +106,7 @@
 								<!-- <p class="map_subtitle" id="map_subtitle"></p>  -->
 							</div>											
 							<div class="col-md-3">
-								<button id="btnRiv" class="btn-riv button on" onclick="btn_rivers();">Rivers</button>
+								<button id="btnRiv" class="btn-riv button on" onclick="btn_rivers();">Rivières</button>
 							</div>
 							<div class="col-md-3" id="btn_lvls" class="btn-group btn-group-sm"> 
 								<button id="btnZone" class="btn-lyr button" onclick="btn_change_lyr('zone');">Zones</button>
@@ -117,12 +124,12 @@
 					<div class="row">
 						<span id="width"></span>
   						<span id="height"></span>
-						<div class="col-md-1">
+						<div id="play-container" class="col-md-1">
 							<button id="btnPlayPause" class="button play"></button>
 							<button id="btnStop" class="button stop"></button>
 							<div id="playMode_text">Pour réactiver les principales fonctions du dashboard, appuyez sur le bouton ‘stop’</div>
 						</div>
-						<div class="col-md-11">
+						<div id="timeseries-container" class="col-md-11">
 							<div id="timeseries"></div>
 							<div id="timeseriesbrush"></div>
 							<!-- <button id="btnDates" class="btn-dates button" onclick="btn_selectDates();">March</button> -->
