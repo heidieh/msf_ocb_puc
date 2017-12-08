@@ -37,7 +37,6 @@ var g = {};
 [data,date_extent] = addEpitime(data,g);
 //console.log("date_extent: ", date_extent);
 console.log(g);
-console.log("updated for Firefox");
 
 /*************************/
 /*****  CROSSFILTER  *****/
@@ -147,11 +146,38 @@ g.currentvars.currentTotals = {};
 g.currentvars.currentZones = {pcodes: [], names: []};
 g.currentvars.currentProvs = {pcodes: [], names: []};
 g.currentvars.currentEpiDates = {};
-//g.currentvars.currentEpiDates.min_default = new Date(2015,7,31);
-//g.currentvars.currentEpiDates.max_default = new Date(2015,10,30);
-var dateRange = getEpiRange();
-g.currentvars.currentEpiDates.min_default = dateRange[0];
-g.currentvars.currentEpiDates.max_default = dateRange[1];
+
+g.timerangebuttons = [{
+						id: 'btnTimeRange_4epiweek',
+						range_type: 'epiweek',
+						range_param: 4,
+						text: '4 dernières semaines-epi'
+					   },{
+					   	id: 'btnTimeRange_8epiweek',
+						range_type: 'epiweek',
+						range_param: 8,
+						text: '8 dernières semaines-epi'
+					   },{
+					   	id: 'btnTimeRange_52epiweek',
+						range_type: 'epiweek',
+						range_param: 52,
+						text: '52 dernières semaines-epi'
+					   },{
+					   	id: 'btnTimeRange_1epimonth',
+						range_type: 'epimonth',
+						range_param: 1,
+						text: 'Dernier mois-epi complet'
+					   },{
+					   	id: 'btnTimeRange_3epimonth',
+						range_type: 'epimonth',
+						range_param: 3,
+						text: 'Derniers 3 mois-epi complet'
+					   }];
+g.timerangebuttons.default_btn = g.timerangebuttons[4];
+
+var defaultRange = getEpiRange(g.timerangebuttons.default_btn.range_type, g.timerangebuttons.default_btn.range_param);
+g.currentvars.currentEpiDates.min_default = defaultRange[0];
+g.currentvars.currentEpiDates.max_default = defaultRange[1];
 g.currentvars.currentEpiDates.min = g.currentvars.currentEpiDates.min_default; //new Date(2015,7,31);
 g.currentvars.currentEpiDates.max = g.currentvars.currentEpiDates.max_default; //new Date(2015,10,30);
 g.currentvars.currentEpiDates.all = []; //[new Date(2015,2,2), new Date(2015,2,9)];
@@ -1049,6 +1075,7 @@ function createTimeSeriesCharts(id1, id2) {
 	var bar_width = (width/time_data.length)-0.5;		//changing bar width only for focus chart  //0.5 for bar spacing
 	g.currentvars.currentEpiDates.bar_width = bar_width;
 	g.currentvars.currentEpiDates.tick_freq = getTickFrequency(bar_width);
+	g.currentvars.currentEpiDates.tick_freq_x2 = getTickFrequencyX2(orig_bar_width);
 	//console.log("bar_width: ", bar_width, g.currentvars.currentEpiDates.tick_freq);
 
 	focus.selectAll(".bar")
@@ -1099,7 +1126,7 @@ function createTimeSeriesCharts(id1, id2) {
 	    .attr("height", function(d) { return height2 - y2(d.value.cas); });
 
 	context.append("g")
-	      .attr("class", "axis axis--x")
+	      .attr("class", "axis axis--x2")
 	      .attr("transform", "translate(0," + height2 + ")")
 	      .call(xAxis2);
 
@@ -1149,6 +1176,16 @@ function getTickFrequency(bar_width) {
 	}
 }
 
+function getTickFrequencyX2(bar_width) {
+	//console.log("getTickFrequencyX2: ", bar_width)
+	if (bar_width > 11) {return 1}
+	else if (bar_width > 10) {return 2}
+	else if (bar_width > 9) {return 3}
+	else if (bar_width > 7) {return 4}
+	else if (bar_width > 4.5) {return 6}
+	else if (bar_width > 3) {return 12}
+}
+
 function updateTimeSeriesCharts(id1, id2, time_data) {
 	//console.log("IN UPDATE CHARTS");
 
@@ -1170,7 +1207,8 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	x.domain([g.epitime.date_extent[0], d3.timeDay.offset(g.epitime.date_extent[1], 7)]);
 	y.domain([0, d3.max(time_data, function(d) {return d.value.cas; })]);
 	ylet.domain([0, d3.max(time_data, function(d) {return d.value.let; })]);
-	x2.domain(x.domain());
+	//x2.domain(x.domain());
+	x2.domain([g.epitime.date_extent[0], d3.timeDay.offset(g.epitime.date_extent[1], 7)]);
 	y2.domain(y.domain());
 	ylet2.domain(ylet.domain());
 
@@ -1188,6 +1226,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	var bar_width = (width/time_data.length) - 0.5;		//0.5 for bar spacing
 	g.currentvars.currentEpiDates.bar_width = bar_width;
 	g.currentvars.currentEpiDates.tick_freq = getTickFrequency(bar_width);
+	g.currentvars.currentEpiDates.tick_freq_x2 = getTickFrequencyX2(orig_bar_width);
 	//console.log("bar_width: ", bar_width, g.currentvars.currentEpiDates.tick_freq);
 
 
@@ -1420,10 +1459,24 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 					//return dateFormat(d);
 					//return getEpiWeek(d3.timeDay.offset(newdate3, -3.5));
 					return getEpiWeek(d3.timeDay.offset(d, -3));
+					//return 'BBB';
 			})
 	    svg1.select('g').select('.axis--x').call(xAxis);
 
-	    //svg1.select('.axis--x').call(xAxis)
+	    /*console.log("tick freq 2: ", g.currentvars.currentEpiDates.tick_freq_x2)
+	    var xAxis2 = d3.axisBottom(x2)
+	    	.ticks(d3.timeMonth) //, g.currentvars.currentEpiDates.tick_freq_x2)
+	    	.tickFormat(function(d) {
+	    		//console.log(d.getMonth())
+	    		if (d.getMonth()==0) {
+	    			return d3.timeFormat("%Y")(d);
+	    		} else if ((d.getMonth()%g.currentvars.currentEpiDates.tick_freq_x2)==0) {
+	    			return getFrenchMonthName(d3.timeFormat("%B")(d));
+	    		} else {
+	    			return ''; //getFrenchMonthName(d3.timeFormat("%B")(d));
+	    		};
+	    	});
+	    svg2.select('g').select('.axis--x2').call(xAxis2);*/
 
 	    g.currentvars.currentEpiDates.all = [];
 	    g.currentvars.currentEpiDates.s = s;
@@ -1483,6 +1536,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 						return getEpiWeek(d3.timeDay.offset(d, -3));
 				})*/
 		    svg1.select('g').select('.axis--x').call(xAxis);
+		    //svg2.select('g').select('.axis--x2').call(xAxis2);
 		
 	/*var valueline = d3.line()
 			    .x(function(d) { console.log(d.key, d3.format(',.2%')(d.value.let)); return x(d.key); })
@@ -1773,6 +1827,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 						//return getEpiWeek(d);
 						//return dateFormat(d);
 						return getEpiWeek(d3.timeDay.offset(d, -3));
+						//return 'CCC';
 				})
 	    	//svg1.select('g').select('.axis--x').call(xAxis);
 		    svg1.select("g").select(".axis--x").call(xAxis);
@@ -1814,6 +1869,35 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 			  //console.log("d0, d1 = ", d0, d1);
 	    }
 
+		//compare button start & end dates to current start & end dates to turn buttons on & off appropriately
+	    g.timerangebuttons.forEach(function(btn) {
+	    	//console.log(btn);
+	    	//console.log(sameDay(btn.date_min, g.currentvars.currentEpiDates.min), sameDay(btn.date_max, g.currentvars.currentEpiDates.max));
+	    	var dates_match = sameDay(btn.date_min, g.currentvars.currentEpiDates.min) && sameDay(btn.date_max, g.currentvars.currentEpiDates.max);
+	        //console.log("match? ",dates_match)
+	        if ((dates_match) && (!($('.'+btn.id).hasClass('on')))) {
+	        	$('.btn-timerange').removeClass('on');
+	    		$('#'+btn.id).addClass('on');
+	    		//console.log("turn on ", btn);
+	    	} else if ((!(dates_match)) && ($('#'+btn.id).hasClass('on'))) {
+	            $('#'+btn.id).removeClass('on');
+	            //console.log("turn off ", btn);
+	        }
+	    });
+
+	    var xAxis2 = d3.axisBottom(x2)
+	    	.ticks(d3.timeMonth) //, g.currentvars.currentEpiDates.tick_freq_x2)
+	    	.tickFormat(function(d) {
+	    		//console.log(d.getMonth())
+	    		if (d.getMonth()==0) {
+	    			return d3.timeFormat("%Y")(d);
+	    		} else if ((d.getMonth()%g.currentvars.currentEpiDates.tick_freq_x2)==0) {
+	    			return getFrenchMonthName(d3.timeFormat("%B")(d));
+	    		} else {
+	    			return ''; //getFrenchMonthName(d3.timeFormat("%B")(d));
+	    		};
+	    	});
+	    svg2.select('g').select('.axis--x2').call(xAxis2);
 
     	updateMap();
 
@@ -1856,6 +1940,11 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 
 };
 
+
+function getFrenchMonthName(eng_month) {
+	var month_translations = {'January': "Janvier", 'February': "Février", 'March': "Mars", 'April': "Avril", 'May': "Mai", 'June': "Juin", 'July': "Juillet", 'August': "Août", 'September': "Septembre", 'October': "Octobre", 'November': "Novembre", 'December': "Décembre"};
+ 	return month_translations[eng_month];
+ }
 
 
 /************************************/
@@ -1986,6 +2075,7 @@ function togglePlayMode(mode) {
 		$('.styledSelect').addClass('no-point');
 		$('.select').addClass('no-point');
 		$('#btn_reset').addClass('no-point');
+		$('.btn-timerange').addClass('no-point');
 
 		svg2.selectAll(".bar2.active").style('fill', '#7f7f7f');
 		svg2.select('g.brush').remove();
@@ -2009,6 +2099,7 @@ function togglePlayMode(mode) {
 		$('.styledSelect').removeClass('no-point');
 		$('.select').removeClass('no-point');
 		$('#btn_reset').removeClass('no-point');
+		$('.btn-timerange').removeClass('no-point');
 
 		svg1.selectAll(".bar").classed("playBar", function(d) {return false;})
 		svg1.selectAll(".playBar_line").attr('display', 'none');
@@ -2111,12 +2202,14 @@ window.onload = function () {
         	//btn_change_lyr(g.currentvars.currentMapLyr);
         	map = generateMap('#map', [], req.responseText, req2.responseText, req3.responseText, req4.responseText);
 			//$('#map').width($('#map').width());  
+			createTimeRangeButtons();
 			createTimeSeriesCharts('#timeseries', '#timeseriesbrush');
 			//console.log(timeSeriesCharts);
 			updateMapInfo('', '', '', '');
 			updateMapLegend(g.currentvars.currentMinVal, g.currentvars.currentMaxVal);
 			changeDiseaseSelection();
 			changeStatSelection();
+			
 			console.log("g = ", g);
 			resize();
         }
@@ -2147,14 +2240,14 @@ for (stat in g.statList) {
     }
 }
 
-// Iterate over each select element
+// Iterate over each select (dropdown) element
 $('select').each(function () {
 
     // Cache the number of options
     var $this = $(this),
         numberOfOptions = $(this).children('option').length;
 
-	console.log($this, numberOfOptions);
+	//console.log($this, numberOfOptions);
 
     // Hides the select element
     $this.addClass('s-hidden');
@@ -2208,11 +2301,11 @@ $('select').each(function () {
         if (($styledSelect.context.id == 'disease-select') && (g.currentvars.currentDisease != $styledSelect.text())) {
         	g.currentvars.currentDisease = $styledSelect.text();
         	changeDiseaseSelection();
-        	console.log($this.val(), $styledSelect.text(), $styledSelect.context.id);
+        	//console.log($this.val(), $styledSelect.text(), $styledSelect.context.id);
         } else if (($styledSelect.context.id == 'stat-select') && (g.currentvars.currentStat.full != $styledSelect.text())) {
         	g.currentvars.currentStat = $styledSelect.text();
         	changeStatSelection();
-        	console.log($this.val(), $styledSelect.text(), $styledSelect.context.id);
+        	//console.log($this.val(), $styledSelect.text(), $styledSelect.context.id);
         };
     });
 
@@ -2321,6 +2414,8 @@ function btn_reset() {
 	cf.epiDateDim.filterAll();
 	g.currentvars.currentEpiDates.min = g.currentvars.currentEpiDates.min_default; //new Date(2015,7,31);
 	g.currentvars.currentEpiDates.max = g.currentvars.currentEpiDates.max_default; //new Date(2015,10,30);
+	$('.btn-timerange').removeClass('on');
+	$('#btnTimeRange_3epimonth').addClass('on');
 	updateAll();
 	//console.log(g.currentvars.currentEpiDates.bar_width, g.currentvars.currentEpiDates.tick_freq);
 }
@@ -2342,9 +2437,29 @@ $('#btnIntro').click(function(){
     });
 });*/
 
-/*function btn_selectDates() {
-	g.currentvars.currentEpiDates.min = new Date(2015,2,2);
-	g.currentvars.currentEpiDates.max = new Date(2015,2,31);
+function createTimeRangeButtons() {
+	var tr_btns_html = '';
+
+	g.timerangebuttons.forEach(function(btn) {
+		//console.log("create ", btn);
+		var dates = getEpiRange(btn.range_type, btn.range_param);
+		btn.date_min = dates[0];
+		btn.date_max = dates[1];
+		btn.epiweek_min = getEpiWeek(btn.date_min);
+		btn.epiweek_max = getEpiWeek(btn.date_max);
+
+		//tr_btns_html += "<button id='btnTimeRange_" + btn.range_param + btn.range_type + "' class='btn-timerange button' onclick='btn_selectTimeRange(&quot;" + btn.range_type + "&quot;," + btn.range_param + ");'>" + btn.text + "</button>";
+		tr_btns_html += "<button id='btnTimeRange_" + btn.range_param + btn.range_type + "' class='btn-timerange button' onclick='btn_selectTimeRange(&quot;" + btn.range_type + "&quot;," + btn.range_param + ");'>" + btn.text + "</button>";
+	
+	});
+	$('#timerange_buttons').html(tr_btns_html);
+}
+
+function btn_selectTimeRange(rng_type, param) {
+	//console.log("in btn_selectTimeRange ", rng_type, param);
+	var dates = getEpiRange(rng_type, param);
+	g.currentvars.currentEpiDates.min = dates[0];
+	g.currentvars.currentEpiDates.max = dates[1];
 	g.currentvars.currentEpiWeek.min = getEpiWeek(g.currentvars.currentEpiDates.min);
 	g.currentvars.currentEpiWeek.max = getEpiWeek(g.currentvars.currentEpiDates.max);
 	g.currentvars.currentEpiDates.all = [];
@@ -2356,25 +2471,63 @@ $('#btnIntro').click(function(){
 		}
 	}
 	updateTimeSeriesCharts('#timeseries', '#timeseriesbrush', currentTimeSeriesData);
-}*/
+
+	$('.btn-timerange').removeClass('on');
+	$('#btnTimeRange_' + param + rng_type).addClass('on');
 
 
+}
+
+/*$('.button_qf.on').each(function () {
+    var orig_id = this.id;
+    var buttons = g.viz_definition[key1].buttons_filt_range;
+    buttons.forEach(function(btn){
+        var btn_id = 'btn_qf-'+btn.btn_type + btn.btn_param;
+        if (orig_id==btn_id) {               //e.g. btn_qf-lastXepiweeks4
+            if (!((btn.btn_startDate==dates[0]) && (btn.btn_endDate==dates[1]))) {  //compare start & end dates to current dates[0] & dates[1]
+                $('#'+orig_id).removeClass('on');
+            }
+        }    
+    });
+});*/
 
 function resize() { 
   	//console.log("RESIZE w", window.innerWidth, ' x h', window.innerHeight);
   	if (window.innerWidth < 768) {
   		//console.log("SLIMLINE");
-  		if (!($('#btnPlayPause').hasClass('slimline'))) {$('#btnPlayPause').addClass('slimline'); };
-    	if (!($('#btnStop').hasClass('slimline'))) {$('#btnStop').addClass('slimline'); };
-    	if (!($('#playMode_text').hasClass('slimline'))) {$('#playMode_text').addClass('slimline');  };
+  		if (!($('#btnPlayPause').hasClass('slimline'))) {$('#btnPlayPause').addClass('slimline');};
+    	if (!($('#btnStop').hasClass('slimline'))) {$('#btnStop').addClass('slimline');};
+    	if (!($('#playMode_text').hasClass('slimline'))) {$('#playMode_text').addClass('slimline');};
+    	if (!($('.more_info').hasClass('slimline'))) {$('.more_info').addClass('slimline');};
+    	$('#btnZone').removeClass('slimline');
+    	$('#btnProv').removeClass('slimline');
+    	$('#title-container').removeClass('slimline');
+    	//$('#timerange_buttons').removeClass('slimline');
+    	//$('.btn-timerange').removeClass('slimline');
+  	} else if (window.innerWidth < 1026) {$('#btnPlayPause').removeClass('slimline'); 
+    	$('#btnStop').removeClass('slimline'); 
+    	$('#playMode_text').removeClass('slimline');  
+    	$('.more_info').removeClass('slimline');
+  		if (!($('#btnZone').hasClass('slimline'))) {$('#btnZone').addClass('slimline');};
+  		if (!($('#btnProv').hasClass('slimline'))) {$('#btnProv').addClass('slimline');};   
+  		if (!($('#title-container').hasClass('slimline'))) {$('#title-container').addClass('slimline');}; 
+  		//if (!($('#timerange_buttons').hasClass('slimline'))) {$('#timerange_buttons').addClass('slimline');}; 
+  		//if (!($('.btn-timerange').hasClass('slimline'))) {$('.btn-timerange').addClass('slimline');}; 
   	} else {
   		$('#btnPlayPause').removeClass('slimline'); 
     	$('#btnStop').removeClass('slimline'); 
     	$('#playMode_text').removeClass('slimline');  
+    	$('.more_info').removeClass('slimline');
+    	$('#btnZone').removeClass('slimline');
+    	$('#btnProv').removeClass('slimline');
+    	$('#title-container').removeClass('slimline');
+    	//$('#timerange_buttons').removeClass('slimline');
+    	//$('.btn-timerange').removeClass('slimline');
   	}
     svg1.remove();
     svg2.remove();
     createTimeSeriesCharts('#timeseries', '#timeseriesbrush');
     updateTimeSeriesCharts('#timeseries', '#timeseriesbrush', currentTimeSeriesData);
+
 }
 window.onresize = resize;

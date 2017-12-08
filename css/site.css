@@ -25,17 +25,23 @@
   padding-top: 20px;
 }
 
+#title-container.slimline {
+  margin-left: 50px;
+  max-width: 340px;
+}
 
 #dash_title{
-	/*display: inline-block;*/
+	display: block;
 	font: 20px sans-serif;
   /*float: right;*/
 	font-weight: bold;
 	text-align: left;
-	margin-top: 8px;
-	margin-left: 25px;
+	margin-top: 10px;
+	margin-left: 15px;
 	margin-bottom: 4px;
 }
+
+
 .dash_subtitle{
 	/*display: block;*/
   /*position: absolute;*/
@@ -49,17 +55,17 @@
 }
 
 #btnIntro{
-  /*display: inline-block;*/
-  position: absolute;
-  /*left: 20px;*/
-  margin-right: 10px;
+  display: block;
+  /*position: absolute;*/
+  margin-left: 15px;
+  /*margin-right: 10px;*/
   /*top: 5px;*/
   /*font: 12px sans-serif;*/
   /*float: right;*/
   /*text-align: center;*/
-  margin-top: 0px;
-  margin-left: 10px;
-  margin-bottom: 0px;
+  margin-top: 2px;
+  /*margin-left: 100px;*/
+  /*margin-bottom: 0px;*/
 }
 
 #btnIntro.on {
@@ -91,29 +97,38 @@
 }
 .intro-timeseries {
   min-width: 400px;
-  max-width: 600px;
+  max-width: 500px;
   font: 12px sans-serif;
 }
 
-p span{
+/*p span{
 	display: inline-block;
   float: right;
-}
+}*/
 
 .logo{
   /*float: right;*/
 	margin-top: 5px;
 	margin-left: 0px;
-	width: 80px;  
-	height: 35px;
+	width: 72px;  
+	height: 31.5px;
 	display: inline-block;
 }
 
-.more_info {
+.more_info { 
+  /*width: 200px;*/
+  max-width: 200px; 
+  min-width: 100px;
 	font: 11px sans-serif;
 	text-align: right;
 	margin-top: 0px;
 	margin-right: 10px;
+  float: right;
+}
+.more_info.slimline {
+  /*max-width: 200px;*/
+  width: 100px;
+  float: right;
 }
 
 #menu_title {
@@ -127,7 +142,7 @@ p span{
 #map-container {
 	margin-left: 0px;
   margin-right: 0px;
-	margin-top: 30px;
+	margin-top: 10px;
   margin-bottom: 5px;
 }
 
@@ -463,11 +478,17 @@ p span{
   margin-right: 10px;
 }
 
-#btnRiv {
-
+#btnProv.slimline{
+  border-radius: 8px 8px 8px 8px;
+  margin-right: 10px;
 }
 
-.btn-lyr, .btn-riv{
+#btnZone.slimline{
+  border-radius: 8px 8px 8px 8px;
+}
+
+.btn-lyr, .btn-riv {
+  display: inline-block;
   width: 80px;
   margin-left: 0px;
   float: right;
@@ -478,12 +499,45 @@ p span{
   color: white;   /* #ffff00; */
 }
 
+#btnRiv {
+  margin-right: 10px;
+}
+#timerange_buttons {
+  margin-top: 30px;
+  margin-right: 0px;
+}
+#timerange_buttons.slimline {
+  /*margin-top: 30px;*/
+  margin-right: 10px;
+}
+
+.btn-timerange {
+  width: 110px;
+  margin-right: 5px;
+  /*float: left;*/
+}
+
+.btn-timerange.slimline {
+  /*width: 90px;*/
+  margin-right: 50px;
+  /*float: left;*/
+}
+
+.btn-timerange.on {
+  background-color: #3b8ec2; /* #264b8b; */
+  color: white;   /* #ffff00; */
+}
+
+#timeseries-container {
+  margin-bottom: 10px;
+}
+
 #timeseries{
   margin-top: 20px;
   margin-left: 5px;
   margin-right: 0px;
   height: 120px;
-  width: 90%; 
+  width: 100%; 
   display: inline-block;
 }
 #timeseriesbrush{
@@ -491,7 +545,7 @@ p span{
   margin-left: 5px;
   margin-right: 0px;
   height: 60px;
-  width: 90%; 
+  width: 100%; 
   display: inline-block;
 }
 
