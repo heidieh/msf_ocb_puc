@@ -1881,7 +1881,7 @@
    * @returns Element's position info
    */
   function _getOffset(element) {
-    console.log("in getOffset")
+    //console.log("in getOffset")
     var elementPosition = {};
 
     var body = document.body;
@@ -1916,7 +1916,7 @@
       //set left
       elementPosition.left = _x;
     }
-    console.log(elementPosition)
+    //console.log(elementPosition)
     return elementPosition;
   }
 

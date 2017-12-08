@@ -185,57 +185,60 @@ var date_sort_asc = function (date1, date2) {   //sort dates in ascending order
   return 0;
 };
 
-function getEpiRange() {  //returns range of dates for current selection ([first_date, last_date]) in relative time (e.g. 'last 3 epimonths')
+//input rng_type ('epiweek'/'epimonth'/'epiyear') and param (integer for number of units of rng_type)
+//returns range of dates for current selection ([first_date, last_date]) in relative time (e.g. 'last 3 epimonths')
+function getEpiRange(rng_type, param) {  
     var dateRange = [];
     var allDates = [];
     var num_epiwks = epitime_all.length;
     var last_epiTime = epitime_all[epitime_all.length-1];
     //console.log("LAST EPITIME: ", last_epiTime);
-    var param = 3;  //param X=3 is last X epimonths in this case
 
-    //define startYr, endYr, startMonth, endMonth
-    var endYr = last_epiTime.epiyear;     
-    if (param ==0) {                    //if require current month only
-        var endMonth = last_epiTime.epimonth;
-        var startYr = endYr;
-        var startMonth = endMonth;
-    } else if (param <= endMonth) {     //if number of months required still within current year
-        var endMonth = last_epiTime.epimonth-1;    
-        var startYr = endYr;
-        var startMonth = endMonth - param;
-    } else {                                    //if number of months required overlaps previous years
-        var endMonth = last_epiTime.epimonth-1;    
-        if ((param % 12) > endMonth) {  //if number of months required overlaps additional year despite < 12 months
-            var startYr = endYr - Math.floor(param/12) - 1;
-            var startMonth = endMonth - (((param % 12)-1)-12);
-        } else {
-            var startYr = endYr - Math.floor(param/12);
-            var startMonth = endMonth - ((param % 12)-1);
+    //define startYr, endYr, startMonth, endMonth, startWeek, endWeek - depending on rng_type
+    if (rng_type=='epiweek') {
+        var endYr = last_epiTime.epiyear;
+        var endWeek = last_epiTime.epiweek;
+        if (param <= num_epiwks) {
+            var start_epiTime = epitime_all[num_epiwks-param];
+        } else {                        
+            var start_epiTime = epitime_all[0];   //if button goes back further than first date, set to first date
+            
+        }
+        var startWeek = start_epiTime.epiweek;
+        var startYr = start_epiTime.epiyear;  
+
+    } else if (rng_type=='epimonth') {
+        var endYr = last_epiTime.epiyear;     
+        if (param ==0) {                    //if require current month only
+            var endMonth = last_epiTime.epimonth;
+            var startYr = endYr;
+            var startMonth = endMonth;
+        } else if (param <= endMonth) {     //if number of months required still within current year
+            var endMonth = last_epiTime.epimonth-1;    
+            var startYr = endYr;
+            var startMonth = endMonth - param;
+        } else {                                    //if number of months required overlaps previous years
+            var endMonth = last_epiTime.epimonth-1;    
+            if ((param % 12) > endMonth) {  //if number of months required overlaps additional year despite < 12 months
+                var startYr = endYr - Math.floor(param/12) - 1;
+                var startMonth = endMonth - (((param % 12)-1)-12);
+            } else {
+                var startYr = endYr - Math.floor(param/12);
+                var startMonth = endMonth - ((param % 12)-1);
+            };
         };
-    };
+    } /*else if (rng_type=='epiyear') {
+        if (param ==0) {        
+            var endYr = last_epiTime.epiyear; 
+            var startYr = endYr;
+        } else {
+            var endYr = last_epiTime.epiyear-1;
+            var startYr = endYr - param + 1;
+        }; 
+    };*/
 
-    //if using epiyears & epiweeks for relative time, need to define filtType 
-    /*if ((filtType=="epiyear") || (filtType=="lastXepiyears")) {
-        for (i=0; i<num_epiwks; i++) {          //get all start and end dates - for each epiweek       
-            if ((epitime_all[i].epiyear >= startYr) && (epitime_all[i].epiyear <= endYr)) {
-                allDates.push(epitime_all[i].epiDate);
-            } 
-        }
-    } else if ((filtType=="epimonth") || (filtType=="lastXepimonths")) {*/
-    for (i=0; i<num_epiwks; i++) {      
-        if ((epitime_all[i].epiyear == startYr) && (epitime_all[i].epiyear == endYr)) {
-            if ((epitime_all[i].epimonth >= startMonth) && (epitime_all[i].epimonth <= endMonth)) {
-                allDates.push(epitime_all[i].epiDate);
-            }
-        } else if ((epitime_all[i].epiyear == startYr) && (epitime_all[i].epimonth >= startMonth)) {
-            allDates.push(epitime_all[i].epiDate);
-        } else if ((epitime_all[i].epiyear == endYr) && (epitime_all[i].epimonth <= endMonth)) {
-            allDates.push(epitime_all[i].epiDate);
-        } else if ((epitime_all[i].epiyear > startYr) && (epitime_all[i].epiyear < endYr)) {
-            allDates.push(epitime_all[i].epiDate);
-        }
-    }
-    /*} else if ((filtType=="epiweek") || (filtType=="lastXepiweeks")) {
+
+    if (rng_type=='epiweek') {
         for (i=0; i<num_epiwks; i++) {      
             if ((epitime_all[i].epiyear == startYr) && (epitime_all[i].epiyear == endYr)) {
                 if ((epitime_all[i].epiweek >= startWeek) && (epitime_all[i].epiweek <= endWeek)) {
@@ -249,6 +252,26 @@ function getEpiRange() {  //returns range of dates for current selection ([first
                 allDates.push(epitime_all[i].epiDate);
             }
         }   
+    } else if (rng_type=='epimonth') {
+        for (i=0; i<num_epiwks; i++) {      
+            if ((epitime_all[i].epiyear == startYr) && (epitime_all[i].epiyear == endYr)) {
+                if ((epitime_all[i].epimonth >= startMonth) && (epitime_all[i].epimonth <= endMonth)) {
+                    allDates.push(epitime_all[i].epiDate);
+                }
+            } else if ((epitime_all[i].epiyear == startYr) && (epitime_all[i].epimonth >= startMonth)) {
+                allDates.push(epitime_all[i].epiDate);
+            } else if ((epitime_all[i].epiyear == endYr) && (epitime_all[i].epimonth <= endMonth)) {
+                allDates.push(epitime_all[i].epiDate);
+            } else if ((epitime_all[i].epiyear > startYr) && (epitime_all[i].epiyear < endYr)) {
+                allDates.push(epitime_all[i].epiDate);
+            }
+        }
+    } /*else if (rng_type=='epiyear') {
+        for (i=0; i<num_epiwks; i++) {            
+            if ((epitime_all[i].epiyear >= startYr) && (epitime_all[i].epiyear <= endYr)) {
+                allDates.push(epitime_all[i].epiDate);
+            } 
+        }
     } */
 
     var first, last = new Date();
