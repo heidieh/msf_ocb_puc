@@ -6,7 +6,6 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="css/bootstrap-grid.min.css">
-		<!-- <link rel="stylesheet" href="css/jquery-ui.min.css"> -->
 		<link rel="stylesheet" type="text/css" href="css/introjs.css"/>
         <link rel="stylesheet" type="text/css" href="css/site.css"/>
 		<link rel="stylesheet" type="text/css" href="css/leaflet.css"/>    
@@ -17,18 +16,12 @@
 		<script src="js/topojson.v1.min.js"></script>
         <script src="js/jquery.js"></script>
 		<script src="js/jquery-ui.min.js"></script>
-
 		<script src="js/d3.v4.min.js" charset="utf-8"></script> 
-        <!-- <script src="js/d3.js" charset="utf-8"></script> -->
-		<!-- <script src="js/d3-tip.js" charset="utf-8"></script>  -->
         <script src="js/crossfilter.v1.min.js" charset="utf-8"></script> 
 		<script src="js/intro.js"></script> 
-
-		<!-- <script src="http://d3js.org/topojson.v0.min.js"></script> -->
 		<script src="js/topojson-client.min.js"></script>
 
 		<script src="data/data.js"></script>
-		<!-- <script src="data/cod_zs.json"></script> -->
 		<script src="data/geonames.js"></script>
 
 		<script src="js/epitime.js"></script>
@@ -69,27 +62,19 @@
             		<img class='logo' src="images/msf-logo.png" alt="MSF logo" />
             	</div>
 
-            	<div id="title-container" class="col-md-8">  
+            	<div id="title-container" class="col">  
             		<div class="row">
                 		<p id="dash_title">MSF OCB Pool d'Urgence Congo Dashboard</p>
                 	</div>
-                	<div class="row">
+                	<div class="row float-left">
                 		<button title="Faites le tour des principales caractéristiques de ce site" id="btnIntro" class="button btn">Faire un Tour</button> 
                 	</div>
 	            </div>
-	                <!-- <div class="row"> -->
-	                	 <!-- <div class="col-md-3"> -->
-	                		
-	                	<!-- </div> -->
-	                	<!-- <div class="col-md-9">
-	                	<p class="dash_subtitle">! Dashboard en cours de développement</p>
-	                	<p class="dash_subtitle">! Note: données factices utilisées</p>
-	                	</div> -->
-	                <!-- </div> -->
 	            
-                <div class="col-md-3">
-                    <p class="more_info"><i>Source: </i><a href="http://www.minisanterdc.cd/new/index.php" target="_blank">Le Ministère de la Santé</a></p><p class="more_info">Pour plus d'informations concernant le projet PUC, contactez <a href="mailto:msfocb-rdc-puc-Coordassist@brussels.msf.org" target="_top">le coordinateur</a></p>
-					<!-- <span class="more_info">Pour plus d'informations concernant le dashboard, contactez <a href="mailto:xxx" target="_top">xxx</a></span> -->
+	            <div class="col">
+                	<div class="float-right more_info">
+                    	<p><i>Source: </i><a href="http://www.minisanterdc.cd/new/index.php" target="_blank">Le Ministère de la Santé</a></p><p>Pour plus d'informations concernant le projet PUC, contactez <a href="mailto:msfocb-rdc-puc-Coordassist@brussels.msf.org" target="_top">le coordinateur</a></p>
+                	</div>
                 </div>
 
             </div>  
@@ -103,7 +88,6 @@
 						<div class="row">					
 							<div class="col-md-6">
 								<p class="map_title" id="map_title"></p>
-								<!-- <p class="map_subtitle" id="map_subtitle"></p>  -->
 							</div>											
 							<div class="col-md-3">
 								<button id="btnRiv" class="btn-riv button on" onclick="btn_rivers();">Rivières</button>
@@ -138,18 +122,7 @@
 							<div id="timeseriesbrush"></div>
 							
 						</div>
-						<div id="timerange_buttons" class="col-md-2">
-							<!-- <button id="btnTimeRange_4epiweek" class="btn-timerange button" onclick="btn_selectTimeRange('epiweek', 4);">4 dernières semaines-epi</button>
-							<button id="btnTimeRange_8epiweek" class="btn-timerange button" onclick="btn_selectTimeRange('epiweek', 8);">8 dernières semaines-epi</button>
-							<button id="btnTimeRange_52epiweek" class="btn-timerange button" onclick="btn_selectTimeRange('epiweek', 52);">52 dernières semaines-epi</button>
-							<button id="btnTimeRange_1epimonth" class="btn-timerange button" onclick="btn_selectTimeRange('epimonth', 1);">Dernier mois-epi complet</button>
-							<button id="btnTimeRange_3epimonth" class="btn-timerange button on" onclick="btn_selectTimeRange('epimonth', 3);">Derniers 3 mois-epi complet</button> -->
-
-							<!-- <button id='btnTimeRange_4epiweek' class='btn-timerange button' onclick='btn_selectTimeRange("epiweek",4);'>4 dernières semaines-epi</button>
-
-							<button id='btnTimeRange_8epiweek' class='btn-timerange button' onclick='btn_selectTimeRange('epiweek',8);'>8 dernières semaines-epi</button><button id='btnTimeRange_52epiweek' class='btn-timerange button' onclick='btn_selectTimeRange('epiweek',52);'>52 dernières semaines-epi</button><button id='btnTimeRange_1epimonth' class='btn-timerange button' onclick='btn_selectTimeRange('epimonth',1);'>Dernier mois-epi complet</button><button id='btnTimeRange_3epimonth' class='btn-timerange button' onclick='btn_selectTimeRange('epimonth',3);'>Derniers 3 mois-epi complet</button> -->
-
-						</div>
+						<div id="timerange_buttons" class="col-md-2"></div>
 					</div>
 			
 				</div>  
