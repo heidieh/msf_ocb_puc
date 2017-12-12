@@ -2,22 +2,15 @@
 .container-fluid{
 	margin-left: 200px;
   margin-right: 10px;
-    /*padding-left:15%;
-    padding-right:5%;*/
-    padding-bottom:20px;
+  padding-bottom:20px;
 
 }
-
-/*.spacersm {
-    margin-top:10px;
-}*/
 
 /* The side menu */
 .sidemenu {
   height: 100%;
   width: 200px;
   position: fixed;
-  /*z-index: 1;*/
   top: 0;
   left: 0;
   background-color: #111; /*#7BA5F0;*/
@@ -33,7 +26,6 @@
 #dash_title{
 	display: block;
 	font: 20px sans-serif;
-  /*float: right;*/
 	font-weight: bold;
 	text-align: left;
 	margin-top: 10px;
@@ -41,47 +33,15 @@
 	margin-bottom: 4px;
 }
 
-
-.dash_subtitle{
-	/*display: block;*/
-  /*position: absolute;*/
-	font: 12px sans-serif;
-	/*font-weight: bold; */
-	font-style: italic;
-	text-align: left;
-	margin-top: 0px;
-	margin-left: 0px;
-	margin-bottom: 0px;
-}
-
 #btnIntro{
   display: block;
-  /*position: absolute;*/
   margin-left: 15px;
-  /*margin-right: 10px;*/
-  /*top: 5px;*/
-  /*font: 12px sans-serif;*/
-  /*float: right;*/
-  /*text-align: center;*/
   margin-top: 2px;
-  /*margin-left: 100px;*/
-  /*margin-bottom: 0px;*/
 }
 
 #btnIntro.on {
   background-color: #E50000; 
   color: white;
-}
-
-.intro-sidemenu-select {
- /* background-color: orange;
-  opacity: 0.5;
-  border:5px solid green;*/
-}
-
-.intro-sidemenu-tooltip {
-  background-color: pink;
-  /*height: 600px;*/
 }
 
 .intro-tooltip {
@@ -90,24 +50,20 @@
   max-width: 600px;
   font: 12px sans-serif;
 }
+
 .intro-map {
   min-width: 400px;
   max-width: 600px;
   font: 12px sans-serif;
 }
+
 .intro-timeseries {
   min-width: 400px;
   max-width: 500px;
   font: 12px sans-serif;
 }
 
-/*p span{
-	display: inline-block;
-  float: right;
-}*/
-
 .logo{
-  /*float: right;*/
 	margin-top: 5px;
 	margin-left: 0px;
 	width: 72px;  
@@ -116,19 +72,11 @@
 }
 
 .more_info { 
-  /*width: 200px;*/
-  max-width: 200px; 
-  min-width: 100px;
+  width: 200px;
 	font: 11px sans-serif;
 	text-align: right;
-	margin-top: 0px;
 	margin-right: 10px;
-  float: right;
-}
-.more_info.slimline {
-  /*max-width: 200px;*/
-  width: 100px;
-  float: right;
+  float: right !important;
 }
 
 #menu_title {
@@ -164,14 +112,6 @@
 	margin-bottom: 3px;
 }
 
-/*.map_subtitle{
-	font: 14px sans-serif;
-	margin-top: 0px;
-	margin-left: 0px;
-	margin-bottom: 5px;
-	font-weight: bold; 
-}*/
-
 .mapinfo {
     padding: 5px 6px;
     font: 11px/11px Arial, Helvetica, sans-serif;
@@ -186,46 +126,14 @@
     color: #777;
 }
  
-/*.mapinfo_title {
-	font-size: 12px;
-	font-weight: bold;
-	text-align: right;
-	margin-top: 0px;
-	margin-bottom: 3px;
- } */
-
-/*.mapinfo_stat{
-	font-size: 11px;
-	text-align: right;
-	margin-top: 0px;
-	margin-bottom: 2px;
- }*/
- 
 .maplegend {
  	width: 100%;
-	/*min-width: 160px;
-	max-width: 200px;*/
-    padding:5px;
-    background-color:white;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    border-radius: 4px;
- }
- 
-/*.maplegend_title {
-	font-size: 14px;
-	font-weight: bold;
-	text-align: left;
-	margin-bottom: 10px;
- } */
-/*.maplegend_cat{
-	height: 10px;
-	font-size: 12px;
-	text-align: left;
-	margin-top: 0px; 	
-	white-space: nowrap;
-	/* display: inline;  
- }*/
+  padding:5px;
+  background-color:white;
+  background: rgba(255,255,255,0.8);
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
  
 /*.mapLegend i {
     width: 18px;
@@ -310,8 +218,8 @@
     padding-top: 3px;
     /*font-weight:bold;*/
     -webkit-border-radius: 8px;
-   -moz-border-radius: 8px;
-   border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
 }
 .styledSelect:after {
     content:"";
@@ -330,7 +238,6 @@
     display:none;
     position:absolute;
     top: 5px;
-    /*top:100%;*/
     right:0;
     left:0;
     z-index:999;
@@ -359,11 +266,6 @@
     color:white;
 }
 
-/*.rounded {
-   -webkit-border-radius: 20px;
-   -moz-border-radius: 20px;
-   border-radius: 20px;
-}*/
 .yellow {background-color: #eec111;}
 .yellow select {color: #000;}
 .blue {background-color: #3b8ec2;}
@@ -408,16 +310,6 @@
 	width: 200px;
 	overflow: hidden;
 }
-
-/*.sprite { background: url('sprite.png') no-repeat top left; width: 189px;  } 
-.sprite.dropdown { background-position: 0 0; width: 22px; height: 30px; } 
-.sprite.extent_lg { background-position: 0 -40px; width: 128px; height: 128px; } 
-.sprite.extent_sm { background-position: 0 -178px; width: 28px; height: 28px; } 
-.sprite.msf-logo { background-position: 0 -216px; width: 320px; height: 147px; } 
-.sprite.msf-logo2 { background-position: 0 -373px; width: 283px; height: 213px; } 
-.sprite.pause { background-position: 0 -596px; height: 187px; } 
-.sprite.play { background-position: 0 -793px; height: 184px; } */
-
  
 .button {
   background-color: #cccccc; /* #3160b2; */
@@ -507,8 +399,11 @@
   margin-right: 0px;
 }
 #timerange_buttons.slimline {
-  /*margin-top: 30px;*/
-  margin-right: 10px;
+  margin-top: 20px;
+}
+
+#timerange_buttons.slimline2 {
+  margin-left: 60px;
 }
 
 .btn-timerange {
@@ -518,7 +413,8 @@
 }
 
 .btn-timerange.slimline {
-  /*width: 90px;*/
+  display: inline-block;
+  width: 95px;
   margin-right: 50px;
   /*float: left;*/
 }
@@ -569,10 +465,7 @@
   font-weight: 500;
   fill: red;
 }
-/*.area {
-  fill: steelblue;
-  clip-path: url(#clip);
-}*/
+
 .axis--y text{
   fill: steelblue;
 }
@@ -593,12 +486,11 @@ rect.active {
 
 rect.selection {
   fill-opacity: 0.4;
-  fill: darkgrey; /*yellow;*/
+  fill: darkgrey; 
 }
 
 .bar {
   fill: steelblue;
-  /*clip-path: url('#clip'); */  /*https://stackoverflow.com/questions/31768968/insane-css-clip-path-bug-on-firefox*/
 }
 
 .playBar {
@@ -611,14 +503,12 @@ rect.selection {
   fill: none;
   stroke: red;
   stroke-width: 2px;
-  /*clip-path: url(#clip);*/
 }
 
 
 .bar2 {
   fill-opacity: 1;
   fill: lightgrey;
-  /*clip-path: url(#clip);*/
 }
 
 .bar2.active {
@@ -630,8 +520,7 @@ rect.selection {
   fill: none;
   stroke: #8c8c8c;
   stroke-width: 2px;
-  opacity: 0.5;  /*HEIDI - remove later*/
-  /*clip-path: url(#clip);*/
+  opacity: 0.5;
 }
 
 /*.line2_active {
@@ -642,12 +531,7 @@ rect.selection {
 
 .context {
   fill: grey;
-  /*clip-path: url(#clip);*/
 }
-
-/*.context.active {
-  fill: green;
-}*/
 
 .toolTip {
   font: 11px sans-serif;
@@ -672,20 +556,12 @@ rect.selection {
 .brush .resize path {
   fill: yellow;  /*#eee;
   stroke: #666;
-}
+}*/
 
-.zoom {
+/*.zoom {
   cursor: move;
   fill: none;
   pointer-events: all;
-}*/
-
-/*.button.playMode{
-  float: center; 
-  width: 50px;
-  height: 50px;
-  margin-top: 30px;
-  margin-left: 0px;
 }*/
 
 .button.play{
@@ -749,37 +625,3 @@ rect.selection {
   margin-left: 10px;
 }
 
-/*.button_sm {
-    background-color: #cccccc; /* #3160b2; 
-    border: none;
-	border-radius: 8px;
-	outline: none;
-	/*outline-color: #ffff00;
-    color: black; /* white; 
-    padding: 4px 10px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 11px;
-    /*margin: 4px 2px;
-	margin-left: 0px;
-	margin-right: 0px;
-	margin-bottom: 8px;
-    cursor: pointer;
-    -webkit-transition-duration: 0.4s; /* Safari 
-    transition-duration: 0.4s;
-}*/
-
-/*.button_sm:hover {
-	box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
-	/* background-color: #264b8b 
-}
-
-.button_sm:active {
-  border-radius: 8px;
-  background-color: #89457c; /* #264b8b; 
-  color: white;   /* #ffff00; 
-  box-shadow: 0 4px #666;
-  transform: translateY(3px); 
-  /* border: 1px solid #979797;  
-}*/
