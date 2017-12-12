@@ -2,9 +2,7 @@
 /****  INTRO.JS TOUR  ****/
 /*************************/
 
-//$('#btnIntro').click(function(){
 function helpTour() {
- 	//console.log('CLICKED INTRO BUTTON');
     var intro = introJs();
     $('#btnIntro').addClass('on');
     intro.setOptions({
@@ -17,13 +15,7 @@ function helpTour() {
 		    	element: '#mySideMenu',
 			    intro:"<div><p style='font-size:14px'><b>Le Menu</b></p><p>Le Menu contient des options pour sélectionner des données spécifiques, ainsi que des résumés de la sélection en cours.</p><p>Les options pour sélectionner les données incluent:</p><ul><li style='margin-bottom: 5px;'><b>Pathologie:</b> la pathologie est sélectionnée dans la liste déroulante</li><li style='margin-bottom: 5px;'><b>Statistique:</b> la statistique (<i>Nombre de Cas</i> ou <i>Létalité</i>) est sélectionnée dans la liste déroulante</li><li style='margin-bottom: 5px;'><b>Réinitialiser:</b> Ce bouton resélectionne toutes les régions (provinces ou zones), et resélectionne l’intervalle de temps par défaut (les 3 derniers mois épidémiologiques). La pathologie et la statistique actuelles ne sont pas modifiées.</li></ul><p>Résumé des données actuelles sélectionnées:</p><ul><li style='margin-bottom: 5px;'><b>Total indiqué sur la carte:</b> Affiche la statistique calculée pour la pathologie actuelle, pour la période actuelle sélectionnée et pour toutes les régions actuelles (provinces ou zones) sélectionnées.</li><li style='margin-bottom: 5px;'><b>Montre options choisies:</b> Ce bouton ouvre et ferme une fenêtre affichant un <i>Résumé des options choisies</i>. Cela comprend la pathologie, la statistique, les semaines épidémiologiques et leurs dates, ainsi que les régions (provinces ou zones) sélectionnées.</li></ul></div>",
 		    	position: 'right',
-		    	//highlightClass: 'intro-sidemenu-select',   //class affects selected div
 		    	tooltipClass: 'intro-tooltip'
-		    /*},{
-		    	element: '#map-container',
-			  	intro: "<div><h4><b>La Carte</b></h4><p>La carte affiche les valeurs de la statistique et de la pathologie en cours (qui sont toutes deux sélectionnées dans le Menu) et pour la période de temps sélectionnée (sélectionnée dans le deuxième histogramme ci-dessous - expliqué à l'étape suivante). Le titre de la carte (en haut à gauche) change pour refléter la statistique actuelle et la pathologie affichée.</p><p>Les options pour interagir avec la carte incluent:</p><ul><li style='margin-bottom: 5px;'>Pour basculer l'affichage de la carte entre les Provinces et les Zones, sélectionnez le bouton approprié en haut à droite de la carte.</li><li style='margin-bottom: 5px;'>Pour afficher la statistique actuelle pour une région spécifique (province ou zone), passez la souris dessus. Une boîte d'information apparaîtra dans le coin supérieur droit de la carte.</li><li style='margin-bottom: 5px;'>Pour sélectionner une région spécifique (province ou zone), cliquez dessus. Pour le désélectionner, cliquez dessus une seconde fois. Il est possible de sélectionner plusieurs régions en même temps. La sélection actuelle des régions est résumée dans la fenêtre 'Résumé des options choisies’ dans le Menu (cliquez sur le bouton ‘Montre options choisies’ pour ouvrir cette fenêtre).</li><li style='margin-bottom: 5px;'>Pour ajouter ou supprimer des rivières de la carte, activez ou désactivez le bouton <i>Rivières</i>.</li></ul></div>",
-			  	position: 'bottom-middle-aligned',
-			  	tooltipClass: 'intro-map'*/
 		    },{
 		    	element: '#map-container',
 			  	intro: "<div><p style='font-size:14px'><b>La Carte</b></p><p>La carte affiche les valeurs de la statistique et de la pathologie en cours (qui sont toutes deux sélectionnées dans le <i>Menu</i>) et pour la période de temps sélectionnée (sélectionnée dans le deuxième histogramme ci-dessous - expliqué à l'étape suivante). Le titre de la carte (en haut à gauche) change pour refléter la statistique actuelle et la pathologie affichée.</p></div>",
@@ -47,53 +39,22 @@ function helpTour() {
 		    	position: 'right',
 		    	tooltipClass: 'intro-tooltip'
 		    },
-		  {
+		    /*{
 			  intro:"<div><p style='font-size:14px'><b>Plus d'informations:</b></p><ul><li style='margin-bottom: 5px;'>Le projet Pool d'Urgence Congo est mis en œuvre par MSF OCB ...</li><li style='margin-bottom: 5px;'>Il est soutenu par ...</li><li style='margin-bottom: 5px;'>Le dashboard / tableau de bord a été développé en 2017 pour soutenir ....</li><li style='margin-bottom: 5px;'>Toutes les données sont ...</li></ul></div>",
 			  tooltipClass: 'intro-tooltip'
-		  } ,
+		    }*/
  		]
 	});
     intro.start();
-    intro.onbeforechange(function(targetElement) {
-	    //console.log("about to change: ", intro);
-	    //console.log(this._options.steps[this._currentStep].element, targetElement.id)
-	});
-    intro.onbeforeexit(function() {
+    /*intro.onbeforeexit(function() {
 	    //addHints();
 	});
 	intro.onchange(function(targetElement) {
-		/*$(".introjs-helperNumberLayer").css("style", "top: 50px");
-		$(".introjs-helperNumberLayer").css("style", "left: 50px");*/
-		/*$(".introjs-helperNumberLayer").css("top", "50px");
-		$(".introjs-helperNumberLayer").css("left", "50px");*/
-	    /*console.log("onchange", targetElement.id);
-	    if (targetElement.id=="mySidenav") {
-	    	console.log("change to PURPLE")
-	    	$('.introjs-helperlayer').addClass('mySidenav');
-	    	//$('.introjs-helperLayer').css('style','background-color: orange');
-	    	$('.introjs-tooltip').css('background-color', 'orange');
-	    	//$('.introjs-tooltip').css('style', 'background-color: orange');
-	    	$('.introjs-tooltip').css('height', '600px');
-	    	//$('.introjs-fixedTooltip').css('style','background-color: orange');
-	    	$('.sidenav').css('background-color', 'grey');
-	    } else {
-	    	$('.introjs-helperLayer').css('background-color', 'orange');
-	    	$('.sidenav').css('background-color', 'black');
-	    }*/
-	});
-	intro.onafterchange(function(targetElement) {
-		/*$(".introjs-helperNumberLayer").css("style", "top: 50px");
-		$(".introjs-helperNumberLayer").css("style", "left: 50px");*/
-		/*$(".introjs-helperNumberLayer").css("top", "50px");
-		$(".introjs-helperNumberLayer").css("left", "50px");*/
-	});
+	});*/
     intro.onexit(function() {
 	    $('#btnIntro').removeClass('on');
 	});
 };
-//}); 
-
-
 
 var hints = [
           /*{

@@ -4,7 +4,6 @@
 // - barchart:
 //    - on hover tooltip for whole height of chart, not only for bars  https://blog.webkid.io/responsive-chart-usability-d3/
 //    - epiweek date on Thurs 00:00, should be Thurs 12:00 to be exactly halfway through week - use d3.timeInterval to create custom interval?
-// - map - when hovering over a region that is not selected - map info says 'not selected' instead of '0'
 // - Help intro updates?
 // - add Hints to intro.js?
 // - move Nombre de Cas/lethality dropdown choices to above map (as only relevant to map)?
