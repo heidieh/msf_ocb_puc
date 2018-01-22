@@ -3,7 +3,6 @@ var epitime_all = [];
 var date_extent = [];
 
 function addEpitime(data,g) {
-	//console.log("ADDING EPITIME");
 	
 	createEpitime(data);
 	g.epitime = {};
@@ -11,12 +10,8 @@ function addEpitime(data,g) {
     g.epitime.all = epitime_all;
 
 	for (var i=0; i<=data.length-1; i++) {
-        /*if (data[i]['epiwk']=='2015-51') {
-            console.log(data[i]['epiwk'], getEpiDate(data[i]['epiwk']));
-        }*/
 		data[i].epidate = getEpiDate(data[i]['epiwk']);
 	}
-	//console.log("global ", g);
 	return [data,date_extent];
 }
 
@@ -53,7 +48,7 @@ function getEpiweeksInData(data) {
 function createEpitime(data) {      //returns array of epiTime objects in dashboard
 	var parseTime = d3.timeParse("%d-%m-%Y");
 
-    var epi_first = new epiTime("2007-52",52,12,2007,parseTime("24-12-2007"));
+    var epi_first = new epiTime("2006-52",52,12,2006,parseTime("25-12-2006"));
     var epi_prev = epi_first;   
     var epiweeksInData = getEpiweeksInData(data);
     var datesInData = [];
@@ -90,9 +85,7 @@ function createEpitime(data) {      //returns array of epiTime objects in dashbo
      
         if (epiweeksInData.includes(new_epi_id)) {      //if week is included in dataset 
             datesInData.push(new_date);
-        } /*else {
-        	console.log("not ", new_epi_id);
-        }*/
+        };
         all_epitimes.push(epi_temp);
                       
         epi_prev = epi_temp;    
@@ -109,20 +102,26 @@ function createEpitime(data) {      //returns array of epiTime objects in dashbo
             epitime_all.push(all_epitimes[i]);
         }
     }
-    console.log("All Epitime: ", epitime_all);
+    //console.log("All Epitime: ", epitime_all);
 
 }; 
 
 
 function getEpiDate(epiwk) {   //function accepts epiweek, returns associated date (in date format)
     var num_epiwks = epitime_all.length;
+    //var firstDate = new Date(00,0,1);
+    //var epiDate = new Date(00,0,1);   //1st Jan 2000
     
     for (i=0; i<=num_epiwks-1; i++) {
         if (epitime_all[i].epi_id == epiwk) {
-            var epiDate = new Date(epitime_all[i].epiDate);
+            epiDate = new Date(epitime_all[i].epiDate);
             break;
         }
     }
+    /*if (sameDay(epiDate, firstDate)) {
+        console.log("1 Jan 2000: ", epiwk)   
+    }*/
+
     return epiDate;
 }
 
@@ -137,7 +136,6 @@ function getEpiWeek(epidt) {   //function accepts epidate (in date format), retu
     
     for (i=0; i<=num_epiwks-1; i++) {
         if (sameDay(epitime_all[i].epiDate, epidt)) {
-            //console.log(epitime_all[i].epiDate, epidt);
             var epiWk = epitime_all[i].epiweek + '-' + epitime_all[i].epiyear;
             break;
         }
@@ -192,8 +190,7 @@ function getEpiRange(rng_type, param) {
     var allDates = [];
     var num_epiwks = epitime_all.length;
     var last_epiTime = epitime_all[epitime_all.length-1];
-    //console.log("LAST EPITIME: ", last_epiTime);
-
+    
     //define startYr, endYr, startMonth, endMonth, startWeek, endWeek - depending on rng_type
     if (rng_type=='epiweek') {
         var endYr = last_epiTime.epiyear;
@@ -236,7 +233,6 @@ function getEpiRange(rng_type, param) {
             var startYr = endYr - param + 1;
         }; 
     };*/
-
 
     if (rng_type=='epiweek') {
         for (i=0; i<num_epiwks; i++) {      
