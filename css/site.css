@@ -502,7 +502,7 @@ rect.selection {
 .line {
   fill: none;
   stroke: red;
-  stroke-width: 2px;
+  stroke-width: 1.5px;
 }
 
 

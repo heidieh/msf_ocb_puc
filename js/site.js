@@ -8,6 +8,7 @@
 // - add Hints to intro.js?
 // - move Nombre de Cas/lethality dropdown choices to above map (as only relevant to map)?
 // - add print function
+// - add reset buttons to reset all features (including diseases & statistic)
 //
 // Done since last update:
 // - added Help/Tour with intro.js
@@ -15,12 +16,29 @@
 // - added lakes layer to map
 // - udates for window resizing
 // - map info box distinguishes between value of 0 and region 'non séléctionné'
+// - 'Indisponible' - used when no data inputs for that geometry at all
+// - barchart - for y-axis title - make distance from y-axis dependent on size of number labelled (e.g. 100,000 further away than 100)
 ////////////////////////////////////////////////////////////////////
 
 
 /***********************/
 /*****  DATA PREP  *****/
 /***********************/
+
+var data = (function() {
+        var json = null;
+        $.ajax({
+            'async': false,
+            'global': false,
+            'url': "data/data.js",
+            'dataType': "json",
+            'success': function (data) {
+                json = data;
+            }
+        });
+        return json;
+    })();
+
 //Global namespace
 var g = {};
 [data,date_extent] = addEpitime(data,g);
@@ -34,9 +52,9 @@ var cf = crossfilter(data);
 console.log(data);
 
 cf.epiDateDim = cf.dimension(function(d) {return d.epidate});
-cf.malDim = cf.dimension(function(d){if (d.mal!='') {return d.mal}});
-cf.provDim = cf.dimension(function(d) {if (d.prov=='') {return '';} else {return d.prov_pc}});  
-cf.provDim2 = cf.dimension(function(d) {if (d.prov=='') {return '';} else {return d.prov_pc}});  //to filter on only
+cf.malDim = cf.dimension(function(d){if (d.mal!='') {return d.mal} else {return 'Non défini'}});
+cf.provDim = cf.dimension(function(d) {if (d.prov_pc=='') {return '';} else {return d.prov_pc}});  
+cf.provDim2 = cf.dimension(function(d) {if (d.prov_pc=='') {return '';} else {return d.prov_pc}});  //to filter on only
 cf.zsDim = cf.dimension(function(d) {if (d.zs_pc=='') {return '';} else {return d.zs_pc}});
 cf.zsDim2 = cf.dimension(function(d) {if (d.zs_pc=='') {return '';} else {return d.zs_pc}});  //to filter on only
 
@@ -67,7 +85,6 @@ function reduceInitial() {
     };
 }
 
-
 /********************************/
 /******  GLOBAL VARIABLES  ******/
 /********************************/
@@ -76,7 +93,11 @@ function reduceInitial() {
 var lookup = {};
 g.diseaseList = [];
 for (var item, i=0; item = data[i++];) {
-  var mal = item.mal;
+  if (item.mal=='') {
+  	var mal = 'Non défini';
+  } else {
+  	var mal = item.mal;
+  }
   if (!(mal in lookup)) {
     lookup[mal] = 1;
     g.diseaseList.push(mal);
@@ -882,8 +903,8 @@ function getCurrentTimeSeriesData() {
 
 function createTimeSeriesCharts(id1, id2) {
 
-	var margin = {top: 10, right: 60, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
-	    margin2 = {top: 10, right: 60, bottom: 20, left: 60}, 
+	var margin = {top: 10, right: 60, bottom: 20, left: 70},		//margins of actual x- and y-axes within svg  
+	    margin2 = {top: 10, right: 60, bottom: 20, left: 70}, 
 	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
 	    width2 = $(id2).width() - margin2.left - margin2.right,
 	    height = $(id1).height() - margin.top - margin.bottom,		//height of main svg
@@ -1017,13 +1038,13 @@ function createTimeSeriesCharts(id1, id2) {
 		.append("text")
 		.attr("class", "y-axis-title")
 		//.attr("transform", "translate(-15," +  (height+margin.bottom)/2 + ") rotate(-90)")
-		.attr("transform", "translate(-45," + (87) + ") rotate(-90)")
+		.attr("transform", "translate(-55," + (87) + ") rotate(-90)")
 		.text(" ");
 	focus
 		.append("text")
 		.attr("class", "ylet-axis-title")
 		//.attr("transform", "translate(-15," +  (height+margin.bottom)/2 + ") rotate(-90)")
-		.attr("transform", "translate(" + (width+60) + "," + (66) + ") rotate(-90)")
+		.attr("transform", "translate(" + (width+55) + "," + (66) + ") rotate(-90)")
 		.text(" ");
 
 
@@ -1055,8 +1076,8 @@ function getTickFrequencyX2(bar_width) {
 
 function updateTimeSeriesCharts(id1, id2, time_data) {
 
-	var margin = {top: 10, right: 60, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
-	    margin2 = {top: 10, right: 60, bottom: 20, left: 60}, 
+	var margin = {top: 10, right: 60, bottom: 20, left: 70},		//margins of actual x- and y-axes within svg  
+	    margin2 = {top: 10, right: 60, bottom: 20, left: 70}, 
 	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
 	    width2 = $(id2).width() - margin2.left - margin2.right,
 	    height = $(id1).height() - margin.top - margin.bottom,		//height of main svg
@@ -1101,7 +1122,14 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 		yAxis = d3.axisLeft(y).ticks(5).tickFormat(function(d) {return d3.format(",.0f")(d)}),
 		yletAxis = d3.axisRight(ylet).ticks(5).tickFormat(function(d) {return d3.format(",.1%")(d)});
 
-	
+	//get variable margin for y-axis title
+	function getTitleMarg() {
+    	if (y.domain()[1] < 1000) {return -40;}
+    	else if (y.domain()[1] < 10000) {return -45;}
+    	else if (y.domain()[1] < 100000) {return -50;}
+    	else if (y.domain()[1] < 1000000) {return -55;}
+    }
+    var y_title_marg = getTitleMarg();
 	
 	//select all bars, remove them, and exit previous data set
 	//then add/enter new data set
@@ -1160,6 +1188,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
       .call(yletAxis);
 
 	svg1.select(".y-axis-title")
+		.attr("transform", "translate(" + y_title_marg + ",87) rotate(-90)")
 		.text(g.statList[0].full);
 
 	svg1.select(".ylet-axis-title")
@@ -1666,7 +1695,7 @@ $(function() {
 
 function addPlayLine() {
 	var id1 = '#timeseries';
-	var margin = {top: 10, right: 60, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
+	var margin = {top: 10, right: 60, bottom: 20, left: 70},		//margins of actual x- and y-axes within svg  
 	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
 	    height = $(id1).height() - margin.top - margin.bottom;		//height of main svg
 
