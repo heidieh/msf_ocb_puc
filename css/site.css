@@ -33,6 +33,15 @@
 	margin-bottom: 4px;
 }
 
+#random{
+  font: 12px sans-serif;
+  color: red;
+  text-align: left;
+  font-style: italic;
+  margin-top: 2px;
+  margin-bottom: 10px;
+}
+
 #btnIntro{
   display: block;
   margin-left: 15px;
