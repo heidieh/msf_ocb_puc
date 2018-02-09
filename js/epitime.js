@@ -1,18 +1,17 @@
 
-var epitime_all = [];
-var date_extent = [];
-
-function addEpitime(data,g) {
-	
-	createEpitime(data);
+//reads in array of data with field 'epiwk' and returns same array of data with field added for 'epidate'
+//add global variable g.epitime
+function addEpitimeToData(data) {	
+	var created_epi = createEpitime(data);
 	g.epitime = {};
-	g.epitime.date_extent = date_extent;
-    g.epitime.all = epitime_all;
+	g.epitime.date_extent = created_epi[0];
+    g.epitime.all = created_epi[1];
 
 	for (var i=0; i<=data.length-1; i++) {
 		data[i].epidate = getEpiDate(data[i]['epiwk']);
 	}
-	return [data,date_extent];
+	//return [data,date_extent];
+    return data;
 }
 
 function epiTime(epi_id, epiweek, epimonth, epiyear, epiDate) {     //epiTime object
@@ -23,6 +22,7 @@ function epiTime(epi_id, epiweek, epimonth, epiyear, epiDate) {     //epiTime ob
     this.epiDate = epiDate;
 }   
 
+//reads in array of data, returns array of unique epiweeks ('epiwk') in data
 function getEpiweeksInData(data) {
     var all_epiweeks = [];  
     for (i=0; i<=data.length-1; i++) {
@@ -45,15 +45,19 @@ function getEpiweeksInData(data) {
     return all_years;
 };*/
 
-function createEpitime(data) {      //returns array of epiTime objects in dashboard
-	var parseTime = d3.timeParse("%d-%m-%Y");
 
+//reads in array of data, returns date extent ([minDate, maxDate]) and array of epiTime objects between the first and last dates in array
+function createEpitime(data) {    
+	var parseTime = d3.timeParse("%d-%m-%Y");
     var epi_first = new epiTime("2006-52",52,12,2006,parseTime("25-12-2006"));
     var epi_prev = epi_first;   
     var epiweeksInData = getEpiweeksInData(data);
     var datesInData = [];
     var all_epitimes = [];
+    var epitime_all_data = [];
+    //epitime_all = [];
     
+    //get all years in data (all_years) and max year (epi_max_yr)
     var all_years = [];
     for (i=0; i<= epiweeksInData.length-1; i++) {
         if (!(all_years.includes(parseInt((epiweeksInData[i]).substr(0,4))))) {  //if year not included in all_years list
@@ -63,6 +67,7 @@ function createEpitime(data) {      //returns array of epiTime objects in dashbo
     var epi_max_yr = Math.max.apply(null, all_years); 
     //console.log("All years: ", all_years);      
     
+    //create array of epiTime objects, one for each week from first default week (2006-52) to end of max epi year
     while (epi_prev.epiyear <= epi_max_yr) {
         var new_date = d3.timeDay.offset(epi_prev.epiDate, 7); //add 7 days to previous date       
         var new_month = parseInt(d3.timeFormat("%m")(d3.timeDay.offset(new_date, 3))); //add 3 days to date & get month number as integer
@@ -91,36 +96,45 @@ function createEpitime(data) {      //returns array of epiTime objects in dashbo
         epi_prev = epi_temp;    
     }
 
+    //get min & max dates of actual data
     datesInData.sort(date_sort_asc);
     var minDateInData = datesInData[0];
     var maxDateInData = datesInData[datesInData.length-1];
     //console.log("min, max dates: ", minDateInData, maxDateInData);
     date_extent = [minDateInData, maxDateInData];
 
+    //push all epiTime objects within actual data extent into new array (epitime_all_data)
     for (var i=0; i<=all_epitimes.length-1; i++) {          
         if ((minDateInData <= all_epitimes[i].epiDate) && (all_epitimes[i].epiDate <= maxDateInData)) {
-            epitime_all.push(all_epitimes[i]);
+            epitime_all_data.push(all_epitimes[i]);
         }
     }
-    //console.log("All Epitime: ", epitime_all);
+    //console.log("All Epitime in data: ", epitime_all_data);
+    return [date_extent, epitime_all_data];
 
 }; 
 
 
-function getEpiDate(epiwk) {   //function accepts epiweek, returns associated date (in date format)
-    var num_epiwks = epitime_all.length;
-    //var firstDate = new Date(00,0,1);
-    //var epiDate = new Date(00,0,1);   //1st Jan 2000
-    
-    for (i=0; i<=num_epiwks-1; i++) {
-        if (epitime_all[i].epi_id == epiwk) {
-            epiDate = new Date(epitime_all[i].epiDate);
-            break;
+//function reads epiweek(epiwk, format e.g. '2008-15') and optional epitime (epiwks, array of all epitime objects), returns associated date (epidate, in date format)
+function getEpiDate(epiwk, epiwks) {   
+    if (epiwks!=null) {
+        //console.log(epiwk, epiwks);
+        var num_epiwks = epiwks.length;
+        for (i=0; i<=num_epiwks-1; i++) {
+            if (epiwks[i].epi_id == epiwk) {
+                epiDate = new Date(epiwks[i].epiDate);
+                break;
+            }
+        }
+    } else {    
+        var num_epiwks = g.epitime.all.length;
+        for (i=0; i<=num_epiwks-1; i++) {
+            if (g.epitime.all[i].epi_id == epiwk) {
+                epiDate = new Date(g.epitime.all[i].epiDate);
+                break;
+            }
         }
     }
-    /*if (sameDay(epiDate, firstDate)) {
-        console.log("1 Jan 2000: ", epiwk)   
-    }*/
 
     return epiDate;
 }
@@ -131,15 +145,27 @@ function sameDay(d1, d2) {
         d1.getDate() === d2.getDate();
 }
 
-function getEpiWeek(epidt) {   //function accepts epidate (in date format), returns associated epiweek
-    var num_epiwks = epitime_all.length;
-    
-    for (i=0; i<=num_epiwks-1; i++) {
-        if (sameDay(epitime_all[i].epiDate, epidt)) {
-            var epiWk = epitime_all[i].epiweek + '-' + epitime_all[i].epiyear;
-            break;
+//function reads epidate (epidt, in date format) and optional epitime (epiwks, array of all epitime objects), returns associated epiweek
+function getEpiWeek(epidt, epiwks) {   
+    if (epiwks!=null) {
+        //console.log(epidt, epiwks);
+        var num_epiwks = epiwks.length;
+        for (i=0; i<=num_epiwks-1; i++) {
+            if (sameDay(epiwks[i].epiDate, epidt)) {
+                var epiWk = epiwks[i].epiweek + '-' + epiwks[i].epiyear;
+                break;
+            }
+        }
+    } else {
+        var num_epiwks = g.epitime.all.length;
+        for (i=0; i<=num_epiwks-1; i++) {
+            if (sameDay(g.epitime.all[i].epiDate, epidt)) {
+                var epiWk = g.epitime.all[i].epiweek + '-' + g.epitime.all[i].epiyear;
+                break;
+            }
         }
     }
+    
     return epiWk;
 }
 
@@ -188,17 +214,17 @@ var date_sort_asc = function (date1, date2) {   //sort dates in ascending order
 function getEpiRange(rng_type, param) {  
     var dateRange = [];
     var allDates = [];
-    var num_epiwks = epitime_all.length;
-    var last_epiTime = epitime_all[epitime_all.length-1];
+    var num_epiwks = g.epitime.all.length;
+    var last_epiTime = g.epitime.all[g.epitime.all.length-1];
     
     //define startYr, endYr, startMonth, endMonth, startWeek, endWeek - depending on rng_type
     if (rng_type=='epiweek') {
         var endYr = last_epiTime.epiyear;
         var endWeek = last_epiTime.epiweek;
         if (param <= num_epiwks) {
-            var start_epiTime = epitime_all[num_epiwks-param];
+            var start_epiTime = g.epitime.all[num_epiwks-param];
         } else {                        
-            var start_epiTime = epitime_all[0];   //if button goes back further than first date, set to first date
+            var start_epiTime = g.epitime.all[0];   //if button goes back further than first date, set to first date
             
         }
         var startWeek = start_epiTime.epiweek;
@@ -236,30 +262,30 @@ function getEpiRange(rng_type, param) {
 
     if (rng_type=='epiweek') {
         for (i=0; i<num_epiwks; i++) {      
-            if ((epitime_all[i].epiyear == startYr) && (epitime_all[i].epiyear == endYr)) {
-                if ((epitime_all[i].epiweek >= startWeek) && (epitime_all[i].epiweek <= endWeek)) {
-                    allDates.push(epitime_all[i].epiDate);
+            if ((g.epitime.all[i].epiyear == startYr) && (g.epitime.all[i].epiyear == endYr)) {
+                if ((g.epitime.all[i].epiweek >= startWeek) && (g.epitime.all[i].epiweek <= endWeek)) {
+                    allDates.push(g.epitime.all[i].epiDate);
                 }
-            } else if ((epitime_all[i].epiyear == startYr) && (epitime_all[i].epiweek >= startWeek)) {
-                allDates.push(epitime_all[i].epiDate);
-            } else if ((epitime_all[i].epiyear == endYr) && (epitime_all[i].epiweek <= endWeek)) {
-                allDates.push(epitime_all[i].epiDate);
-            } else if ((epitime_all[i].epiyear > startYr) && (epitime_all[i].epiyear < endYr)) {
-                allDates.push(epitime_all[i].epiDate);
+            } else if ((g.epitime.all[i].epiyear == startYr) && (g.epitime.all[i].epiweek >= startWeek)) {
+                allDates.push(g.epitime.all[i].epiDate);
+            } else if ((g.epitime.all[i].epiyear == endYr) && (g.epitime.all[i].epiweek <= endWeek)) {
+                allDates.push(g.epitime.all[i].epiDate);
+            } else if ((g.epitime.all[i].epiyear > startYr) && (g.epitime.all[i].epiyear < endYr)) {
+                allDates.push(g.epitime.all[i].epiDate);
             }
         }   
     } else if (rng_type=='epimonth') {
         for (i=0; i<num_epiwks; i++) {      
-            if ((epitime_all[i].epiyear == startYr) && (epitime_all[i].epiyear == endYr)) {
-                if ((epitime_all[i].epimonth >= startMonth) && (epitime_all[i].epimonth <= endMonth)) {
-                    allDates.push(epitime_all[i].epiDate);
+            if ((g.epitime.all[i].epiyear == startYr) && (g.epitime.all[i].epiyear == endYr)) {
+                if ((g.epitime.all[i].epimonth >= startMonth) && (g.epitime.all[i].epimonth <= endMonth)) {
+                    allDates.push(g.epitime.all[i].epiDate);
                 }
-            } else if ((epitime_all[i].epiyear == startYr) && (epitime_all[i].epimonth >= startMonth)) {
-                allDates.push(epitime_all[i].epiDate);
-            } else if ((epitime_all[i].epiyear == endYr) && (epitime_all[i].epimonth <= endMonth)) {
-                allDates.push(epitime_all[i].epiDate);
-            } else if ((epitime_all[i].epiyear > startYr) && (epitime_all[i].epiyear < endYr)) {
-                allDates.push(epitime_all[i].epiDate);
+            } else if ((g.epitime.all[i].epiyear == startYr) && (g.epitime.all[i].epimonth >= startMonth)) {
+                allDates.push(g.epitime.all[i].epiDate);
+            } else if ((g.epitime.all[i].epiyear == endYr) && (g.epitime.all[i].epimonth <= endMonth)) {
+                allDates.push(g.epitime.all[i].epiDate);
+            } else if ((g.epitime.all[i].epiyear > startYr) && (g.epitime.all[i].epiyear < endYr)) {
+                allDates.push(g.epitime.all[i].epiDate);
             }
         }
     } /*else if (rng_type=='epiyear') {
