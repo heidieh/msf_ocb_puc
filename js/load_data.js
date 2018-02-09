@@ -38,8 +38,7 @@ function displayDataDialog() {
 	        $.ajax({
 	            'async': false,
 	            'global': false,
-	            //'url': "data/data_RDCIDS17SEM52.js",
-	            'url': "data/data_RDCIDS15sem51.js",
+	            'url': "data/data.js",
 	            'dataType': "json",
 	            'success': function (data) {
 	                json = data;
