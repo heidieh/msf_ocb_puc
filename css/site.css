@@ -6,6 +6,41 @@
 
 }
 
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 9999; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    /*background-color: rgb(0,0,0);*/ /* Fallback color */
+    background-color: rgba(0,0,0,0.85); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  /*z-index: 999;*/ /* Sit on top */
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 8px 8px 8px 8px;
+    width: 70%;
+}
+
+#modal_text {
+  font: 14px sans-serif;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 10px;
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+
 /* The side menu */
 .sidemenu {
   height: 100%;
@@ -171,114 +206,40 @@
 
 
 
-/* Drop-down disease list   http://jsfiddle.net/BB3JK/47/ */
-/*.select {
-  margin-top: 20px;
-  margin-left: 14px;
-  background: url(../images/dropdown.png) no-repeat 92% center;  
-  height: 25px;
-  overflow: hidden;
-  width: 160px;
+.styled-select {
+   background: url(../images/dropdown.png) no-repeat 94% -5px;
+   background-color: #3b8ec2;
+   /*font-size: 11px;
+   color: white;*/
+   width: 160px;
+   height: 22px;
+   overflow: hidden;
+   outline: none;
+   /*border: none;*/
+    /*-webkit-border-radius: 8px;
+   -moz-border-radius: 8px;*/
+   /*border-radius: 20px;*/
+   padding: 0px 4px; /*4px 11px;*/
+   display: inline-block;
+   margin-left: 14px;
+   margin-bottom: 10px;
 }
 
-.select select {
+.styled-select select {
    background: transparent;
    border: none;
-   font-size: 11px;
-   height: 25px;
-   padding: 5px; /* If you add too much padding here, the options won't show in IE 
-   width: 200px;
-}*/
+   font: 12px sans-serif;
+   color: white;
+   height: 22px;
+   padding: 5px; /* If you add too much padding here, the options won't show in IE */
+   width: 180px;
+}
 
-.s-hidden {
-    visibility:hidden;
-    padding-right:10px;
-}
-.select {
-    cursor:pointer;
-    display:inline-block;
-    position:relative;
-    /*font:normal 11px/22px Arial, Sans-Serif;*/
-    color:black;
-    /*border:1px solid #ccc;*/
-    margin-top: 20px;
-    margin-left: 14px;
-    /*background: url(../images/dropdown.png) no-repeat 92% center;  */
-    height: 25px;
-    /*overflow: hidden;*/
-    width: 160px;
-    -webkit-border-radius: 8px;
-   -moz-border-radius: 8px;
-   border-radius: 8px;
-
-}
-.styledSelect {
-    position:absolute;
-    top:5;
-    right:0;
-    bottom:0;
-    left:0;
-    font: 12px sans-serif;
-  /*color: #666666; *//*#4F4F4F;*/
-  /*font-weight: 400;*/
-    background-color: #3b8ec2; 
-    color: white;
-    padding-left: 14px;
-    padding-top: 3px;
-    /*font-weight:bold;*/
-    -webkit-border-radius: 8px;
-    -moz-border-radius: 8px;
-    border-radius: 8px;
-}
-.styledSelect:after {
-    content:"";
-    width:0;
-    height:0;
-    border:5px solid transparent;
-    border-color:black transparent transparent transparent;
-    position:absolute;
-    top:9px;
-    right:16px;
-}
-.styledSelect:active, .styledSelect.active {
-    /*background-color: #cccccc;*/
-}
-.options {
-    display:none;
-    position:absolute;
-    top: 5px;
-    right:0;
-    left:0;
-    z-index:999;
-    margin:0 0;
-    padding:0 0;
-    list-style:none;
-    /*border:1px solid #ccc;*/
-    color: black;
-    background-color:lightgrey; /*white;*/
-    -webkit-box-shadow:0 1px 2px rgba(0, 0, 0, 0.2);
-    -moz-box-shadow:0 1px 2px rgba(0, 0, 0, 0.2);
-    box-shadow:0 1px 2px rgba(0, 0, 0, 0.2);
-    -webkit-border-radius: 8px;
+.rounded {
+   -webkit-border-radius: 8px;
    -moz-border-radius: 8px;
    border-radius: 8px;
 }
-.options li {
-    font: 12px sans-serif;
-    margin:4 0px;
-    padding:0 10px;
-    /*color: black;
-    background-color: pink;*/
-}
-.options li:hover {
-    background-color:#3b8ec2;
-    color:white;
-}
-
-.yellow {background-color: #eec111;}
-.yellow select {color: #000;}
-.blue {background-color: #3b8ec2;}
-.blue select {color: #fff;}
 
 #head-val {
   margin-top: 20px;
@@ -307,8 +268,17 @@
   margin-top: 12px;
   padding-left: 14px;
   display: none;
-  max-height: 320px;
+  max-height: 300px;
   overflow: auto;
+}
+
+#btn_reload_data {
+  position: fixed;
+  top: 660px;
+  margin-left: 0px;
+  height: 25px;
+  width: 200px;
+  overflow: hidden;
 }
 
 #btn_reset {
@@ -357,7 +327,6 @@
 }
 
 .disable {
-  /*background-color: #ffff00; */
   color: grey;
   font-style: italic;
 }

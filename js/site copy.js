@@ -1,52 +1,66 @@
-//////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 //Next dev steps:
+// - remove "var data ="" from data.js  (OR add it in export from database?)
 // - barchart:
 //    - on hover tooltip for whole height of chart, not only for bars  https://blog.webkid.io/responsive-chart-usability-d3/
 //    - epiweek date on Thurs 00:00, should be Thurs 12:00 to be exactly halfway through week - use d3.timeInterval to create custom interval?
+// - Help intro updates?
+// - add Hints to intro.js?
+// - move Nombre de Cas/lethality dropdown choices to above map (as only relevant to map)?
 // - add print function
-// - remove dependence on jquery
-
+// - add reset buttons to reset all features (including diseases & statistic)
 //
 // Done since last update:
-// - reset (Reinitialser) button - resets diseases, statistic, map zoom and map buttons (prov, rivers both 'on')
-// - added modal window to select date range of data to load in dashboard
-///////////////////////////////////////////////////////////////////////////////////////////
+// - added Help/Tour with intro.js
+// - added buttons for selecting relative time range options e.g. 'last complete epimonth', 'last 8 epiweeks'
+// - added lakes layer to map
+// - udates for window resizing
+// - map info box distinguishes between value of 0 and region 'non séléctionné'
+////////////////////////////////////////////////////////////////////
 
 
 /***********************/
 /*****  DATA PREP  *****/
 /***********************/
 
-var data = [{"cas": 0,
-	"dec": 0,
-	"epiwk": "2016-1",
-	"mal": "NA",
-},
-{
-	"cas": 0,
-	"dec": 0,
-	"epiwk": "2017-52",
-	"mal": "NA",
-}];
+/*var data = (function() {
+        var json = null;
+        $.ajax({
+            'async': false,
+            'global': false,
+            'url': "data/data.js",
+            'dataType': "json",
+            'success': function (data) {
+                json = data;
+            }
+        });
+        return json;
+    })();*/
 
 //Global namespace
 var g = {};
-data = addEpitimeToData(data);
-console.log("data = ", data);
+[data,date_extent] = addEpitime(data,g);
 console.log("g = ", g);
-
 
 
 /*************************/
 /*****  CROSSFILTER  *****/
 /*************************/
 var cf = crossfilter(data);
+console.log(data);
+
 cf.epiDateDim = cf.dimension(function(d) {return d.epidate});
-cf.malDim = cf.dimension(function(d){if (d.mal!='') {return d.mal} else {return 'Non défini'}});
+cf.malDim = cf.dimension(function(d){if (d.mal!='') {return d.mal} else {console.log("Non defini"); return 'Non défini'}});
+console.log("ok 1")
 cf.provDim = cf.dimension(function(d) {if (d.prov_pc=='') {return '';} else {return d.prov_pc}});  
+console.log("ok 2")
 cf.provDim2 = cf.dimension(function(d) {if (d.prov_pc=='') {return '';} else {return d.prov_pc}});  //to filter on only
+console.log("ok 3")
 cf.zsDim = cf.dimension(function(d) {if (d.zs_pc=='') {return '';} else {return d.zs_pc}});
+console.log("ok 4")
 cf.zsDim2 = cf.dimension(function(d) {if (d.zs_pc=='') {return '';} else {return d.zs_pc}});  //to filter on only
+
+console.log("ok 5")
 
 cf.statsByEpiDateGroup = cf.epiDateDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
 //console.log("Stats by EpiDate: ", cf.statsByEpiDateGroup.top(Infinity));
@@ -55,68 +69,7 @@ cf.statsByZsGroup = cf.zsDim.group().reduce(reduceAdd, reduceRemove, reduceIniti
 cf.statsByProvGroup = cf.provDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
 //console.log("Stats by Province: ", cf.statsByProvGroup.top(Infinity));
 
-
-
-function updateDashboardData() {
-	//console.log("UPDATE DATA HERE ");
-
-	//remove all cf filters and data
-	cf.epiDateDim.filterAll();
-	cf.malDim.filterAll();
-	cf.provDim.filterAll();
-	cf.provDim2.filterAll();
-	cf.zsDim.filterAll();
-	cf.zsDim2.filterAll();
-	cf.remove();
-
-	g.currentvars.currentZones = {pcodes: [], names: []};
-	g.currentvars.currentProvs = {pcodes: [], names: []};
-
-	//add new data
-	cf.add(data);
-
-	//reset epitime variables & quick filter time range 
-	var defaultRange = getEpiRange(g.timerangebuttons.default_btn.range_type, g.timerangebuttons.default_btn.range_param);
-	g.currentvars.currentEpiDates.min_default = defaultRange[0];
-	g.currentvars.currentEpiDates.max_default = defaultRange[1];	
-	g.currentvars.currentEpiDates.min = g.currentvars.currentEpiDates.min_default;
-	g.currentvars.currentEpiDates.max = g.currentvars.currentEpiDates.max_default;
-	//console.log(g.currentvars.currentEpiDates);
-	createTimeRangeButtons();
-
-	//recreate time series charts
-	svg1.remove();
-    svg2.remove();
-    currentTimeSeriesData = getCurrentTimeSeriesData();
-    createTimeSeriesCharts('#timeseries', '#timeseriesbrush');
-    updateTimeSeriesCharts('#timeseries', '#timeseriesbrush', currentTimeSeriesData);
-	
-    //reset disease & stat dropdowns
-	createDiseaseList();
-	select_disease.options.length = 0;
-	for (disease in g.diseaseList) {
-		if (g.diseaseList[disease]!='') {
-	    	select_disease.options[select_disease.options.length] = new Option(g.diseaseList[disease], disease);
-	    }
-	}	
-	select_stat.options.length = 0;
-	for (stat in g.statList) {
-		if (g.statList[stat].full!='') {
-	    	select_stat.options[select_stat.options.length] = new Option(g.statList[stat].full, stat);
-	    }
-	}
-	changeDiseaseSelection(0);
-	changeStatSelection(0);
-
-	//reset map elements
-	if (!($('#btnRiv').hasClass('on'))) {btn_rivers();};
-	btn_change_lyr('prov'); 
-	setDefaultMapZoom();
-	
-	//update all remaining
-	updateAll();
-}
-
+console.log("ok 2")
 
 function reduceAdd(p, v) {
     p.cas += v.cas;
@@ -137,30 +90,23 @@ function reduceInitial() {
         let: 0
     };
 }
+console.log("ok fin")
 
 /********************************/
 /******  GLOBAL VARIABLES  ******/
 /********************************/
 
 //Create list of diseases in data
-function createDiseaseList() {
-	var lookup = {};
-	g.diseaseList = [];
-	for (var item, i=0; item = data[i++];) {
-	  if (item.mal=='') {
-	  	var mal = 'Non défini';
-	  } else {
-	  	var mal = item.mal;
-	  }
-	  if (!(mal in lookup)) {
-	    lookup[mal] = 1;
-	    g.diseaseList.push(mal);
-	  }
-	}
-	g.diseaseList.sort();
-};
-createDiseaseList();
-
+var lookup = {};
+g.diseaseList = [];
+for (var item, i=0; item = data[i++];) {
+  var mal = item.mal;
+  if (!(mal in lookup)) {
+    lookup[mal] = 1;
+    g.diseaseList.push(mal);
+  }
+}
+g.diseaseList.sort();
 
 //g.statList = [{abrv: 'cas', full: 'Nombre de Cas', color_scale: 'YlBr'}, {abrv: 'dec', full: 'Nombre de Décès', color_scale: 'Red'}, {abrv: 'let', full: 'Létalité', color_scale: 'Red'}];
 g.statList = [{abrv: 'cas', full: 'Nombre de Cas', color_scale: 'YlBr'}, {abrv: 'let', full: 'Létalité', color_scale: 'Red'}]; 
@@ -572,7 +518,7 @@ function generateMap(id, data, responseText_zs, responseText_prov, responseText_
 	//console.log("in generateMap");
 
 	currentMapData = getCurrentPolyVars();
-    //console.log("currentMapData: ", currentMapData);
+    console.log("currentMapData: ", currentMapData);
 	
 	function style(feat, i){
         try {
@@ -680,7 +626,7 @@ function generateMap(id, data, responseText_zs, responseText_prov, responseText_
 	catch(e){
 	    geojson_lak = {};
 	    console.log(e)
-	}  
+	}
 
 
     var mapInfo = L.control({position: 'topright'});
@@ -699,6 +645,19 @@ function generateMap(id, data, responseText_zs, responseText_prov, responseText_
 		return svg;
 	};
 	mapLegend.addTo(map);
+
+
+	document.getElementById('btn_reset').onclick = function(abc) {    //zoom to extent when user clicks on reset button
+        var pos = abc.target.getAttribute('data-position');
+        var zoom = abc.target.getAttribute('data-zoom');
+        if (pos && zoom) {
+            var locat = pos.split(',');
+            var zoo = parseInt(zoom);
+            map.setView(locat, zoo, {animation: true});
+            return false;
+        }
+    }  
+
 
 	function highlightFeature(e){
 		var layer = e.target;
@@ -921,55 +880,20 @@ function getName(pcode, lyr) {
 	return name;
 }
 
-function setDefaultMapZoom() {
-    map.setView(["-4.0", "22.0"], 5, {animation: true});
-}
-
-
 
 
 /*******************************/
 /****  CREATE OTHER CHARTS  ****/
 /*******************************/
 
-/*function getCurrentTimeSeriesData() {
-	var timeSeries = [];		
-	statsInTime = cf.statsByEpiDateGroup.top(Infinity);
-	console.log("statsInTime: ", statsInTime);
-	console.log("epitime all: ", g.epitime.all)
-
-	for (var i=0; i<=statsInTime.length-1; i++) {
-		timeSeries.push({'key': statsInTime[i].key, 'value': statsInTime[i].value});
-	}
-	//sort into date order
-	timeSeries.sort(function(a,b){
-		return b.key - a.key;
-	});
-	//console.log("timeSeries: ", timeSeries);
-	g.currentvars.currentTimeSeries = timeSeries;
-	return timeSeries;
-}*/
-
 function getCurrentTimeSeriesData() {
 	var timeSeries = [];		
-	var datesInSeries = [];
 	statsInTime = cf.statsByEpiDateGroup.top(Infinity);
 	//console.log("statsInTime: ", statsInTime);
-	//console.log("epitime all: ", g.epitime.all)
 
-	//add all epidate stats from data
 	for (var i=0; i<=statsInTime.length-1; i++) {
 		timeSeries.push({'key': statsInTime[i].key, 'value': statsInTime[i].value});
-		datesInSeries.push(statsInTime[i].key.getTime());
 	}
-	//add epidate stats for weeks without data (to 'complete' timeSeries)
-	for (var i=0; i<=g.epitime.all.length-1; i++) {
-		if ((datesInSeries.indexOf(g.epitime.all[i].epiDate.getTime())) == -1) {
-			timeSeries.push({'key': g.epitime.all[i].epiDate, 'value': {cas: 0, dec: 0, let: 0}});
-			datesInSeries.push(g.epitime.all[i].epiDate.getTime());
-		}
-	}
-
 	//sort into date order
 	timeSeries.sort(function(a,b){
 		return b.key - a.key;
@@ -982,8 +906,8 @@ function getCurrentTimeSeriesData() {
 
 function createTimeSeriesCharts(id1, id2) {
 
-	var margin = {top: 10, right: 60, bottom: 20, left: 70},		//margins of actual x- and y-axes within svg  
-	    margin2 = {top: 10, right: 60, bottom: 20, left: 70}, 
+	var margin = {top: 10, right: 60, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
+	    margin2 = {top: 10, right: 60, bottom: 20, left: 60}, 
 	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
 	    width2 = $(id2).width() - margin2.left - margin2.right,
 	    height = $(id1).height() - margin.top - margin.bottom,		//height of main svg
@@ -1010,15 +934,7 @@ function createTimeSeriesCharts(id1, id2) {
 	var xAxis = d3.axisBottom(x),
 	    xAxis2 = d3.axisBottom(x2),
 	    yAxis = d3.axisLeft(y).ticks(5).tickFormat(function(d) {return d3.format(",.0f")(d)}),
-	    //yletAxis = d3.axisRight(ylet).ticks(5).tickFormat(function(d) { return d3.format(",.1%")(d)});
-		yletAxis = d3.axisRight(ylet).ticks(5).tickFormat(function(d) {
-			if (d3.max(g.currentvars.currentTimeSeries, function(d) { return d.value.let; }) <= 0.003) {
-				return d3.format(",.2%")(d);
-			} else {
-				return d3.format(",.1%")(d);
-			}
-		});
-			
+		yletAxis = d3.axisRight(ylet).ticks(5).tickFormat(function(d) {return d3.format(",.1%")(d)});
 
 	svg1.append("defs").append("clipPath")
 	    .attr("id", "clip")
@@ -1049,11 +965,8 @@ function createTimeSeriesCharts(id1, id2) {
 	ylet2.domain(ylet.domain());
 
 	var orig_bar_width = (width/time_data.length);
-	//console.log("orig_bar_width = ", orig_bar_width, " = ", width, "/",time_data.length);
 	var bar_width = (width/time_data.length)-0.5;		//changing bar width only for focus chart  //0.5 for bar spacing
-	//console.log("bar_width = ", bar_width, " = ", width, "/",time_data.length, "-0.5");
 	g.currentvars.currentEpiDates.bar_width = bar_width;
-	g.currentvars.currentEpiDates.bar_width_x2 = orig_bar_width;
 	g.currentvars.currentEpiDates.tick_freq = getTickFrequency(bar_width);
 	g.currentvars.currentEpiDates.tick_freq_x2 = getTickFrequencyX2(orig_bar_width);
 
@@ -1128,13 +1041,13 @@ function createTimeSeriesCharts(id1, id2) {
 		.append("text")
 		.attr("class", "y-axis-title")
 		//.attr("transform", "translate(-15," +  (height+margin.bottom)/2 + ") rotate(-90)")
-		.attr("transform", "translate(-55," + (87) + ") rotate(-90)")
+		.attr("transform", "translate(-45," + (87) + ") rotate(-90)")
 		.text(" ");
 	focus
 		.append("text")
 		.attr("class", "ylet-axis-title")
 		//.attr("transform", "translate(-15," +  (height+margin.bottom)/2 + ") rotate(-90)")
-		.attr("transform", "translate(" + (width+55) + "," + (66) + ") rotate(-90)")
+		.attr("transform", "translate(" + (width+60) + "," + (66) + ") rotate(-90)")
 		.text(" ");
 
 
@@ -1156,7 +1069,6 @@ function getTickFrequency(bar_width) {
 }
 
 function getTickFrequencyX2(bar_width) {
-	//console.log("getTickFrequencyX2: ", bar_width)
 	if (bar_width > 11) {return 1}
 	else if (bar_width > 10) {return 2}
 	else if (bar_width > 9) {return 3}
@@ -1166,10 +1078,9 @@ function getTickFrequencyX2(bar_width) {
 }
 
 function updateTimeSeriesCharts(id1, id2, time_data) {
-	//console.log("IN updateTimeSeriesCharts, time_data = ", time_data);
-	
-	var margin = {top: 10, right: 60, bottom: 20, left: 70},		//margins of actual x- and y-axes within svg  
-	    margin2 = {top: 10, right: 60, bottom: 20, left: 70}, 
+
+	var margin = {top: 10, right: 60, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
+	    margin2 = {top: 10, right: 60, bottom: 20, left: 60}, 
 	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
 	    width2 = $(id2).width() - margin2.left - margin2.right,
 	    height = $(id1).height() - margin.top - margin.bottom,		//height of main svg
@@ -1192,14 +1103,10 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 
 	//get the width of each bar 
 	var orig_bar_width = (width/time_data.length);
-	//console.log("orig_bar_width = ", orig_bar_width, " = ", width, "/",time_data.length);
 	var bar_width = (width/time_data.length) - 0.5;		//0.5 for bar spacing
-	//console.log("bar_width = ", bar_width, " = ", width, "/",time_data.length, "-0.5");
 	g.currentvars.currentEpiDates.bar_width = bar_width;
-	g.currentvars.currentEpiDates.bar_width_x2 = orig_bar_width;
 	g.currentvars.currentEpiDates.tick_freq = getTickFrequency(bar_width);
 	g.currentvars.currentEpiDates.tick_freq_x2 = getTickFrequencyX2(orig_bar_width);
-	
 
 	//FIX TICK ALIGNMENT HERE
 	var xAxis = d3.axisBottom(x)
@@ -1216,27 +1123,9 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 		}),
 	    xAxis2 = d3.axisBottom(x2),
 		yAxis = d3.axisLeft(y).ticks(5).tickFormat(function(d) {return d3.format(",.0f")(d)}),
-		//yletAxis = d3.axisRight(ylet).ticks(5).tickFormat(function(d) {return d3.format(",.1%")(d)});
-		yletAxis = d3.axisRight(ylet).ticks(5).tickFormat(function(d) {
-			if (d3.max(g.currentvars.currentTimeSeries, function(d) { return d.value.let; }) <= 0.003) {
-				return d3.format(",.2%")(d);
-			} else {
-				return d3.format(",.1%")(d);
-			}
-		});
+		yletAxis = d3.axisRight(ylet).ticks(5).tickFormat(function(d) {return d3.format(",.1%")(d)});
 
-	//get variable margin for y-axis title
-	function getTitleMarg() {
-    	if (y.domain()[1] < 1000) {return -40;}
-    	else if (y.domain()[1] < 10000) {return -45;}
-    	else if (y.domain()[1] < 100000) {return -50;}
-    	else if (y.domain()[1] < 1000000) {return -55;}
-    }
-    var y_title_marg = getTitleMarg();
-
-    /*console.log("date extent: ", g.epitime.date_extent)
-    svg2.select('.axis--x2')
-		.call(xAxis2)*/	
+	
 	
 	//select all bars, remove them, and exit previous data set
 	//then add/enter new data set
@@ -1295,7 +1184,6 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
       .call(yletAxis);
 
 	svg1.select(".y-axis-title")
-		.attr("transform", "translate(" + y_title_marg + ",87) rotate(-90)")
 		.text(g.statList[0].full);
 
 	svg1.select(".ylet-axis-title")
@@ -1332,8 +1220,8 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 				.attr("class", "line2")
     			.attr("d", valueline2);*/
 
-	/*svg2.select('.axis--x2')
-		.call(xAxis2)	*/
+	svg2.select('.axis--x2')
+		.call(xAxis2)	
 
 	var zoom = d3.zoom()
 	    .scaleExtent([1, Infinity])
@@ -1376,15 +1264,13 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 
 
 	function brushmoved() {
-		//console.log("IN brushmoved");
 		if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-		var s = d3.event.selection || x2.range();   //range selected or entire range
-	    bar_width = ((g.currentvars.currentEpiDates.bar_width_x2) * ((x2.range()[1]-x2.range()[0])/(s[1]-s[0]))) - 0.5;   //0.5 for bar spacing
-	    //console.log("bar_width = ", bar_width, " = ", g.currentvars.currentEpiDates.bar_width_x2, " or ", orig_bar_width, "*",(x2.range()[1]-x2.range()[0])/(s[1]-s[0]), "-0.5");
+
+	    var s = d3.event.selection || x2.range();   //range selected or entire range
+	    bar_width = ((orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0])) - 0.5;   //0.5 for bar spacing
 	    g.currentvars.currentEpiDates.bar_width = bar_width;
 	    g.currentvars.currentEpiDates.tick_freq = getTickFrequency(bar_width);
-	    //console.log(orig_bar_width, g.currentvars.currentEpiDates.bar_width, g.currentvars.currentEpiDates.tick_freq);
-	    
+		
 		//FIX TICK ALIGNMENT HERE
 		var xAxis = d3.axisBottom(x)
 			.ticks(d3.timeThursday, g.currentvars.currentEpiDates.tick_freq)
@@ -1431,13 +1317,11 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 
 		    svg1.select('g').select('.axis--x').call(xAxis);
 
-			//ylet.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
-			//ylet2.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
-			ylet.domain([0, d3.max(g.currentvars.currentTimeSeries, function(d) { return d.value.let; })]);
-			ylet2.domain([0, d3.max(g.currentvars.currentTimeSeries, function(d) { return d.value.let; })]);
-
+			ylet.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
+			ylet2.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
+			
 			svg1.select("g").selectAll(".line")
-	    		.data([g.currentvars.currentTimeSeries])
+	    		.data([time_data])
 			    .attr("class", "line")
 			    .attr("d", valueline);
 
@@ -1482,8 +1366,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	}
 
 	function brushupdate() {  //called when updating through code, not on mousemove
-		//console.log("IN brushupdate");
-		
+
 		gBrush.call(brush.move, [g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7)].map(x));	
 
 		if ((g.currentvars.currentEpiDates.s[0]==x2.range()[0]) && (g.currentvars.currentEpiDates.s[1]==x2.range()[1])) {  //full extent
@@ -1496,8 +1379,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
         
 		x.domain([g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7)]);
         var s = [x2(g.currentvars.currentEpiDates.min), x2(d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7))];
-        bar_width = ((g.currentvars.currentEpiDates.bar_width_x2) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0])) - 0.5;   //0.5 for bar spacing
-        //console.log("bar_width = ", bar_width, " = ", g.currentvars.currentEpiDates.bar_width_x2, " or ", orig_bar_width, "*",(x2.range()[1]-x2.range()[0])/(s[1]-s[0]), "-0.5");
+        bar_width = ((orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0])) - 0.5;   //0.5 for bar spacing
         g.currentvars.currentEpiDates.bar_width = bar_width;
         g.currentvars.currentEpiDates.tick_freq = getTickFrequency(bar_width);
         handle.attr("display", null).attr("transform", function(d, i) {/*console.log(s[i], - height / 4); */return "translate(" + [g.currentvars.currentEpiDates.s[i], 14] + ")"; });
@@ -1539,13 +1421,11 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
     		.attr("x", function(d) { return x(d.key); })
     		.attr("width", bar_width);
 
-		//ylet.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
-		//ylet2.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
-		ylet.domain([0, d3.max(g.currentvars.currentTimeSeries, function(d) { return d.value.let; })]);
-		ylet2.domain([0, d3.max(g.currentvars.currentTimeSeries, function(d) { return d.value.let; })]);
+		ylet.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
+		ylet2.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
 
 		svg1.select("g").selectAll(".line")
-    		.data([g.currentvars.currentTimeSeries])
+    		.data([time_data])
 		    .attr("class", "line")
 		    .attr("d", valueline);
 
@@ -1556,10 +1436,10 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	}
 
 	function brushend() {
-		//console.log("IN brushend");
-		
 		if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+	    
 	    var s = d3.event.selection || x2.range();   //range selected or entire range
+
 	    //determines whether to hide bar handles or not (in full extent)
 	    if (d3.event.sourceEvent) {    	
 	    	var path2 = [d3.event.sourceEvent.target]; //technique to get propagation path in both Chrome & Firefox
@@ -1623,11 +1503,9 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 			
 			x.domain([g.currentvars.currentEpiDates.min, d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7)]);
 	        var s = [x2(g.currentvars.currentEpiDates.min), x2(d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7))];
-	        bar_width = ((g.currentvars.currentEpiDates.bar_width_x2) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0])) - 0.5;   //0.5 for bar spacing
-	        //console.log("bar_width = ", bar_width, " = ", g.currentvars.currentEpiDates.bar_width_x2, " or ", orig_bar_width, "*",(x2.range()[1]-x2.range()[0])/(s[1]-s[0]), "-0.5");
+	        bar_width = ((orig_bar_width) * (x2.range()[1]-x2.range()[0])/(s[1]-s[0])) - 0.5;   //0.5 for bar spacing
 	        g.currentvars.currentEpiDates.bar_width = bar_width;
 	        g.currentvars.currentEpiDates.tick_freq = getTickFrequency(bar_width);
-	        //g.currentvars.currentEpiDates.tick_freq_x2 = getTickFrequencyX2(orig_bar_width);
 
 	        if (clicked_on=='rect') {    
 	        	if (!((g.currentvars.currentEpiDates.s[0]==x2.range()[0]) && (g.currentvars.currentEpiDates.s[1]==x2.range()[1]))){ 
@@ -1658,11 +1536,10 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 				})
 		    svg1.select("g").select(".axis--x").call(xAxis);
 
-			//ylet.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
-			ylet.domain([0, d3.max(g.currentvars.currentTimeSeries, function(d) { return d.value.let; })]);
+			ylet.domain([0, d3.max(time_data, function(d) { return d.value.let; })]);
 
 			svg1.select("g").selectAll(".line")
-	    		.data([g.currentvars.currentTimeSeries])
+	    		.data([time_data])
 			    .attr("class", "line")
 			    .attr("d", valueline);
 
@@ -1687,9 +1564,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 
 		//compare button start & end dates to current start & end dates to turn buttons on & off appropriately as user brushes
 	    g.timerangebuttons.forEach(function(btn) {
-	    	
 	    	var dates_match = sameDay(btn.date_min, g.currentvars.currentEpiDates.min) && sameDay(btn.date_max, g.currentvars.currentEpiDates.max);
-	        //console.log(btn, g.currentvars.currentEpiDates, dates_match)
 	        if ((dates_match) && (!($('.'+btn.id).hasClass('on')))) {
 	        	$('.btn-timerange').removeClass('on');
 	    		$('#'+btn.id).addClass('on');
@@ -1716,7 +1591,6 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	}
 
 	function zoomed() {
-		//console.log("IN zoomed");
 	    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
 	    var t = d3.event.transform;
 	    x.domain(t.rescaleX(x2).domain());
@@ -1730,7 +1604,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 function getFrenchMonthName(eng_month) {
 	var month_translations = {'January': "Janvier", 'February': "Février", 'March': "Mars", 'April': "Avril", 'May': "Mai", 'June': "Juin", 'July': "Juillet", 'August': "Août", 'September': "Septembre", 'October': "Octobre", 'November': "Novembre", 'December': "Décembre"};
  	return month_translations[eng_month];
-}
+ }
 
 
 /************************************/
@@ -1816,7 +1690,7 @@ $(function() {
 
 function addPlayLine() {
 	var id1 = '#timeseries';
-	var margin = {top: 10, right: 60, bottom: 20, left: 70},		//margins of actual x- and y-axes within svg  
+	var margin = {top: 10, right: 60, bottom: 20, left: 60},		//margins of actual x- and y-axes within svg  
 	    width = $(id1).width() - margin.left - margin.right,		//width of main svg
 	    height = $(id1).height() - margin.top - margin.bottom;		//height of main svg
 
@@ -1856,7 +1730,6 @@ function togglePlayMode(mode) {
 		$('.styledSelect').addClass('no-point');
 		$('.select').addClass('no-point');
 		$('#btn_reset').addClass('no-point');
-		$('#btn_reload_data').addClass('no-point');
 		$('.btn-timerange').addClass('no-point');
 
 		svg2.selectAll(".bar2.active").style('fill', '#7f7f7f');
@@ -1879,7 +1752,6 @@ function togglePlayMode(mode) {
 		$('.styledSelect').removeClass('no-point');
 		$('.select').removeClass('no-point');
 		$('#btn_reset').removeClass('no-point');
-		$('#btn_reload_data').removeClass('no-point');
 		$('.btn-timerange').removeClass('no-point');
 
 		svg1.selectAll(".bar").classed("playBar", function(d) {return false;})
@@ -1903,7 +1775,6 @@ function updateMap() {
 }
 
 function updateAll() {
-	//console.log("in updateAll(), ", data)
 	updateMap();
 	currentTimeSeriesData = getCurrentTimeSeriesData();
 	updateTimeSeriesCharts('#timeseries', '#timeseriesbrush', currentTimeSeriesData);
@@ -1978,23 +1849,24 @@ window.onload = function () {
 			createTimeSeriesCharts('#timeseries', '#timeseriesbrush');
 			updateMapInfo('', '', '', '');
 			updateMapLegend(g.currentvars.currentMinVal, g.currentvars.currentMaxVal);
-			changeDiseaseSelection(0);
-			changeStatSelection(0);
-			//console.log("g = ", g);
+			changeDiseaseSelection();
+			changeStatSelection();
+			
+			console.log("g = ", g);
 			resize();
-			displayDataDialog();
         }
 
     }
 
 }
 	
+
 var select_disease = document.getElementById("disease-select");
 for (disease in g.diseaseList) {
 	if (g.diseaseList[disease]!='') {
     	select_disease.options[select_disease.options.length] = new Option(g.diseaseList[disease], disease);
     }
-}	
+}
 
 var select_stat = document.getElementById("stat-select");
 for (stat in g.statList) {
@@ -2003,6 +1875,66 @@ for (stat in g.statList) {
     }
 }
 
+// Iterate over each select (dropdown) element
+$('select').each(function () {
+
+    var $this = $(this),
+        numberOfOptions = $(this).children('option').length;
+
+    $this.addClass('s-hidden');   //hide select element
+    $this.wrap('<div class="select"></div>');   //wrap select element in div
+    $this.after('<div class="styledSelect"></div>');  //insert styled div on top of hidden select element
+
+    var $styledSelect = $this.next('div.styledSelect');  //cache styled div
+    $styledSelect.text($this.children('option').eq(0).text());  //show first option in styled div
+
+    //insert list after styled div and cache list
+    var $list = $('<ul />', {
+        'class': 'options'
+    }).insertAfter($styledSelect);
+
+    //insert list items into list for each select option
+    for (var i = 0; i < numberOfOptions; i++) {
+        $('<li />', {
+            text: $this.children('option').eq(i).text(),
+            rel: $this.children('option').eq(i).val()
+        }).appendTo($list);
+    }
+    var $listItems = $list.children('li');   //cache list items
+
+    //show list when styled div is clicked (also hides it if div is clicked again)
+    $styledSelect.click(function (e) {
+        e.stopPropagation();
+        $('div.styledSelect.active').each(function () {
+            $(this).removeClass('active').next('ul.options').hide();
+        });
+        $(this).toggleClass('active').next('ul.options').toggle();
+    });
+
+    //hides list when item is clicked and updates styled div to show selected item
+    //updates select element to have value of selected option
+    $listItems.click(function (e) {
+        e.stopPropagation();
+        $styledSelect.text($(this).text()).removeClass('active');
+        $this.val($(this).attr('rel'));
+        $list.hide();
+        if (($styledSelect.context.id == 'disease-select') && (g.currentvars.currentDisease != $styledSelect.text())) {
+        	g.currentvars.currentDisease = $styledSelect.text();
+        	changeDiseaseSelection();
+        } else if (($styledSelect.context.id == 'stat-select') && (g.currentvars.currentStat.full != $styledSelect.text())) {
+        	g.currentvars.currentStat = $styledSelect.text();
+        	changeStatSelection();
+        };
+    });
+
+    //hides list when clicking outside of it
+    $(document).click(function () {
+        $styledSelect.removeClass('active');
+        $list.hide();
+    });
+
+});
+
 
 function sameDay(d1, d2) {
     return d1.getFullYear() === d2.getFullYear() &&
@@ -2010,22 +1942,16 @@ function sameDay(d1, d2) {
         d1.getDate() === d2.getDate();
 }
 
-function changeDiseaseSelection(opt) {
-	if (opt!=null) {
-		select_disease.selectedIndex = opt;
-	}
-	g.currentvars.currentDisease = select_disease.options[select_disease.selectedIndex].text;
+function changeDiseaseSelection() {
 	var element = document.getElementById('map_title');
+	g.currentvars.currentDisease = select_disease.options[select_disease.selectedIndex].text;
 	element.innerHTML = g.currentvars.currentDisease + ' - ' + g.currentvars.currentStat.full;	//Could amend/correct/re-write disease names here
 	cf.malDim.filterAll();
 	cf.malDim.filter(g.currentvars.currentDisease);
 	updateAll();
 }
 
-function changeStatSelection(opt) {
-	if (opt!=null) {
-		select_stat.selectedIndex = opt;
-	}
+function changeStatSelection() {
 	var element = document.getElementById('map_title');
 	for (i=0; i<=g.statList.length-1; i++) {
 		if (g.statList[i].full == select_stat.options[select_stat.selectedIndex].text) {
@@ -2095,12 +2021,7 @@ function btn_filt_sum() {
 	}
 }
 
-function btn_reload_data() {   
-    displayDataDialog();
-}  
-
 function btn_reset() {
-
 	cf.zsDim.filterAll();
 	cf.zsDim2.filterAll();
 	cf.provDim.filterAll();
@@ -2112,11 +2033,6 @@ function btn_reset() {
 	g.currentvars.currentEpiDates.max = g.currentvars.currentEpiDates.max_default; 
 	$('.btn-timerange').removeClass('on');
 	$('#'+g.timerangebuttons.default_btn.id).addClass('on');
-	changeDiseaseSelection(0);
-	changeStatSelection(0);
-	if (!($('#btnRiv').hasClass('on'))) {btn_rivers();};
-	btn_change_lyr('prov'); 
-	setDefaultMapZoom();
 	updateAll();
 }
 
@@ -2167,7 +2083,6 @@ function btn_selectTimeRange(rng_type, param) {
 			g.currentvars.currentEpiDates.all.push(g.epitime.all[i].epiDate);
 		}
 	}
-	//currentTimeSeriesData = getCurrentTimeSeriesData();
 	updateTimeSeriesCharts('#timeseries', '#timeseriesbrush', currentTimeSeriesData);
 
 	$('.btn-timerange').removeClass('on');
