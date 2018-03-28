@@ -1,0 +1,151 @@
+/*Marker clusters*/
+.marker-cluster-pie g.arc{
+  fill-opacity: 0.5;
+}
+.marker-cluster-pie-label {
+  font-size: 14px;
+  font-weight: bold;
+  font-family: sans-serif;
+}
+
+/*Markers*/
+.marker {
+  width: 20px;
+  height: 20px;
+  border-width: 1px;
+  border-radius:2px;
+  margin-top: -10px;
+  margin-left: -10px;
+  border-style: solid;
+  /*fill: #CCC;
+  stroke: #444;
+  background: #CCC;*/
+  border-color: #444;
+}
+.marker div{
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: sans-serif;
+}
+
+/*marker categories*/
+.category-alerte_alarme{
+  fill: #f04f4f;    /* red */
+  stroke: #871616;
+  /*background: #F88;*/
+  /*border-color: #800;*/
+}
+.category-alerte_focus{
+  fill: #f49636;     /* orange */
+  stroke: #a3580b;
+  /*background: #FA0;*/
+  /*border-color: #B60;*/
+}
+.category-alerte_suivi_actif{
+  fill: #FF3;     /* yellow */
+  stroke: #D80;
+  /*background: #FF3;*/
+  /*border-color: #D80;*/
+}
+.category-alerte_ferme{
+  fill: #a57442;      /* brown */
+  stroke: #835527;
+  /*fill: #BFB;
+  stroke: #070;
+  background: #BFB;*/
+  /*border-color: #070;*/
+}
+.category-evaluation{
+  fill: #7294f0;         /* blue */
+  stroke: #29407e;
+  /*background: #9DF;*/
+  /*border-color: #007;*/
+}
+.category-intervention{
+  fill: #965b96;       /* purple */
+  stroke: #601960;
+  /*background: #CCC;*/
+  /*border-color: #444;*/
+}
+.category-alerte_NA{
+  fill: #404040;       /* grey */
+  stroke: #363333;
+  /*background: #CCC;*/
+  /*border-color: #444;*/
+}
+
+/*marker icons*/
+.icon-alerte_alarme{
+  background-image: url(../images/alerte_alarme.png);
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: 0px 1px;
+  background-size: 16px 16px;
+}
+.icon-alerte_focus{
+  background-image: url(../images/alerte_focus.png);
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: 1px 0px;
+  background-size: 16px 16px;
+}
+.icon-alerte_suivi_actif{
+  background-image: url(../images/alerte_suivi_actif.png);
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: 1px 0px;
+  background-size: 16px 16px;
+}
+.icon-alerte_ferme{
+  background-image: url(../images/alerte_ferme.png);
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: 1px 0px;
+  background-size: 16px 16px;
+}
+.icon-evaluation{
+  background-image: url(../images/evaluation.png);
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: 1px 0px;
+  background-size: 16px 16px;
+}
+.icon-intervention{
+  background-image: url(../images/intervention.png);
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: 1px 0px;
+  background-size: 16px 16px;
+}
+.icon-alerte_NA{
+  background-image: url(../images/alerte_NA.png);
+  background-color: white;
+  background-repeat: no-repeat;
+  background-position: 1px 0px;
+  background-size: 16px 16px;
+}
+
+/*Popup*/
+.map-popup span.heading {
+  /*display: inline-block;*/
+  font-size: 1.1em;
+  font-weight: bold;
+}
+.map-popup span.attribute {
+  display: block;
+  font-size:1em;
+}
+.map-popup span.attribute-sm {
+  display: block;
+  font-size:0.9em;
+}
+.map-popup span.label {
+  font-weight: bold;
+  font-size: 1em;
+}
+.map-popup span.label-sm {
+  font-weight: bold;
+  font-style: italic;
+  font-size:0.9em;
+}
