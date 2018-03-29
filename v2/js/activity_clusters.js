@@ -108,7 +108,7 @@ function defineMarkerFeaturePopup(feature, layer) {
         }
     }
 
-    popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="v2/images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';
+    popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="/images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';
     //popupContent += '<span class="heading">'+ g.activities.names[props['act_type']] +'</span><hr>';
     popupContent += '<span class="heading">'+ act.popup_text +'</span><hr>';
     popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['act_code'] +':</span> '+ props['act_code'] +'</span>';
