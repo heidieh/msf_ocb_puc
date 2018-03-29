@@ -77,49 +77,49 @@
 
 /*marker icons*/
 .icon-alerte_alarme{
-  background-image: url(v2/images/alerte_alarme.png);
+  background-image: url(../images/alerte_alarme.png);
   background-color: white;
   background-repeat: no-repeat;
   background-position: 0px 1px;
   background-size: 16px 16px;
 }
 .icon-alerte_focus{
-  background-image: url(v2/images/alerte_focus.png);
+  background-image: url(../images/alerte_focus.png);
   background-color: white;
   background-repeat: no-repeat;
   background-position: 1px 0px;
   background-size: 16px 16px;
 }
 .icon-alerte_suivi_actif{
-  background-image: url(v2/images/alerte_suivi_actif.png);
+  background-image: url(../images/alerte_suivi_actif.png);
   background-color: white;
   background-repeat: no-repeat;
   background-position: 1px 0px;
   background-size: 16px 16px;
 }
 .icon-alerte_ferme{
-  background-image: url(v2/images/alerte_ferme.png);
+  background-image: url(../images/alerte_ferme.png);
   background-color: white;
   background-repeat: no-repeat;
   background-position: 1px 0px;
   background-size: 16px 16px;
 }
 .icon-evaluation{
-  background-image: url(v2/images/evaluation.png);
+  background-image: url(../images/evaluation.png);
   background-color: white;
   background-repeat: no-repeat;
   background-position: 1px 0px;
   background-size: 16px 16px;
 }
 .icon-intervention{
-  background-image: url(v2/images/intervention.png);
+  background-image: url(../images/intervention.png);
   background-color: white;
   background-repeat: no-repeat;
   background-position: 1px 0px;
   background-size: 16px 16px;
 }
 .icon-alerte_NA{
-  background-image: url(v2/images/alerte_NA.png);
+  background-image: url(../images/alerte_NA.png);
   background-color: white;
   background-repeat: no-repeat;
   background-position: 1px 0px;
