@@ -1,16 +1,23 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 //Next dev steps:
+// - PUC activities:
+//		- color legend/identifier for rapid recognition of colors
+//		- create real data geojson file
+//		- add btns to resize function / slimline
+// - update to d3 v5, convert xmlhttprequest calls to promise
+// - hide left-hand menu for mobile version
+// - think about optimising selection of time range of data - to make loading faster - e.g. can we 'add' data into crossfilter rather than replace
+//
+// Long-term dev:
 // - barchart:
 //    - on hover tooltip for whole height of chart, not only for bars  https://blog.webkid.io/responsive-chart-usability-d3/
 //    - epiweek date on Thurs 00:00, should be Thurs 12:00 to be exactly halfway through week - use d3.timeInterval to create custom interval?
 // - add print function
 // - remove dependence on jquery
 // - mobile/tablet layout?
-// - add PUC activities - e.g. http://bl.ocks.org/gisminister/10001728
 //
 // Done since last update:
-// - reset (Reinitialser) button - resets diseases, statistic, map zoom and map buttons (prov, rivers both 'on')
-// - added modal window to select date range of data to load in dashboard (v1.5)
+// - added PUC activities as pie clusters with associated left-hand menu buttons
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -47,27 +54,13 @@ if (displayLoadDataDialog==true) {
     })();   
 }
 
-/*var data_acts = (function() {
-    var json = null;
-    $.ajax({
-        'async': false,
-        'global': false,
-        'url': "data/data_acts_fix.js",    //replace with axios endpoint
-        'dataType': "json",
-        'success': function (data) {
-            json = data;
-        }
-    });
-    return json;
-})();*/
-
 
 //Global namespace
 var g = {};
 data = addEpitimeToData(data);
-console.log("data = ", data);
+//console.log("data = ", data);
 //console.log("data_acts = ", data_acts);
-console.log("g = ", g);
+//console.log("g = ", g);
 
 
 
@@ -1928,7 +1921,7 @@ $(function() {
 
 				svg1.selectAll(".bar").classed("playBar", function(d) {		
 					if (sameDay(d.key,currentDate)) {
-						console.log("in btnPlayPause");
+						//console.log("in btnPlayPause");
 						updateMap();
 						addPlayLine();
 						return true;

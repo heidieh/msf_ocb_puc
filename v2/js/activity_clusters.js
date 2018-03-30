@@ -15,12 +15,12 @@ function addActivityClusters() {
 	map.addLayer(markerClusters);
 
 	d3.json(geojsonClusterPath, function(error, data) {
-        console.log("Loading clusters...");
+        //console.log("Loading clusters...");
         if (!error) {
             //console.log("cluster data", data)
             geojson = data;
             //convert all dates (i.e. properties with 'date_' prefix) to date format
-            console.log("geojson features: ", geojson.features.length)
+            //console.log("geojson features: ", geojson.features.length)
             for (var i=0; i<=geojson.features.length-1; i++) { 
                 for (var prop in geojson.features[i].properties) {
                     if (prop.substring(0,5)=='date_') {
@@ -29,7 +29,7 @@ function addActivityClusters() {
                     }
                 }
             }
-            console.log("activity cluster geojson = ", geojson);
+            //console.log("activity cluster geojson = ", geojson);
 
             markers = L.geoJson(geojson, {
       			pointToLayer: defineMarkerFeature,			//defines class & icon
@@ -80,7 +80,11 @@ function defineMarkerFeature(feature, latlng) {     //defines which markers to s
     var maxDate = new Date(Math.max.apply(null, dates));
     //console.log(minDate, maxDate, dates);
 
-    var dateCheck = ((g.currentvars.currentEpiDates.min <= maxDate) && (d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7) > minDate));
+    if (g.currentvars.currentAnimation.playMode == 'stop') {
+        var dateCheck = ((g.currentvars.currentEpiDates.min <= maxDate) && (d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7) > minDate));
+    } else {
+        var dateCheck = ((g.currentvars.currentAnimation.currentEpiDate <= maxDate) && (d3.timeDay.offset(g.currentvars.currentAnimation.currentEpiDate, 7) > minDate));
+    }
     var diseaseCheck = (diseaseVal==g.currentvars.currentDisease);
     var locationCheck = (((g.currentvars.currentZones.pcodes.length==0) && (g.currentvars.currentProvs.pcodes.length==0)) || ((g.currentvars.currentZones.pcodes.indexOf(feature.properties['zs_pc'])!=-1) && (g.currentvars.currentProvs.pcodes.length==0)) || ((g.currentvars.currentProvs.pcodes.indexOf(feature.properties['prov_pc'])!=-1) && (g.currentvars.currentZones.pcodes.length==0)));
     var menuOptionCheck = (g.currentvars.currentActivities.indexOf(categoryVal) != -1);
@@ -108,8 +112,8 @@ function defineMarkerFeaturePopup(feature, layer) {
         }
     }
 
-    popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';
-    //popupContent += '<span class="heading">'+ g.activities.names[props['act_type']] +'</span><hr>';
+    //popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="../images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';
+    popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';  //for github version
     popupContent += '<span class="heading">'+ act.popup_text +'</span><hr>';
     popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['act_code'] +':</span> '+ props['act_code'] +'</span>';
     popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['loc'] +':</span> '+ props['zs'] + ', ' + props['prov'] +'</span>';
