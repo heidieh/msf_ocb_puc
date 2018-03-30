@@ -3,7 +3,7 @@
 // - PUC activities:
 //		- color legend/identifier for rapid recognition of colors
 //		- create real data geojson file
-//		- add btns to resize function / slimline
+//		- add btns to resize function / slimline - or 'close' left-hand menu
 // - update to d3 v5, convert xmlhttprequest calls to promise
 // - hide left-hand menu for mobile version
 // - think about optimising selection of time range of data - to make loading faster - e.g. can we 'add' data into crossfilter rather than replace

@@ -382,6 +382,27 @@ hr.menu_style{
   margin-bottom: 4px;
 }
 
+#btnAltAlarme.on {
+  background: linear-gradient(90deg, #3b8ec2 85%, #f04f4f 15%);
+}
+#btnAltFocus.on {
+  background: linear-gradient(90deg, #3b8ec2 85%, #f49636 15%);
+}
+#btnAltSuiviActif.on {
+  background: linear-gradient(90deg, #3b8ec2 85%, #FF3 15%);
+}
+#btnAltFerme.on {
+  background: linear-gradient(90deg, #3b8ec2 85%, #a57442 15%);
+}
+#btnEval.on {
+  background: linear-gradient(90deg, #3b8ec2 85%, #7294f0 15%);
+}
+#btnInt.on {
+  background: linear-gradient(90deg, #3b8ec2 85%, #965b96 15%);
+}
+
+
+
 #btnProv {
   border-radius: 8px 0px 0px 8px;
 }
