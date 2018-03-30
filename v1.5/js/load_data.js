@@ -1,5 +1,7 @@
+//FIRST AXIOS CALL HERE - get dbMinWeek, dbMaxWeek//
 var dbMinWeek = '2007-1'; // new Date(2007, 0, 1);       	//get from database - one call only
 var dbMaxWeek = '2017-52'; //new Date(2017, 11, 31);     	//get from database - one call only
+
 console.log("Fetch date extent from DB: ", dbMinWeek, dbMaxWeek);
 var dbEpitime = createEpitime([{'epiwk': dbMinWeek}, {'epiwk': dbMaxWeek}]);
 
@@ -22,23 +24,27 @@ function displayDataDialog() {
     html += '</div>';
     html += '</div>';
     html += '<div class="row">';
-    html += '<button id="btnLoad" class="button">Load Data</button><span id="warn"></span>';
+    html += '<button id="btnLoad" class="button">Load Data</button><span id="load-text"></span>';
+    html += '</div><div class="row">';
+    html += '<button id="btnCancel" class="button">Annuler</button>';
     html += '</div>';
 
     var modal = document.getElementById('dataModal');
 	$('.modal-content').html(html);
-	
+	//$('#loading').html('Chargement en cours...');
 	modal.style.display = "block";
-	document.getElementById("btnLoad").onclick = function() {
-		console.log("FETCH DATA FROM DB HERE: ", currentExtent);
 
+	document.getElementById("btnLoad").onclick = function() {
+		$('#load-text').html('Chargement en cours...');
+		console.log("FETCH DATA FROM DB HERE: ", currentExtent);
+		//SECOND AXIOS CALL HERE - get DATA, PARAMETERS = min_week, min_year, max_week, max_year, disease_list//
 	    //LOAD DATA FROM DB HERE
 		data = (function() {
 	        var json = null;
 	        $.ajax({
 	            'async': false,
 	            'global': false,
-	            'url': "data/data.js",
+	            'url': "data/data.js",    //replace with axios endpoint
 	            'dataType': "json",
 	            'success': function (data) {
 	                json = data;
@@ -46,11 +52,21 @@ function displayDataDialog() {
 	        });
 	        return json;
 	    })();
+
+	    //const url = 'data/data.js';
+		//axios.get(url).then(response => console.log(response));
+
+
+	    console.log("data: ", data);
 	    data = addEpitimeToData(data);
 	    console.log ("NEW DATA: ", data)
 	    updateDashboardData();
 	    modal.style.display = "none";
-	    //return data;
+	    //return data;*/
+	}
+
+	document.getElementById("btnCancel").onclick = function() {
+		modal.style.display = "none";
 	}
 
 
@@ -185,10 +201,10 @@ function displayDataDialog() {
 	  //console.log("currentExtent time diff: ", currentExtent[1].getTime() - currentExtent[0].getTime(), min_num_wks * ms_1_wk);
 
 	  if ((currentExtent[1].getTime()-currentExtent[0].getTime()) >= ((min_num_wks-1) * ms_1_wk)) {
-	  	$('#warn').html('');
+	  	$('#load-text').html('');
 	  	$('#btnLoad').removeClass('disable_load');
 	  } else {
-	  	$('#warn').html('! Attention: Un minimum de ' + (min_num_wks) + ' semaines doit être sélectionné');
+	  	$('#load-text').html('! Attention: Un minimum de ' + (min_num_wks) + ' semaines doit être sélectionné');
 	  	$('#btnLoad').addClass('disable_load');
 	  }
 	  
