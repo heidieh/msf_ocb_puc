@@ -26,6 +26,11 @@
   color: white;
 }
 
+#btnLoad:active {
+  background-color: #E50000;
+  color: white;
+}
+
 #btnLoad.disable_load {
 	background-color: grey;
 	color: lightgrey;
@@ -33,7 +38,28 @@
 	pointer-events: none;
 }
 
-#warn {
+#btnCancel {
+  margin-right: 40 !important;
+  margin-left:auto !important;
+  display:block !important;
+  background-color: lightgrey; 
+  color: black;
+}
+
+#btnCancel:hover {
+  background-color: #E50000;
+  color: white;
+}
+
+#load-text {
+	font: 12px sans-serif;
+	font-style: italic;
+	color: red;
+	margin-left: 4px;
+	margin-top: 4px;
+}
+
+#loading {
 	font: 12px sans-serif;
 	font-style: italic;
 	color: red;
