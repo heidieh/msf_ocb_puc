@@ -3,9 +3,8 @@
 // - PUC activities:
 //		- color legend/identifier for rapid recognition of colors
 //		- create real data geojson file
-//		- add btns to resize function / slimline - or 'close' left-hand menu
 // - update to d3 v5, convert xmlhttprequest calls to promise
-// - hide left-hand menu for mobile version
+// - hide left-hand menu for mobile version - e.g. http://jsfiddle.net/hThGb/1/
 // - think about optimising selection of time range of data - to make loading faster - e.g. can we 'add' data into crossfilter rather than replace
 //
 // Long-term dev:
@@ -60,7 +59,7 @@ var g = {};
 data = addEpitimeToData(data);
 //console.log("data = ", data);
 //console.log("data_acts = ", data_acts);
-//console.log("g = ", g);
+console.log("g = ", g);
 
 
 
@@ -139,7 +138,9 @@ function updateDashboardData() {
 	btn_change_lyr('prov'); 
 	setDefaultMapZoom();
 	//if (!($('#btnAlt').hasClass('on'))) {btn_act('alerte');};
-	btn_act('none');
+	//btn_act('none');
+	console.log("call btn_act here")
+	btn_act('all');
 	
 	//update all remaining
 	updateAll();
@@ -1122,6 +1123,9 @@ function createTimeSeriesCharts(id1, id2) {
 	    height = $(id1).height() - margin.top - margin.bottom,		//height of main svg
 	    height2 = $(id2).height() - margin2.top - margin2.bottom;
 
+	//console.log("timeseries container width: ", $('#timeseries-container').width());
+	//console.log("timeseries width: ", width);
+
 	//Render main SVGs
 	svg1 = d3.select(id1)         
 		.append("svg")
@@ -1307,6 +1311,9 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
 	    width2 = $(id2).width() - margin2.left - margin2.right,
 	    height = $(id1).height() - margin.top - margin.bottom,		//height of main svg
 	    height2 = $(id2).height() - margin2.top - margin2.bottom;
+
+	//console.log("timeseries container width: ", $('#timeseries-container').width());
+	//console.log("timeseries width: ", width);
 
 	var x = d3.scaleTime().range([0, width]),   		//x-axis width, accounting for specified margins
 		x2 = d3.scaleTime().range([0, width2]),
@@ -2137,16 +2144,39 @@ window.onload = function () {
 			updateMapLegend(g.currentvars.currentMinVal, g.currentvars.currentMaxVal);
 			changeDiseaseSelection(0);
 			changeStatSelection(0);
+			addMenuToggle();
 			//console.log("g = ", g);
 			resize();
 			if (displayLoadDataDialog == true) {
 				displayDataDialog();
+			} else {
+				btn_act('all');
 			}
         }
 
     }
 
 }
+
+
+function addMenuToggle() {
+	document.getElementById('sideMenu_btn').addEventListener("click", function() {
+	    //console.log("clicked on sideMenu_btn");
+	    document.getElementById('sideMenu').classList.toggle('hide');
+	    document.getElementById('sideMenu_btn').classList.toggle('show');
+	    document.getElementById('main-container').classList.toggle('nomenu');
+	    setTimeout(function(){ resize(); }, 300);
+	    //resize();
+	});
+	document.getElementById('closeMenu_btn').addEventListener("click", function() {
+	    //console.log("clicked on closeMenu_btn");
+	    document.getElementById('sideMenu').classList.toggle('hide');
+	    document.getElementById('sideMenu_btn').classList.toggle('show');
+	    document.getElementById('main-container').classList.toggle('nomenu');
+	    setTimeout(function(){ resize(); }, 300);
+	    //resize();
+	});
+};
 	
 var select_disease = document.getElementById("disease-select");
 for (disease in g.diseaseList) {
@@ -2212,11 +2242,24 @@ function updateHeadline() {
 };
 
 function btn_act(type) {
-
-	if (type=='none') {
+	//console.log("btn_act: ", type)
+	if (type=='none') {  //turn off all activity/alert buttons
 		$('.btn_acts').removeClass('on'); //turn all activity btns off
 		$('.btn_alt').removeClass('on'); //turn all alert btns off
 		g.currentvars.currentActivities = [];
+
+	} else if (type=='all'){  //turn on all activity/alert buttons
+		for (var i=0; i<= g.activities.all.length-1; i++) {
+			var btn = g.activities.all[i];
+			if (btn.btn_name!='') {
+				if (!($(btn.btn_name).hasClass('on'))) {   //switch on
+					$(btn.btn_name).addClass('on');
+					g.currentvars.currentActivities.push(btn.act_name);
+				}
+			}
+			
+		}
+
 
 	} else {   //toggle btn as expected
 
@@ -2400,7 +2443,8 @@ function btn_reset() {
 	btn_change_lyr('prov'); 
 	setDefaultMapZoom();
 	//if (!($('#btnAlt').hasClass('on'))) {btn_act('alerte');};
-	btn_act('none');
+	//btn_act('none');   
+	btn_act('all');
 	updateAll();
 }
 
@@ -2461,7 +2505,7 @@ function btn_selectTimeRange(rng_type, param) {
 
 
 function resize() { 
-  	//console.log("RESIZE w", window.innerWidth, ' x h', window.innerHeight);
+  	//console.log("WINDOW RESIZED to w", window.innerWidth, ' x h', window.innerHeight);
   	if (window.innerWidth < 768) {
   		if (!($('#btnPlayPause').hasClass('slimline'))) {$('#btnPlayPause').addClass('slimline');};
     	if (!($('#btnStop').hasClass('slimline'))) {$('#btnStop').addClass('slimline');};
