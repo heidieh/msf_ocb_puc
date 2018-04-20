@@ -112,8 +112,11 @@ function defineMarkerFeaturePopup(feature, layer) {
         }
     }
 
-    //popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="../images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';
-    popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';  //for github version
+    if (act.act_type=='alerte') {
+        popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="../images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';
+    } else {
+        popupContent += '<span><div style="margin: 0px 8px 0px 0px; display: inline-block;" class="icon-' + act.act_type + '"></div></span>';
+    }
     popupContent += '<span class="heading">'+ act.popup_text +'</span><hr>';
     popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['act_code'] +':</span> '+ props['act_code'] +'</span>';
     popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['loc'] +':</span> '+ props['zs'] + ', ' + props['prov'] +'</span>';

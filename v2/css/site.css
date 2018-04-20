@@ -1,9 +1,16 @@
-
-.container-fluid{
-	margin-left: 200px;
+/*.container-fluid{
+  margin-left: 12.5em;
   margin-right: 10px;
   padding-bottom:20px;
-
+}*/
+#main-container{
+	margin-left: 12.5em;
+  margin-right: 10px;
+  padding-bottom:20px;
+  transition: 0.3s linear;
+}
+#main-container.nomenu {
+  margin-left: 2em;
 }
 
 /* The Modal (background) */
@@ -42,15 +49,59 @@
 }
 
 /* The side menu */
-.sidemenu {
+#sideMenu {
   height: 100%;
-  width: 200px;
+  width: 12.5em;
   position: fixed;
-  top: 0;
-  left: 0;
-  background-color: #111; /*#7BA5F0;*/
-  overflow-x: hidden;
+  display: block;
+  top: 0px;
+  left: 0em;
+  background-color: #111; 
+  /*overflow-x: hidden;*/
   padding-top: 20px;
+  transition: left 0.3s linear;
+}
+
+#sideMenu.hide {
+  left: -12.500em;
+}
+
+#closeMenu_btn {
+  display: inline-block;
+  /*vertical-align: middle;*/
+  width: 0.8em;
+  height: 0.8em;
+  cursor: pointer;
+  /*margin: 1.250em;*/
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em;
+  background: url(../images/close.png) no-repeat; 
+  background-size: 0.8em 0.8em;
+}
+
+#sideMenu_btn {
+  display: none;
+  vertical-align: middle;
+  width: 1.563em;
+  height: 1.250em;
+  cursor: pointer;
+  margin: 1.250em;
+  position: absolute;
+  top: -0.500em;
+  right: -3.50em;
+}
+
+#sideMenu_btn span {
+  height: 2px;
+  background: grey;
+  margin-bottom: 3px;
+  display: block;
+}
+#sideMenu_btn.show{
+  /*position: relative;
+  left: 20px;*/
+  display: inline-block;
 }
 
 hr.menu_style{
@@ -136,6 +187,7 @@ hr.menu_style{
 	color: white;
 	text-align: center;
 }
+
 
 #map-container {
 	margin-left: 0px;
@@ -383,22 +435,22 @@ hr.menu_style{
 }
 
 #btnAltAlarme.on {
-  background: linear-gradient(90deg, #3b8ec2 85%, #f04f4f 15%);
+  background: linear-gradient(90deg, #3b8ec2 85%, #db0000 15%);
 }
 #btnAltFocus.on {
-  background: linear-gradient(90deg, #3b8ec2 85%, #f49636 15%);
+  background: linear-gradient(90deg, #3b8ec2 85%, #ffa500 15%);
 }
 #btnAltSuiviActif.on {
-  background: linear-gradient(90deg, #3b8ec2 85%, #FF3 15%);
+  background: linear-gradient(90deg, #3b8ec2 85%, #76D42C 15%);
 }
 #btnAltFerme.on {
-  background: linear-gradient(90deg, #3b8ec2 85%, #a57442 15%);
+  background: linear-gradient(90deg, #3b8ec2 85%, #969696 15%);
 }
 #btnEval.on {
-  background: linear-gradient(90deg, #3b8ec2 85%, #7294f0 15%);
+  background: linear-gradient(90deg, #3b8ec2 85%, #ffa500 15%);
 }
 #btnInt.on {
-  background: linear-gradient(90deg, #3b8ec2 85%, #965b96 15%);
+  background: linear-gradient(90deg, #3b8ec2 85%, #db0000 15%);
 }
 
 
@@ -466,6 +518,7 @@ hr.menu_style{
 }
 
 #timeseries-container {
+  width: 100%;
   margin-bottom: 10px;
 }
 
