@@ -1,10 +1,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 //Next dev steps:
 // - PUC activities:
-//		- color legend/identifier for rapid recognition of colors
 //		- create real data geojson file
 // - update to d3 v5, convert xmlhttprequest calls to promise
-// - hide left-hand menu for mobile version - e.g. http://jsfiddle.net/hThGb/1/
 // - think about optimising selection of time range of data - to make loading faster - e.g. can we 'add' data into crossfilter rather than replace
 //
 // Long-term dev:
@@ -17,6 +15,7 @@
 //
 // Done since last update:
 // - added PUC activities as pie clusters with associated left-hand menu buttons
+// - option to hide/unhide left-hand menu
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -273,6 +272,7 @@ g.activities.labels = {act_code: 'Code d\'activité',
                     loc: 'Location',
                     typ: 'Typologie',
                     path: 'Pathologie',
+                    comm: 'Commentaires',
                     date_sit: 'Date de la situation',
                     date_det: 'Date de détection',
                     date_part: 'Date de départ', 
@@ -1371,6 +1371,7 @@ function updateTimeSeriesCharts(id1, id2, time_data) {
     	else if (y.domain()[1] < 10000) {return -45;}
     	else if (y.domain()[1] < 100000) {return -50;}
     	else if (y.domain()[1] < 1000000) {return -55;}
+    	else {return -60;}
     }
     var y_title_marg = getTitleMarg();
 
@@ -2180,14 +2181,15 @@ function addMenuToggle() {
 	
 var select_disease = document.getElementById("disease-select");
 for (disease in g.diseaseList) {
-	if (g.diseaseList[disease]!='') {
+	if (g.diseaseList[disease]!=null) {
+		//console.log('Disease: ', disease, g.diseaseList[disease])
     	select_disease.options[select_disease.options.length] = new Option(g.diseaseList[disease], disease);
     }
 }	
 
 var select_stat = document.getElementById("stat-select");
 for (stat in g.statList) {
-	if (g.statList[stat].full!='') {
+	if (g.statList[stat].full!=null) {
     	select_stat.options[select_stat.options.length] = new Option(g.statList[stat].full, stat);
     }
 }

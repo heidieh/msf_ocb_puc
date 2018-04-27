@@ -420,22 +420,57 @@ hr.menu_style{
   margin-left: 14px;
 }
 
-.btn_acts {
-  margin-top: 12px;
+
+/* Activity & Alert buttons */
+
+.btn_img_cont {
+  /*display: inline-block;*/
+ /* margin-top: 5px;*/
+  margin-left: 4px;
+  margin-right: 0px;
+  float:left;
 }
 
 .btn_alt {
-  width: 65px;
+  width: 72px;
   margin-left: 0px;
-  height: 16px;
-  padding: 2px 4px;
+  height: 18px;
+  padding: 0px 3px;
   display: inline-block;
   font-size: 10px;
   margin-bottom: 4px;
 }
 
-#btnAltAlarme.on {
-  background: linear-gradient(90deg, #3b8ec2 85%, #db0000 15%);
+.btn_alt.on {
+  background: #3b8ec2;
+}
+
+.btn_alt img {  
+  background: white; /*#3b8ec2;*/
+  position: 0px 0px;
+  opacity: 0.3;
+  border-radius:1px;
+  border: 1px solid;
+  border-color: #444;
+}
+
+.btn_alt.on img {  
+  opacity: 1.0;
+  border-color: #444;
+}
+
+.btn_alt span {
+  display: inline-block;
+  margin-top: 1px;
+  margin-left: -6px;
+}
+#btnAltSuiviActif span{
+  margin-left: 0px;
+}
+
+
+/*#btnAltAlarme.on {
+  background: #3b8ec2; linear-gradient(90deg, #3b8ec2 85%, #db0000 15%);
 }
 #btnAltFocus.on {
   background: linear-gradient(90deg, #3b8ec2 85%, #ffa500 15%);
@@ -445,13 +480,59 @@ hr.menu_style{
 }
 #btnAltFerme.on {
   background: linear-gradient(90deg, #3b8ec2 85%, #969696 15%);
+}*/
+
+.btn_acts {
+  margin-top: 10px;
 }
+
+.btn_acts span {
+  display: inline-block;
+  margin-top: 1px;
+  margin-left: -40px;
+}
+
+#btnEval_img {
+    /*display: inline-block;*/
+    margin: 0px 5 0 0;
+    width:16px;
+    height:16px; 
+    border-radius:50%;
+    border: 1px solid;
+    border-color: #a96e00;
+    background: #ffa500; 
+    /*float:left;*/
+    opacity: 0.3;
+}
+
 #btnEval.on {
-  background: linear-gradient(90deg, #3b8ec2 85%, #ffa500 15%);
+  background: #3b8ec2; /*linear-gradient(90deg, #3b8ec2 85%, #ffa500 15%);*/
+  /*vertical-align: middle;*/
+}
+.btn_acts.on #btnEval_img {
+  opacity: 1.0;
+}
+
+
+#btnInt_img {
+    /*display: inline-block;*/
+    margin: 0px 5 0 0;
+    width:16px;
+    height:16px; 
+    border-radius:50%;
+    border: 1px solid;
+    border-color: #850000;
+    background: #db0000;
+    /*float:left;*/
+    opacity: 0.3;
 }
 #btnInt.on {
-  background: linear-gradient(90deg, #3b8ec2 85%, #db0000 15%);
+  background: #3b8ec2; /*linear-gradient(90deg, #3b8ec2 85%, #db0000 15%);*/
 }
+.btn_acts.on #btnInt_img {
+  opacity: 1.0;
+}
+
 
 
 
