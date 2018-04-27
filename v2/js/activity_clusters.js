@@ -122,10 +122,10 @@ function defineMarkerFeaturePopup(feature, layer) {
     var typ = props['typ']=='' ? '<i>Indisponible</i>' : props['typ'];
 
     if (act.act_type=='alerte') {
-        //github use:  src="/images/' + props['act_type'] + '.png"
+        //github use:  src="images/' + props['act_type'] + '.png"
         //locally use: src="../images/' + props['act_type'] + '.png"
         //           or src="images/' + props['act_type'] + '.png"
-        popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="/images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';
+        popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';
     } else {
         popupContent += '<span><div style="margin: 0px 8px 0px 0px; display: inline-block;" class="icon-' + act.act_type + '"></div></span>';
     }
