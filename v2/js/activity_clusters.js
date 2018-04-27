@@ -17,10 +17,8 @@ function addActivityClusters() {
 	d3.json(geojsonClusterPath, function(error, data) {
         //console.log("Loading clusters...");
         if (!error) {
-            //console.log("cluster data", data)
             geojson = data;
             //convert all dates (i.e. properties with 'date_' prefix) to date format
-            //console.log("geojson features: ", geojson.features.length)
             for (var i=0; i<=geojson.features.length-1; i++) { 
                 for (var prop in geojson.features[i].properties) {
                     if (prop.substring(0,5)=='date_') {
@@ -54,44 +52,55 @@ function updateActivityClusters() {
 }
 
 
-function defineMarkerFeature(feature, latlng) {     //defines which markers to show at any time
+function defineMarkerFeature(feature, latlng) {     //define which markers to show at any time
     var categoryVal = feature.properties[g.activities.fields.categoryField];
-    //var iconVal = feature.properties[g.activities.fields.iconField];
     var iconVal = feature.properties[g.activities.fields.categoryField];
     var diseaseVal = feature.properties['path'];
-    //console.log("iconVal: ", iconVal)
     
     var myClass = 'marker category-'+categoryVal+' icon-'+iconVal;
 	var myIcon = L.divIcon({
     	className: myClass,
     	iconSize: null
 	});
-	//console.log(myIcon)
 
     //console.log(feature.properties);
     //get min & max dates defined for activity
-    var dates = [];
+    var min_dates = [], max_dates = [];
     for (var prop in feature.properties) {
         if (feature.properties[prop] instanceof Date) {
-            dates.push(feature.properties[prop]);
+            if (['date_sit', 'date_det', 'date_part', 'date_dep', 'date_deb'].indexOf(prop)!=-1) {
+                min_dates.push(feature.properties[prop]);
+            } else if (['date_ferm', 'date_fin', 'date_ret_equipe'].indexOf(prop)!=-1) {
+                max_dates.push(feature.properties[prop]);
+            }
         }
     }
-    var minDate = new Date(Math.min.apply(null, dates));
-    var maxDate = new Date(Math.max.apply(null, dates));
-    //console.log(minDate, maxDate, dates);
-
-    if (g.currentvars.currentAnimation.playMode == 'stop') {
-        var dateCheck = ((g.currentvars.currentEpiDates.min <= maxDate) && (d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7) > minDate));
+    if ((min_dates.length==0) && (max_dates.length==0)) {   //if no dates available don't display marker
+        var dateCheck = false;
     } else {
-        var dateCheck = ((g.currentvars.currentAnimation.currentEpiDate <= maxDate) && (d3.timeDay.offset(g.currentvars.currentAnimation.currentEpiDate, 7) > minDate));
-    }
+        if (min_dates.length==0) {              //if no 'start' dates available
+            var minDate = new Date(Math.min.apply(null, max_dates));
+            var maxDate = new Date(Math.max.apply(null, max_dates));
+        } else if (max_dates.length==0) {       //if no 'end' dates available
+            var minDate = new Date(Math.min.apply(null, min_dates));
+            var maxDate = new Date(Math.max.apply(null, min_dates));
+        } else {                                //if both 'start' and 'end' dates available
+            var minDate = new Date(Math.min.apply(null, min_dates));
+            var maxDate = new Date(Math.max.apply(null, max_dates));
+        };
+        if (g.currentvars.currentAnimation.playMode == 'stop') {
+            var dateCheck = ((g.currentvars.currentEpiDates.min <= maxDate) && (d3.timeDay.offset(g.currentvars.currentEpiDates.max, 7) > minDate));
+        } else {
+            var dateCheck = ((g.currentvars.currentAnimation.currentEpiDate <= maxDate) && (d3.timeDay.offset(g.currentvars.currentAnimation.currentEpiDate, 7) > minDate));
+        };
+    };  
+
     var diseaseCheck = (diseaseVal==g.currentvars.currentDisease);
     var locationCheck = (((g.currentvars.currentZones.pcodes.length==0) && (g.currentvars.currentProvs.pcodes.length==0)) || ((g.currentvars.currentZones.pcodes.indexOf(feature.properties['zs_pc'])!=-1) && (g.currentvars.currentProvs.pcodes.length==0)) || ((g.currentvars.currentProvs.pcodes.indexOf(feature.properties['prov_pc'])!=-1) && (g.currentvars.currentZones.pcodes.length==0)));
     var menuOptionCheck = (g.currentvars.currentActivities.indexOf(categoryVal) != -1);
 
     //check which markers to display - only display if current disease, within current time extent, selected location(s), & option turned on in menu
     if (diseaseCheck && dateCheck && locationCheck && menuOptionCheck) {
-    //if (true) {
         return L.marker(latlng, {icon: myIcon});
     } else {
         return null;
@@ -102,49 +111,55 @@ function defineMarkerFeaturePopup(feature, layer) {
     var props = feature.properties;
     //console.log(props)
     var popupContent = '';
-    //var act_name_text = '';
     var act;
     for (var i=0; i<= g.activities.all.length-1; i++) {
         if ((g.activities.all[i].act_name == props['act_type'])) {
-            //act_name_text = g.activities.all[i].popup_text;
             act = g.activities.all[i];
             break;
         }
     }
+    var act_code = props['act_code']=='' ? '<i>Indisponible</i>' : props['act_code'];
+    var typ = props['typ']=='' ? '<i>Indisponible</i>' : props['typ'];
 
     if (act.act_type=='alerte') {
-        //on github use: src="/images/' + props['act_type'] + '.png"
-        // locally use: src="../images/' + props['act_type'] + '.png"
-        popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';
+        //github use:  src="/images/' + props['act_type'] + '.png"
+        //locally use: src="../images/' + props['act_type'] + '.png"
+        //           or src="images/' + props['act_type'] + '.png"
+        popupContent += '<span><img style="float: left; margin: 0px 8px 0px 0px;" src="/images/' + props['act_type'] + '.png" width="16" height="16"></img></span>';
     } else {
         popupContent += '<span><div style="margin: 0px 8px 0px 0px; display: inline-block;" class="icon-' + act.act_type + '"></div></span>';
     }
     popupContent += '<span class="heading">'+ act.popup_text +'</span><hr>';
-    popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['act_code'] +':</span> '+ props['act_code'] +'</span>';
+
+    popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['act_code'] +':</span> '+ act_code +'</span>';
     popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['loc'] +':</span> '+ props['zs'] + ', ' + props['prov'] +'</span>';
-    popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['typ'] +':</span> '+ props['typ'] +'</span>';
-    popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['path'] +':</span> '+ props['path'] +'</span><hr>';
+    popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['typ'] +':</span> '+ typ +'</span>';
+    popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['path'] +':</span> '+ props['path'] +'</span>';
+
+    if ((props['comm']!=null) && (props['comm']!='')) {
+        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['comm'] +':</span> <i>'+ props['comm'] +'</i></span>'; 
+    } 
+    popupContent += '<hr>';
+
     if (act.act_type=='alerte') {
-        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['date_sit'] +':</span> '+ formatTime(props['date_sit']) +'</span>';
-        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['date_det'] +':</span> '+ formatTime(props['date_det']) +'</span>';
-        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['date_part'] +':</span> '+ formatTime(props['date_part']) +'</span>';
-        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['date_ferm'] +':</span> '+ formatTime(props['date_ferm']) +'</span>';
-    } else if ((act.act_type=='evaluation') || (act.act_type=='intervention')) {
-        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['date_dep'] +':</span> '+ formatTime(props['date_dep']) +'</span>';
-        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['date_deb'] +':</span> '+ formatTime(props['date_deb']) +'</span>';
-        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['date_fin'] +':</span> '+ formatTime(props['date_fin']) +'</span>';
+        var date_vars = ['date_sit', 'date_det', 'date_part', 'date_ferm']
+    } else if (act.act_type=='evaluation') {
+        var date_vars = ['date_dep', 'date_deb', 'date_fin', 'date_ret_equipe']
+    } else if (act.act_type=='intervention') {
+        var date_vars = ['date_dep', 'date_deb', 'date_fin']
     }
-    if (act.act_type=='evaluation') {
-        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['date_ret_equipe'] +':</span> '+ formatTime(props['date_ret_equipe']) +'</span>';
+    for (var i=0; i<=date_vars.length-1; i++) {
+        if (props[date_vars[i]]!=null) {
+            popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels[date_vars[i]] +':</span> '+ formatTime(props[date_vars[i]]) +'</span>';      
+        }
     }
+    popupContent += '<hr>';
     
     popupContent = '<div class="map-popup">'+popupContent+'</div>';
     layer.bindPopup(popupContent,{offset: L.point(1,-2)});
 };
 
 function defineClusterIcon(cluster) {
-	//console.log("cluster: ", cluster);
-	//var rmax = 30; //Maximum radius for cluster pies
     var act_name = '';
 
     var children = cluster.getAllChildMarkers(),
@@ -172,7 +187,6 @@ function defineClusterIcon(cluster) {
                                         break;
                                     }
                                 };
-                                //return g.activities.names[d.data.key] +' ('+d.data.values.length+' activité'+(d.data.values.length!=1?'s':'')+')';}
                                 return act_name +' ('+d.data.values.length+' activité'+(d.data.values.length!=1?'s':'')+')';}
                           }),
         //Create a new divIcon and assign the svg markup to the html property
