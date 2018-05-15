@@ -267,13 +267,13 @@ hr.menu_style{
 .styled-select {
    background: url(../images/dropdown.png) no-repeat 94% -5px;
    background-color: #3b8ec2;
-   /*font-size: 11px;
-   color: white;*/
+   font-size: 11px;
+   color: white;
    width: 160px;
    height: 22px;
    overflow: hidden;
    outline: none;
-   padding: 0px 4px; /*4px 11px;*/
+   padding: 0px 4px; /*4px 11px; */
    display: inline-block;
    margin-left: 14px;
    margin-bottom: 10px;
@@ -434,8 +434,8 @@ hr.menu_style{
 .btn_alt {
   width: 72px;
   margin-left: 0px;
-  height: 18px;
-  padding: 0px 3px;
+  height: 16px;
+  padding: 0px 2px;
   display: inline-block;
   font-size: 10px;
   margin-bottom: 4px;

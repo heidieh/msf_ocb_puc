@@ -1,14 +1,25 @@
 
 //reads in array of data with field 'epiwk' and returns same array of data with field added for 'epidate'
 //add global variable g.epitime
-function addEpitimeToData(data) {	
+function addEpitimeToData(data) {
+    //console.log('epitime.js: 1 - addEpitimeToData');
 	var created_epi = createEpitime(data);
 	g.epitime = {};
 	g.epitime.date_extent = created_epi[0];
     g.epitime.all = created_epi[1];
-
+    //console.log(geonames);
+    
 	for (var i=0; i<=data.length-1; i++) {
 		data[i].epidate = getEpiDate(data[i]['epiwk']);
+
+        /*var location = geonames.find(function(loc) {
+            return loc.zs_pcode == data[i].zs_pc;
+        });
+        //console.log(location);
+
+        data[i].zs = location['zs'];
+        data[i].prov_pc = location['prov_pcode'];
+        data[i].prov = location['prov'];*/
 	}
 	//return [data,date_extent];
     return data;
@@ -22,8 +33,10 @@ function epiTime(epi_id, epiweek, epimonth, epiyear, epiDate) {     //epiTime ob
     this.epiDate = epiDate;
 }   
 
+
 //reads in array of data, returns array of unique epiweeks ('epiwk') in data
 function getEpiweeksInData(data) {
+    //console.log('epitime.js: 2 - getEpiweeksInData');
     var all_epiweeks = [];  
     for (i=0; i<=data.length-1; i++) {
         if (!(all_epiweeks.includes(data[i]['epiwk']))) {
@@ -48,6 +61,7 @@ function getEpiweeksInData(data) {
 
 //reads in array of data, returns date extent ([minDate, maxDate]) and array of epiTime objects between the first and last dates in array
 function createEpitime(data) {    
+    //console.log('epitime.js: 3 - createEpitime');
 	var parseTime = d3.timeParse("%d-%m-%Y");
     var epi_first = new epiTime("2006-52",52,12,2006,parseTime("25-12-2006"));
     var epi_prev = epi_first;   
@@ -117,6 +131,7 @@ function createEpitime(data) {
 
 //function reads epiweek(epiwk, format e.g. '2008-15') and optional epitime (epiwks, array of all epitime objects), returns associated date (epidate, in date format)
 function getEpiDate(epiwk, epiwks) {   
+    //console.log('epitime.js: 4 - getEpiDate');
     if (epiwks!=null) {
         //console.log(epiwk, epiwks);
         var num_epiwks = epiwks.length;
@@ -147,6 +162,7 @@ function sameDay(d1, d2) {
 
 //function reads epidate (epidt, in date format) and optional epitime (epiwks, array of all epitime objects), returns associated epiweek
 function getEpiWeek(epidt, epiwks) {   
+    //console.log('epitime.js: 5 - getEpiWeek');
     if (epiwks!=null) {
         //console.log(epidt, epiwks);
         var num_epiwks = epiwks.length;
@@ -212,6 +228,7 @@ var date_sort_asc = function (date1, date2) {   //sort dates in ascending order
 //input rng_type ('epiweek'/'epimonth'/'epiyear') and param (integer for number of units of rng_type)
 //returns range of dates for current selection ([first_date, last_date]) in relative time (e.g. 'last 3 epimonths')
 function getEpiRange(rng_type, param) {  
+    //console.log('epitime.js: 6 - getEpiRange');
     var dateRange = [];
     var allDates = [];
     var num_epiwks = g.epitime.all.length;
