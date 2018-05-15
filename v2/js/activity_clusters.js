@@ -10,12 +10,13 @@ var markerClusters = L.markerClusterGroup({     //define markerClusters as clust
     });
 
 function addActivityClusters() {
+    //console.log("activity_clusters.js: addActivityClusters");
 	
 	//add empty markerClusters to map
 	map.addLayer(markerClusters);
 
-	d3.json(geojsonClusterPath, function(error, data) {
-        //console.log("Loading clusters...");
+    d3.json(geojsonClusterPath).then(function(data, error) {
+	//d3.json(geojsonClusterPath, function(error, data) {
         if (!error) {
             geojson = data;
             //convert all dates (i.e. properties with 'date_' prefix) to date format
@@ -27,7 +28,6 @@ function addActivityClusters() {
                     }
                 }
             }
-            //console.log("activity cluster geojson = ", geojson);
 
             markers = L.geoJson(geojson, {
       			pointToLayer: defineMarkerFeature,			//defines class & icon
@@ -42,7 +42,7 @@ function addActivityClusters() {
 
 
 function updateActivityClusters() {
-    //console.log("updateActClusters")
+    //console.log("activity_clusters.js: updateActivityClusters");
     markerClusters.clearLayers();
     markers = L.geoJson(geojson, {
                 pointToLayer: defineMarkerFeature,          //defines class & icon
@@ -53,6 +53,7 @@ function updateActivityClusters() {
 
 
 function defineMarkerFeature(feature, latlng) {     //define which markers to show at any time
+    //console.log("activity_clusters.js: defineMarkerFeature");
     var categoryVal = feature.properties[g.activities.fields.categoryField];
     var iconVal = feature.properties[g.activities.fields.categoryField];
     var diseaseVal = feature.properties['path'];
@@ -108,6 +109,7 @@ function defineMarkerFeature(feature, latlng) {     //define which markers to sh
 }
 
 function defineMarkerFeaturePopup(feature, layer) {
+    //console.log("activity_clusters.js: defineMarkerFeaturePopup");
     var props = feature.properties;
     //console.log(props)
     var popupContent = '';
@@ -160,6 +162,7 @@ function defineMarkerFeaturePopup(feature, layer) {
 };
 
 function defineClusterIcon(cluster) {
+    //console.log("activity_clusters.js: defineClusterIcon");
     var act_name = '';
 
     var children = cluster.getAllChildMarkers(),

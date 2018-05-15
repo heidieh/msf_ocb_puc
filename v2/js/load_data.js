@@ -34,6 +34,7 @@ function displayDataDialog() {
 	//$('#loading').html('Chargement en cours...');
 	modal.style.display = "block";
 
+
 	document.getElementById("btnLoad").onclick = function() {
 		$('#load-text').html('Chargement en cours...');
 		console.log("FETCH DATA FROM DB HERE: ", currentExtent);
@@ -57,10 +58,11 @@ function displayDataDialog() {
 		//axios.get(url).then(response => console.log(response));
 
 
-	    console.log("data: ", data);
-	    data = addEpitimeToData(data);
-	    console.log ("NEW DATA: ", data)
-	    updateDashboardData();
+	    //console.log("data: ", data);
+	    //data = addEpitimeToData(data);
+	    data = addParamsToData(data);
+	    //console.log ("NEW DATA: ", data)
+	    resetDashboardData();
 	    modal.style.display = "none";
 	    //return data;*/
 	}

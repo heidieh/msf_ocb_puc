@@ -14,7 +14,7 @@ var files = [
     ['js','js/leaflet.defaultextent.js'],
     ['js','js/leaflet.markercluster.js'],
     ['js','js/topojson.v1.min.js'],
-    ['js','js/d3.v4.min.js'],
+    ['js','js/d3.v5.min.js'],
     ['js','js/crossfilter.v1.min.js'],
     ['js','js/intro.js'],
     ['js','js/topojson-client.min.js'],
@@ -29,14 +29,15 @@ var files = [
 function load_libraries(files) {
     inc_count = -1;
     inc_total = files.length - 1;
+
     var loadScript = function(files, callback){
-        if(inc_count < inc_total){
+        if (inc_count < inc_total){
             inc_count++;
-            var file = files[inc_count];
-            if(file[0] == 'css'){
+            var file = files[inc_count];          
+            if (file[0] == 'css'){
                 document.getElementsByTagName("head")[0].innerHTML += ("<link href=\"" + file[1] + "\" rel=\"stylesheet\" type=\"text/css\">");
                 callback(files, callback);
-            }else if((file[0] == 'js') || (file[0] == 'data')){
+            } else if((file[0] == 'js') || (file[0] == 'data')){
                 var script = document.createElement("script")
                 script.type = "text/javascript";
                 if(script.readyState){   //IE
@@ -44,14 +45,12 @@ function load_libraries(files) {
                         if(script.readyState == "loaded" || script.readyState == "complete") {
                             script.onreadystatechange = null;
                             callback(files, callback);
-                            //console.log("callback ", file)
                         }
                     };
 
                 } else {   //Others
                     script.onload = function () {
                         callback(files, callback);
-                        //console.log("callback ", file)
                     };
                 }
                 script.src = file[1];
