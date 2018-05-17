@@ -270,20 +270,29 @@ function initGlobalVariables() {
 	g.activities.fields.categoryField = 'act_type'; //fieldname for marker category (used in pie)
 	//g.activities.fields.iconField = 'act_type'; //fieldame for marker icon
 	//g.activities.fields.popupFields = ['act_code','act_type', 'loc', 'typ', 'path', 'date_sit', 'date_det', 'date_part', 'date_ferm' ]; //fields displayed in popup window, 'loc'='zs,prov'
-	g.activities.labels = {act_code: 'Code d\'activité',
+	g.activities.labels = {code_alt: 'Code d\'alerte',
+						code_eval: 'Code d\'évaluation',
 	                    act_type:'Type d\'activité',
 	                    loc: 'Location',
+	                    sent: 'Sentinelle',
 	                    typ: 'Typologie',
 	                    path: 'Pathologie',
 	                    comm: 'Commentaires',
-	                    date_sit: 'Date de la situation',
+	                    /*date_sit: 'Date de la situation',
 	                    date_det: 'Date de détection',
 	                    date_part: 'Date de départ', 
 	                    date_ferm: 'Date de fermeture',
-	                    date_dep: 'Date de départ',
+	                    date_dep: 'Date de départ',*/
 	                    date_deb: 'Date de début',
 	                    date_fin: 'Date de fin',
-	                    date_ret_equipe: 'Date de retour de l\'équipement'
+	                    //date_ret_equipe: 'Date de retour de l\'équipement'
+	                    typ_detec: 'Type de détection',
+	                    src_detec: 'Source de détection',
+	                    cum_cas: 'Cas cumulatifs',
+	                    cum_dec: 'Décès cumulatifs',
+	                    opd: 'OPD',
+	                    ipd:'IPD',
+	                    tbi: 'Total des bénéficiaires'
 	                    };
 
 	g.activities.all = [

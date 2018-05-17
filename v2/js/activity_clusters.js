@@ -15,10 +15,11 @@ function addActivityClusters() {
 	//add empty markerClusters to map
 	map.addLayer(markerClusters);
 
-    d3.json(geojsonClusterPath).then(function(data, error) {
-	//d3.json(geojsonClusterPath, function(error, data) {
+    d3.json(geojsonClusterPath).then(function(data, error) {        //d3.js v5
+	//d3.json(geojsonClusterPath, function(error, data) {           //d3.js v4
         if (!error) {
-            geojson = data;
+            geojson = data;         
+            console.log('Activities: ', data);
             //convert all dates (i.e. properties with 'date_' prefix) to date format
             for (var i=0; i<=geojson.features.length-1; i++) { 
                 for (var prop in geojson.features[i].properties) {
@@ -120,9 +121,8 @@ function defineMarkerFeaturePopup(feature, layer) {
             break;
         }
     }
-    var act_code = props['act_code']=='' ? '<i>Indisponible</i>' : props['act_code'];
-    var typ = props['typ']=='' ? '<i>Indisponible</i>' : props['typ'];
 
+    //popup heading
     if (act.act_type=='alerte') {
         //github use:  src="images/' + props['act_type'] + '.png"
         //locally use: src="../images/' + props['act_type'] + '.png"
@@ -133,17 +133,61 @@ function defineMarkerFeaturePopup(feature, layer) {
     }
     popupContent += '<span class="heading">'+ act.popup_text +'</span><hr>';
 
-    popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['act_code'] +':</span> '+ act_code +'</span>';
+    //popup info - main
+    if ((act.act_type == 'alerte') || (act.act_type == 'evaluation')) {
+        var code_alt = props['code_alt']=='' ? '<i>Indisponible</i>' : props['code_alt'];
+        popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['code_alt'] +':</span> '+ code_alt +'</span>';
+    }
+    if ((act.act_type == 'evaluation') || (act.act_type == 'intervention')) {
+        var code_eval = props['code_eval']=='' ? '<i>Indisponible</i>' : props['code_eval'];
+        popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['code_eval'] +':</span> '+ code_eval +'</span>';
+    }
     popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['loc'] +':</span> '+ props['zs'] + ', ' + props['prov'] +'</span>';
-    popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['typ'] +':</span> '+ typ +'</span>';
+    if ((act.act_type == 'alerte') || (act.act_type == 'evaluation')) {
+        if ((props['sent']!=null) && (props['sent']!='')) {
+            popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['sent'] +':</span> '+ props['sent'] +'</span>';
+        }
+    }
+
+    /*var typ = props['typ']=='' ? '<i>Indisponible</i>' : props['typ'];
+    popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['typ'] +':</span> '+ typ +'</span>';*/
     popupContent += '<span class="attribute"><span class="label">'+ g.activities.labels['path'] +':</span> '+ props['path'] +'</span>';
 
-    if ((props['comm']!=null) && (props['comm']!='')) {
-        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['comm'] +':</span> <i>'+ props['comm'] +'</i></span>'; 
+    //popup info - small
+    if (act.act_type == 'alerte') {
+        if ((props['typ_detec']!=null) && (props['typ_detec']!='')) {
+            popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['typ_detec'] +':</span> '+ props['typ_detec'] +'</span>';      
+        }
+        if ((props['src_detec']!=null) && (props['src_detec']!='')) {
+            popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['src_detec'] +':</span> '+ props['src_detec'] +'</span>';      
+        }
+        if ((props['cum_cas']!=null) && (props['cum_cas']!='')) {
+            popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['cum_cas'] +':</span> '+ props['cum_cas'] +'</span>';      
+        }
+        if ((props['cum_dec']!=null) && (props['cum_dec']!='')) {
+            popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['cum_dec'] +':</span> '+ props['cum_dec'] +'</span>';      
+        }
     } 
+    if ((act.act_type == 'evaluation') || (act.act_type == 'intervention')) {
+        if ((props['opd']!=null) && (props['opd']!='')) {
+            popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['opd'] +':</span> '+ props['opd'] +'</span>';      
+        }
+        if ((props['ipd']!=null) && (props['ipd']!='')) {
+            popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['ipd'] +':</span> '+ props['ipd'] +'</span>';      
+        }
+    }
+    if (act.act_type == 'intervention') {
+        if ((props['tbi']!=null) && (props['tbi']!='')) {
+            popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['tbi'] +':</span> '+ props['tbi'] +'</span>';      
+        }
+    }
+   
+
+    
     popupContent += '<hr>';
 
-    if (act.act_type=='alerte') {
+    //popup dates
+    /*if (act.act_type=='alerte') {
         var date_vars = ['date_sit', 'date_det', 'date_part', 'date_ferm']
     } else if (act.act_type=='evaluation') {
         var date_vars = ['date_dep', 'date_deb', 'date_fin', 'date_ret_equipe']
@@ -154,9 +198,20 @@ function defineMarkerFeaturePopup(feature, layer) {
         if (props[date_vars[i]]!=null) {
             popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels[date_vars[i]] +':</span> '+ formatTime(props[date_vars[i]]) +'</span>';      
         }
+    }*/
+    if (props['date_deb']!=null) {
+        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['date_deb'] +':</span> '+ formatTime(props['date_deb']) +'</span>';      
+    }
+    if (props['date_fin']!=null) {
+        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['date_fin'] +':</span> '+ formatTime(props['date_fin']) +'</span>';      
     }
     popupContent += '<hr>';
-    
+
+    //popup extra comments
+    if ((props['comm']!=null) && (props['comm']!='')) {
+        popupContent += '<span class="attribute-sm"><span class="label-sm">'+ g.activities.labels['comm'] +':</span> <i>'+ props['comm'] +'</i></span>'; 
+    } 
+
     popupContent = '<div class="map-popup">'+popupContent+'</div>';
     layer.bindPopup(popupContent,{offset: L.point(1,-2)});
 };
