@@ -493,7 +493,7 @@ font: 11px helvetica neue,open sans,sans-serif;
     overflow: auto;
 }
 
-#btn_export_pdf {
+#btn_export_all {
   /*position: fixed;
   top: 650px;*/
   margin-top: 16px;
