@@ -80,18 +80,18 @@ function addHints(){
         hints: hints
       });
       intro.onhintsadded(function() {
-          console.log('all hints added: ', hints);
+          //console.log('all hints added: ', hints);
           intro.setOptions({hints: hints});
       });
       intro.onhintclick(function(hintElement, item, stepId) {
-          console.log('hint clicked', hintElement, item, stepId);
+          //console.log('hint clicked', hintElement, item, stepId);
       });
       intro.onhintclose(function (stepId) {
-          console.log('hint closed', stepId);
-          console.log(document.querySelectorAll('.introjs-hidehint').length, hints.length)
+          //console.log('hint closed', stepId);
+          //console.log(document.querySelectorAll('.introjs-hidehint').length, hints.length)
 		  if (document.querySelectorAll('.introjs-hidehint').length === hints.length) {
 		  	$('#btnIntro').removeClass('on');
-		  	console.log("reset hints now")
+		  	//console.log("reset hints now")
 		    intro.setOptions({hints: hints}) 
 		  } 
       });
@@ -99,7 +99,7 @@ function addHints(){
   }
 
 function removeHints() {
-	console.log('all hints removed');
+	//console.log('all hints removed');
 	introJs().hideHints();
 	introJs().refresh();
 	//intro = introJs();

@@ -10,13 +10,6 @@
 
 /*Markers*/
 .marker {
-  /*width: 16px;
-  height: 16px;
-  border-color: #444;
-  opacity: 0.9;*/
-  /*background-color: #db0000;*/
-  /*margin-top: -10px;
-  margin-left: -10px;*/
   width: 18px;
   height: 18px;
   border: 1px solid;
@@ -34,52 +27,30 @@
 
 /*marker categories*/
 .category-alerte_alarme{
-  fill: #db0000;    /* red #f04f4f */
+  fill: #db0000;    /* red */
   stroke: #850000;
-  /*background: #F88;*/
-  /*border-color: #800;*/
 }
-.category-alerte_focus{
+.category-alerte_focus{    
   fill: #ffa500;     /* orange */
   stroke: #a96e00;
-  /*background: #FA0;*/
-  /*border-color: #B60;*/
 }
 .category-alerte_suivi_actif{
   fill: #76D42C;     /* green */
   stroke: #559a1e;
-  /*background: #FF3;*/
-  /*border-color: #D80;*/
 }
 .category-alerte_ferme{
   fill: #969696;      /* grey */
   stroke: #424242;
-  /*fill: #BFB;
-  stroke: #070;
-  background: #BFB;*/
-  /*border-color: #070;*/
 }
 .category-alerte_NA{
-  fill: #969696;       /* grey */
+  fill: #5a5a5a;       /* grey */
   stroke: #424242;
-  /*background: #CCC;*/
-  /*border-color: #444;*/
 }
 .category-evaluation{
-  fill: #ffa500;     /* orange */
   stroke: #a96e00;
-  /*fill: #7294f0;          blue 
-  stroke: #29407e;*/
-  /*background: #9DF;*/
-  /*border-color: #007;*/
 }
 .category-intervention{
-  fill: #db0000;    /* red #f04f4f */
   stroke: #850000;
-  /*fill: #965b96;        purple 
-  stroke: #601960;*/
-  /*background: #CCC;*/
-  /*border-color: #444;*/
 }
 
 
@@ -120,39 +91,32 @@
   background-size: 14px 14px;
 }
 .icon-evaluation{
-  /*background-image: url(../images/evaluation.png);
-  background-color: none;
-  background-repeat: no-repeat;
-  background-position: 1px 0px;
-  background-size: 16px 16px;*/
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border: 1px solid;
   border-radius: 50%;
   border-color: #a96e00;
-  background-color: #ffa500;     
+  background-image: repeating-linear-gradient(-45deg, #ffa500, #ffa500 2px, #b27300 2px, #b27300 4px); 
 }
 .icon-intervention{
-  /*background-image: url(../images/intervention.png);
-  background-color: none;
-  background-repeat: no-repeat;
-  background-position: 1px 0px;
-  background-size: 16px 16px;*/
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border: 1px solid;
   border-radius: 50%;
   border-color: #850000;
-  background-color: #db0000;
+  background-image: repeating-linear-gradient(-45deg, #db0000, #db0000 2px, #990000 2px, #990000 4px); 
 }
 
 
-
 /*Popup*/
-.map-popup span.heading {
-  /*display: inline-block;*/
-  font-size: 1.1em;
+.map-popup {
+  min-width: 200px;
+}
+.map-popup span.headingtext {
+  font-size: 1.2em;
   font-weight: bold;
+  margin-right: 8px;
+  
 }
 .map-popup span.attribute {
   display: block;
@@ -171,3 +135,20 @@
   font-style: italic;
   font-size:0.9em;
 }
+
+.popup_icon {
+  display: inline-block;
+  margin: 0px 8px 2px 0px; 
+  vertical-align: bottom;
+}
+.popup_icon image {
+  float: left; 
+  width: 20px;
+  height: 20px;
+}
+
+.serve_icon {
+  margin-bottom: -2px;
+}
+
+

@@ -16,7 +16,7 @@ return (function () {
     options: {
       position: 'topleft',
       text: 'Default Extent',
-      title: 'Zoom to full DRC extent',
+      title: '',
       className: 'leaflet-control-defaultextent'
     },
     onAdd: function (map) {
