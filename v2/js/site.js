@@ -2940,7 +2940,7 @@ function togglePlayMode(mode) {
         $('#disease-select').addClass('no-point');
         $('.styledSelect').addClass('no-point');
         $('.select').addClass('no-point');
-        $('#btn_export_pdf').addClass('no-point');
+        $('#btn_export_all').addClass('no-point');
         $('#btn_reset_map').addClass('no-point');
         $('#btn_reset_all').addClass('no-point');
         $('.btn-timerange').addClass('no-point');
@@ -2964,7 +2964,7 @@ function togglePlayMode(mode) {
         $('#disease-select').removeClass('no-point');
         $('.styledSelect').removeClass('no-point');
         $('.select').removeClass('no-point');
-        $('#btn_export_pdf').removeClass('no-point');
+        $('#btn_export_all').removeClass('no-point');
         $('#btn_reset_map').removeClass('no-point');
         $('#btn_reset_all').removeClass('no-point');
         $('.btn-timerange').removeClass('no-point');
@@ -3305,7 +3305,7 @@ function btn_filt_sum() {
 }
 
 
-function btn_export_pdf() {   
+function btn_export_all() {   
 
     function displayDownloadSpinner (callback) {
         let mapBounds = document.getElementById("map").getBoundingClientRect();
