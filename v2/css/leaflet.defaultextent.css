@@ -5,7 +5,8 @@
 .leaflet-control-defaultextent-toggle {
   text-indent: -9999px;
   white-space: nowrap;
-  background: url('../images/extent.png');
+  /*background: url('../images/extent.png');*/
+  background: url('../images/drc.png');
   /*background: url('../images/home.svg');*/
   background-size: 26px 26px;
   width: 26px;

@@ -1,242 +1,196 @@
 <html>
-    <head>
-    	<!-- Global site tag (gtag.js) - Google Analytics -->
-		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-74703713-2"></script>
-		<script>
-		  window.dataLayer = window.dataLayer || [];
-		  function gtag(){dataLayer.push(arguments);}
-		  gtag('js', new Date());
 
-		  gtag('config', 'UA-74703713-2');
-		</script>
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-74703713-2"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
 
-        <title>PUC Dashboard</title>
-        <link rel="icon" type="image/png" href="images/msf-logo2.png" />
-        <meta charset="utf-8">
+	  gtag('config', 'UA-74703713-2');
+	</script>
+    <title>PUC Dashboard</title>
+    <link rel="icon" type="image/png" href="images/msf-logo2.png" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-        <!-- <script src="js/jquery.js"></script>
-		<script src="js/jquery-ui.min.js"></script>
-
-        <link rel="stylesheet" href="css/bootstrap-grid.min.css">
-		<link rel="stylesheet" type="text/css" href="css/introjs.css"/>
-		<link rel="stylesheet" type="text/css" href="css/MarkerCluster.css"/>
-		<link rel="stylesheet" type="text/css" href="css/activity_clusters.css"/>
-        <link rel="stylesheet" type="text/css" href="css/site.css"/>
-        <link rel="stylesheet" type="text/css" href="css/load_data.css"/>
-		<link rel="stylesheet" type="text/css" href="css/leaflet.css"/>    
-		<link rel="stylesheet" type="text/css" href="css/leaflet.defaultextent.css" />
-
-        <script src="js/leaflet.js"></script>
-        <script src="js/leaflet.defaultextent.js"></script>
-        <script src="js/leaflet.markercluster.js"></script>
-		<script src="js/topojson.v1.min.js"></script>
+<body>
+    <div id="sideMenu">
+        <div id="dash_title" title="Pool d'Urgence Congo">MSF PUC Dashboard </div>
+        <div id="closeMenu_btn" title="Fermez le menu"></div>
+        <div id="sideMenu_btn" title="Ouvrez le menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <hr class="menu_style">
+        <div id="intro_btn">
+            <a title="Faites le tour des principales caractéristiques du dashboard" id="btnIntro" class="button ">Découvrir l'outil</a>
+        </div>
+        <hr class="menu_style">
+        <div class="styled-select rounded">
+            <select id="disease-select" onchange="changeDiseaseSelection();"></select>
+        </div>
+        <div class="styled-select rounded">
+            <select id="stat-select" onchange="changeStatSelection();"></select>
+        </div>
         
-		<script src="js/d3.v4.min.js" charset="utf-8"></script> 
-        <script src="js/crossfilter.v1.min.js" charset="utf-8"></script> 
-		<script src="js/intro.js"></script> 
-		<script src="js/topojson-client.min.js"></script>
+        <hr class="menu_style">
+        <div id="activity_btns">
+            <button id="btnAlt" class="button btn-side-nav btn_acts" onclick="btn_act('alerte');">Toutes les Alertes</button>
+            <div id="alert_btns">
+                <div>
+                    <button id="btnAltAlarme" class="button btn_alt" onclick="btn_act('alerte_alarme');">
+                        <div class="btn_img_cont">
+                            <img src="images/alerte_alarme.png" width="14" height="14" />
+                        </div>
+                        <span>Alarme</span>
+                    </button>
+                    <button id="btnAltFocus" class="button btn_alt" onclick="btn_act('alerte_focus');">
+                        <div class="btn_img_cont">
+                            <img src="images/alerte_focus.png" width="14" height="14" />
+                        </div>
+                        <span>Focus</span>
+                    </button>
+                </div>
+                <div>
+                    <button id="btnAltSuiviActif" class="button btn_alt" onclick="btn_act('alerte_suivi_actif');">
+                        <div class="btn_img_cont">
+                            <img src="images/alerte_suivi_actif.png" width="14" height="14" />
+                        </div>
+                        <span>Suivi Actif</span>
+                    </button>
+                    <button id="btnAltFerme" class="button btn_alt" onclick="btn_act('alerte_ferme');">
+                        <div class="btn_img_cont">
+                            <img src="images/alerte_ferme.png" width="14" height="14" />
+                        </div>
+                        <span>Fermé</span>
+                    </button>
+                </div>
+            </div>
+            <button id="btnEval" class="button btn-side-nav btn_acts" onclick="btn_act('evaluation');">
+                <div class="btn_img_cont">
+                    <div id="btnEval_img"></div>
+                </div>
+                <span>Evaluations</span>
+            </button>
+            <button id="btnInt" class="button btn-side-nav btn_acts" onclick="btn_act('intervention');">
+                <div class="btn_img_cont">
+                    <div id="btnInt_img"></div>
+                </div>
+                <span>Interventions</span>
+            </button>
+        </div>
+        <hr class="menu_style">
+        <div>
+            <button id="btnRiv" class="btn-riv button on" onclick="btn_rivers();">Rivières</button>
+        </div>
 
-		<script src="data/geonames.js"></script>
+        <div id="btn_lvls" class="btn-group btn-group-sm">
+            <button id="btnProv" class="btn-lyr button on" onclick="btn_change_lyr('prov');">Provinces</button>
+            <button id="btnZone" class="btn-lyr button" onclick="btn_change_lyr('zone');">Zones</button>
+        </div>
+        
+        <div>
+            <div contentEditable id="btnSelect" ></div>
+        </div>
+        <hr class="menu_style">
 
-		<script src="js/epitime.js"></script>
-		<script src="js/intro_tour.js"></script>
-		<script src="js/load_data.js"></script>
-		<script src="js/activity_clusters.js"></script> -->
-		<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.3/axios.min.js"></script>
-		<script src="https://unpkg.com/axios/dist/axios.min.js"></script> -->
-		<!-- <link rel="stylesheet" type="text/css" href="css/clusterpies.css" />
-		<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js'></script>
-		<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' /> -->
-  		
-		<!-- ['js','js/jquery.js'],
-	    ['js','js/jquery-ui.min.js'],
-	    ['css','css/bootstrap-grid.min.css'],
-	    ['css','css/introjs.css'],
-	    ['css', 'css/MarkerCluster.css'],
-	    ['css', 'css/activity_clusters.css'],
-	    ['css','css/site.css'],
-	    ['css','css/load_data.css'],
-	    ['css','css/leaflet.css'],
-	    ['css','css/leaflet.defaultextent.css'],
-	    ['js','js/leaflet.js'],
-	    ['js','js/leaflet.defaultextent.js'],
-	    ['js','js/leaflet.markercluster.js'],
-	    ['js','js/topojson.v1.min.js'],
-	    ['js','js/d3.v4.min.js'],
-	    ['js','js/crossfilter.v1.min.js'],
-	    ['js','js/intro.js'],
-	    ['js','js/topojson-client.min.js'],
-	    ['data','data/geonames.js'],
-	    ['js','js/epitime.js'],
-	    ['js','js/intro_tour.js'],
-	    ['js','js/load_data.js'],
-	    ['js','js/activity_clusters.js'],
-	    ['js','js/site.js'],
- -->
-		<script src="js/load_files.js"></script>
-		<!-- <script src="js/site.js"></script>  -->
-		
-    </head>
+        <div id="btn_reset_map">
+            <button title="Réinitialisez la carte" id="btnResetMap" class="button btn-side-nav" onclick="btn_reset_map();" href="#" data-zoom="5" data-position="-4.0,22.0">Réinitialiser la Carte</button>
+        </div>
+        <div id="btn_reset_all">
+            <button title="Réinitialisez tous les paramètres du dashboard" id="btnResetAll" class="button btn-side-nav" onclick="btn_reset_all();" href="#" data-zoom="5" data-position="-4.0,22.0">Réinitialiser Tout</button>
+        </div>
+        <hr class="menu_style">
+        <div id="btn_export_pdf">
+            <button title="Export PDF" id="btnExportPDF" class="button btn-side-nav" onclick="btn_export_pdf();">Export PDF</button> 
+        </div>
 
-    <body>
+        <hr class="menu_style">
+    </div>
+    <div id="main-container" class="container-fluid">
+        <div class="row">
+            <div class="col-md-9">
+                <p class="map_title" id="map_title"></p>
+                <div id="head-val"></div>
+                <div id="filtSum"></div>
+                <div id="win_filt-sum"></div>
+            </div>
+            <div class="col-md-3 map_title" style="color:red; font-weight: 500">
+                ! Données fictives utilisées
+            </div>
+        </div>
 
-    	<div id="sideMenu">
-    		<div id="closeMenu_btn" title="Fermez le menu"></div>
-    		<div id="sideMenu_btn" title="Ouvrez le menu">
-		        <span></span>
-		        <span></span>
-		        <span></span>
-		    </div>
-    		<div id="menu_title">MENU</div>
-    		<hr class="menu_style">
-		  	<div class="styled-select rounded"><select id="disease-select" onchange="changeDiseaseSelection();"></select></div>
-		  	<div class="styled-select rounded"><select id="stat-select" onchange="changeStatSelection();"></select></div>
-		  	<div id="head-val"></div>
-		  	<hr class="menu_style">
-		  	<div id="activity_btns">
-		  		<div id="menu-act">PUC Activités:</div>
-				<button id="btnAlt" class="button btn-side-nav btn_acts" onclick="btn_act('alerte');">Toutes les Alertes</button> 
-				<div id="alert_btns">
-					<div>
-						<button id="btnAltAlarme" class="button btn_alt" onclick="btn_act('alerte_alarme');">         
-						    <div class="btn_img_cont">
-						    	<img src="images/alerte_alarme.png" width="14" height="14"/>
-						    </div>
-						    <span>Alarme</span>
-						</button>
-						<button id="btnAltFocus" class="button btn_alt" onclick="btn_act('alerte_focus');">
-							<div class="btn_img_cont">
-						    	<img src="images/alerte_focus.png" width="14" height="14"/>
-						    </div>
-						    <span>Focus</span>
-						</button> 
-					</div>
-					<div>
-						<button id="btnAltSuiviActif" class="button btn_alt" onclick="btn_act('alerte_suivi_actif');">
-							<div class="btn_img_cont">
-						    	<img src="images/alerte_suivi_actif.png" width="14" height="14"/>
-						    </div>
-						    <span>Suivi Actif</span>
-						</button> 
-						<button id="btnAltFerme" class="button btn_alt" onclick="btn_act('alerte_ferme');">
-							<div class="btn_img_cont">
-						    	<img src="images/alerte_ferme.png" width="14" height="14"/>
-						    </div>
-						    <span>Fermé</span>
-						</button> 
-					</div>
-				</div>
-				<button id="btnEval" class="button btn-side-nav btn_acts" onclick="btn_act('evaluation');">
-					<div class="btn_img_cont">
-						<div id="btnEval_img"></div>
-					</div>
-					<span>Evaluations</span>
-				</button> 
-				<button id="btnInt" class="button btn-side-nav btn_acts" onclick="btn_act('intervention');">
-					<div class="btn_img_cont">
-						<div id="btnInt_img"></div>
-					</div>
-					<span>Interventions</span>
-				</button> 
-			</div>
-			<hr class="menu_style">
-		  	<div id="filtSum">
-		  		<button title="Montrez toutes les options sélectionnées sur le dashboard" id="btnFiltSum" class="button btn-side-nav btn-filt-sum" onclick="btn_filt_sum();">Montre options choisies</button>
-		  		<div id="win_filt-sum"></div>
-		  	</div>
-		  	<hr class="menu_style">
-		  	<div id="btn_reload_data">
-				<button title="Rechargez toutes les données pour le dashboard" id="btnReloadData" class="button btn-side-nav" onclick="btn_reload_data();">Recharger les données</button> 
-			</div>
-		  	<div id="btn_reset">
-				<button title="Réinitialisez tous les paramètres du dashboard" id="btnReset" class="button btn-side-nav" onclick="btn_reset();" href="#" data-zoom="5" data-position="-4.0,22.0">Réinitialiser</button> 
-			</div>
-		</div>
-
-        <div id="main-container" class="container-fluid">
+        <!-- <div class="viz"> -->
             <div class="row">
+                <div class="col-md-12">
+                    <div id="loader">
+                        <p id='load_text'></p>
+                        <div class="row">
+                            <div id="spinner_container">
+                                <div id="spinner"></div>
+                            </div>
+                        </div>
+                    </div> 
+                    <div id="map-container">
+                        <div id="map"></div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row">
+                        <span id="width"></span>
+                        <span id="height"></span>
+                        <div id="play-container" class="col-md-1">
+                            <button id="btnPlayPause" class="button play"></button>
+                            <button id="btnStop" class="button stop"></button>
+                            <div id="playMode_text">Pour réactiver les principales fonctions du dashboard, appuyez sur le bouton ‘stop’</div>
+                        </div>
+                        <div id="timeseries-container" class="col-md-9">
+                            <div id="timeseries"></div>
+                            <div id="timeseriesbrush"></div>
+                        </div>
+                        <div id="timerange_buttons" class="col-md-2"></div>
+                    </div>
+                </div>
+            </div>
+        <!-- </div> -->
+    </div>
 
-            	<div class="col-md-1">
-            		<img class='logo' src="images/msf-logo.png" alt="MSF logo" />
-            	</div>
-
-            	<div id="title-container" class="col">  
-            		<div class="row">
-                		<p id="dash_title">MSF OCB Pool d'Urgence Congo Dashboard</p>
-                	</div>
-                	<p id="random"><i>! Données fictives utilisées</i></p>
-                	<div class="row float-left">
-                		<button title="Faites le tour des principales caractéristiques de ce site" id="btnIntro" class="button btn">Faire un Tour</button> 
-                	</div>
-	            </div>
-	            
-	            <div class="col">
-                	<div class="float-right more_info">
-                    	<p><i>Source: </i><a href="http://www.minisanterdc.cd/new/index.php" target="_blank">Le Ministère de la Santé</a></p><p>Pour plus d'informations concernant le projet PUC, contactez <a href="mailto:msfocb-rdc-puc-Coordassist@brussels.msf.org" target="_top">le coordinateur</a></p>
-                	</div>
+    <!-- Load spinner -->
+    <div id="modal-screen">
+        <div id="modal-window">
+            <div id="modal-content">
+                <div class="row">
+                    <p id="modal-heading">Téléchargement en cours...</p>
+                </div>
+                <div class="row">
+                    <span id="modal-load-update"></span>
+                </div>
+                <div class="row">
+                    <div id="spinner_container">
+                        <div id="spinner"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="btn_cancel">
+                        <button id="btnCancel" class="button" onclick="btn_cancel();">Annuler téléchargement</button>
+                    </div>
                 </div>
 
-            </div>  
-			
-			
-            <div class="row" >
-			
-				<div class="col-md-12"> 
-					
-					<div id = "map-container">	
-						<div class="row">					
-							<div class="col-md-6">
-								<p class="map_title" id="map_title"></p>
-							</div>											
-							<div class="col-md-3">
-								<button id="btnRiv" class="btn-riv button on" onclick="btn_rivers();">Rivières</button>
-							</div>
-							<div class="col-md-3" id="btn_lvls" class="btn-group btn-group-sm"> 
-								<button id="btnZone" class="btn-lyr button" onclick="btn_change_lyr('zone');">Zones</button>
-								<button id="btnProv" class="btn-lyr button on" onclick="btn_change_lyr('prov');">Provinces</button>	
-							</div>
-								
-						</div>	
-						
-						<div class="row"> 	
-							<div id="map"></div>
-						</div> 
-						
-					</div>
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col-md-12">
-					<div class="row">
-						<span id="width"></span>
-  						<span id="height"></span>
-						<div id="play-container" class="col-md-1">
-							<button id="btnPlayPause" class="button play"></button>
-							<button id="btnStop" class="button stop"></button>
-							<div id="playMode_text">Pour réactiver les principales fonctions du dashboard, appuyez sur le bouton ‘stop’</div>
-						</div>
-						<div id="timeseries-container" class="col-md-9">
-							<div id="timeseries"></div>
-							<div id="timeseriesbrush"></div>
-							
-						</div>
-						<div id="timerange_buttons" class="col-md-2"></div>
-					</div>
-			
-				</div>  
             </div>
+        </div>
+    </div>
 
-        </div> 
 
-        <!-- The Data Loading Modal -->
-		<div id="dataModal" class="modal">
-		  <div class="modal-content"></div>
-		</div>
 
-        <!-- <script src="js/site.js"></script>      -->
+    <!-- <script src="js/site.js"></script>      -->
+    <script src="js/load_files.js"></script>
+</body>
 
-    </body>
 </html>
