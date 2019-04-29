@@ -193,7 +193,7 @@ data = addEpitimeToData(mdata);
 //add crossfilter dimensions & groups
 cf = crossfilter(data);
 //console.log('data: ', data)
-console.time('ADD CROSSFILTER DIMS ALL')
+//console.time('ADD CROSSFILTER DIMS ALL')
 cf.epiDateDim = cf.dimension(function(d) {    
     return d.epitimestamp
 });
@@ -206,7 +206,7 @@ cf.provDim = cf.dimension(function(d) {
 cf.zsDim = cf.dimension(function(d) {
     return d.zs_pc
 });
-console.timeEnd('ADD CROSSFILTER DIMS ALL')
+//console.timeEnd('ADD CROSSFILTER DIMS ALL')
 cf.statsByEpiDateGroup = cf.epiDateDim.group().reduce(reduceAdd, reduceRemove, reduceInitial); 
 cf.statsByZsGroup = cf.zsDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
 cf.statsByProvGroup = cf.provDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
@@ -968,7 +968,7 @@ function createMap(id, data, ...responseTexts) {
         minZoom: 2,
         maxZoom: 15,
         layers: [baselayer],
-        zoomDelta: 0.25,
+        zoomDelta: 0.5,
         zoomSnap: 0.25,
         contextmenu: true,
         contextmenuWidth: 220,
@@ -1001,11 +1001,13 @@ function createMap(id, data, ...responseTexts) {
             callback: toggleDrawZoom
         },*/ {
             text: 'Full screen', 
-            icon: '../images/fullscreen.png',
+            //icon: '../images/fullscreen.png',
+            icon: 'images/fullscreen.png',
             callback: fullScreen
         }, {
             text: 'Exit full screen', 
-            icon: '../images/exit_fullscreen.png',
+            //icon: '../images/exit_fullscreen.png',
+            icon: 'images/exit_fullscreen.png',
             callback: fullScreen
         }]
     });
