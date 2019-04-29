@@ -24,7 +24,7 @@ const select_stat = document.getElementById("stat-select");
 
 
 let g = {};
-console.log("g = ", g);
+//console.log("g = ", g);
 let data;
 let currentMapData;
 let cf;
