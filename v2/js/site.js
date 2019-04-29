@@ -1001,11 +1001,13 @@ function createMap(id, data, ...responseTexts) {
             callback: toggleDrawZoom
         },*/ {
             text: 'Full screen', 
-            icon: '../images/fullscreen.png',
+            //icon: '../images/fullscreen.png',
+            icon: 'images/fullscreen.png',
             callback: fullScreen
         }, {
             text: 'Exit full screen', 
-            icon: '../images/exit_fullscreen.png',
+            //icon: '../images/exit_fullscreen.png',
+            icon: 'images/exit_fullscreen.png',
             callback: fullScreen
         }]
     });
