@@ -956,7 +956,7 @@ function createMap(id, data, ...responseTexts) {
         }
     }
 
-    var baselayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+    var baselayer = L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png',
     {
         attribution: "<img class='logo' src='images/msf-logo.png'/>"
     });
