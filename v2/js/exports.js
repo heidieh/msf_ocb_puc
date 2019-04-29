@@ -11,7 +11,7 @@ function dashboardExport() {
 	let sitrep_data;
 	document.getElementById("modal-load-update").innerHTML = 'Création de l\'image PNG de la carte...';
 	printer.printMap('A4Landscape','fname', function(map_dataUrl) {
-		//console.log(map_dataUrl)
+		//console.log('map_dataUrl: ', map_dataUrl)
 		if ((map_dataUrl=='') || ($('#btnCancel').hasClass('cancel'))) {
 			console.log('Error printing map');
 			cancelDownload();
