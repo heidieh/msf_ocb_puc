@@ -132,12 +132,14 @@ L.Control.EasyPrint = L.Control.extend({
   _createImagePlaceholder: function (sizeMode, callback) {
     
     var plugin = this;
-    
+    console.log('this.mapContainer: ', this.mapContainer)
+    console.log('this.originalState: ', this.originalState)
     domtoimage.toPng(this.mapContainer, {
         width: parseInt(this.originalState.mapWidth.replace('px')),
         height: parseInt(this.originalState.mapHeight.replace('px'))
       })
       .then(function (dataUrl) {
+        console.log('createImagePlaceholder ', dataUrl)
         plugin.blankDiv = document.createElement("div");
         var blankDiv = plugin.blankDiv;
         plugin.outerContainer.parentElement.insertBefore(blankDiv, plugin.outerContainer);
