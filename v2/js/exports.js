@@ -6,6 +6,7 @@
 
 
 function dashboardExport() {
+	console.log('export dashboard')
 	let map_data;
 	let sitrep_data;
 	document.getElementById("modal-load-update").innerHTML = 'Création de l\'image PNG de la carte...';
