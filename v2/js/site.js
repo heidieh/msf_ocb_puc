@@ -1005,14 +1005,14 @@ function createMap(id, data, ...responseTexts) {
         },*/ {
             text: 'Full screen', 
             //icon: '../images/fullscreen.png',  //for local server //check if also for github - below doesn't work
-            //icon: 'images/fullscreen.png',
-            icon: publish_github? 'images/fullscreen.png' : '../images/fullscreen.png',
+            icon: 'images/fullscreen.png',
+            //icon: publish_github? 'images/fullscreen.png' : '../images/fullscreen.png',
             callback: fullScreen
         }, {
             text: 'Exit full screen', 
             //icon: '../images/exit_fullscreen.png',    //for local server  //check if also for github - below doesn't work
-            //icon: 'images/exit_fullscreen.png',
-            icon: publish_github? 'images/exit_fullscreen.png' : '../images/exit_fullscreen.png',
+            icon: 'images/exit_fullscreen.png',
+            //icon: publish_github? 'images/exit_fullscreen.png' : '../images/exit_fullscreen.png',
             callback: fullScreen
         }]
     });

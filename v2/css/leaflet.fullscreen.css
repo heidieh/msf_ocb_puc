@@ -1,7 +1,7 @@
 /*Updated for PUC dashboard - changed icons*/
 
 .leaflet-control-fullscreen a {
-  background:#fff url(fullscreen.png) no-repeat 0 0;
+  background:#fff url(images/fullscreen.png) no-repeat 0 0;
   /*background:#fff url(../images/fullscreen.png) no-repeat 0 0;*/
   background-size:26px 26px;
   background-position: 2px 2px;
@@ -17,7 +17,7 @@
     }*/
 
   .leaflet-fullscreen-on .leaflet-control-fullscreen a {
-    background:#fff url(exit_fullscreen.png) no-repeat 0 0;
+    background:#fff url(images/exit_fullscreen.png) no-repeat 0 0;
     /*background:#fff url(../images/exit_fullscreen.png) no-repeat 0 0;*/
     background-size:26px 26px;
     background-position: 2px 2px;
@@ -48,7 +48,7 @@
     .leaflet-control-fullscreen a {
       /*background-image:url(fullscreen@2x.png);*/
       /*background:#fff url(../images/fullscreen.png) no-repeat 0 0;*/
-      background:#fff url(fullscreen.png) no-repeat 0 0;
+      background:#fff url(images/fullscreen.png) no-repeat 0 0;
       background-size:26px 26px;
       background-position: 2px 2px;
     }
