@@ -134,12 +134,21 @@ function writeFiltSum(doc, filtTop, callback) {
 //Draw Legend 
 function drawLegend(doc, legend_left, legend_top, callback) {
 
-	let legendIcons = [ {'url': '../images/alerte_alarme.png', 'marg-left': 10, 'marg-top': 40, 'width': 15},
-						{'url': '../images/alerte_focus.png', 'marg-left': 10, 'marg-top': 60, 'width': 15},
-						{'url': '../images/alerte_suivi_actif.png', 'marg-left': 10, 'marg-top': 80, 'width': 15},
-						{'url': '../images/alerte_ferme.png', 'marg-left': 10, 'marg-top': 100, 'width': 15},
-						{'url': '../images/evaluation.png', 'marg-left': 4, 'marg-top': 130, 'width': 20},
-						{'url': '../images/intervention.png', 'marg-left': 4, 'marg-top': 156, 'width': 20}];
+	let legendIcons = publish_github? [
+			{'url': 'images/alerte_alarme.png', 'marg-left': 10, 'marg-top': 40, 'width': 15},
+			{'url': 'images/alerte_focus.png', 'marg-left': 10, 'marg-top': 60, 'width': 15},
+			{'url': 'images/alerte_suivi_actif.png', 'marg-left': 10, 'marg-top': 80, 'width': 15},
+			{'url': 'images/alerte_ferme.png', 'marg-left': 10, 'marg-top': 100, 'width': 15},
+			{'url': 'images/evaluation.png', 'marg-left': 4, 'marg-top': 130, 'width': 20},
+			{'url': 'images/intervention.png', 'marg-left': 4, 'marg-top': 156, 'width': 20}
+		  ] : [ 
+			{'url': '../images/alerte_alarme.png', 'marg-left': 10, 'marg-top': 40, 'width': 15},
+			{'url': '../images/alerte_focus.png', 'marg-left': 10, 'marg-top': 60, 'width': 15},
+			{'url': '../images/alerte_suivi_actif.png', 'marg-left': 10, 'marg-top': 80, 'width': 15},
+			{'url': '../images/alerte_ferme.png', 'marg-left': 10, 'marg-top': 100, 'width': 15},
+			{'url': '../images/evaluation.png', 'marg-left': 4, 'marg-top': 130, 'width': 20},
+			{'url': '../images/intervention.png', 'marg-left': 4, 'marg-top': 156, 'width': 20}
+		];
 
 	let count = 0;
 	legendIcons.forEach(function(icon, i) {
@@ -259,8 +268,8 @@ function writeDashboardPDFKit(mapPng, callback) {
 
 	let logoUri = '';
 	function writeHeadings(doc, callback) {
-	    let imgData = '../images/msf-logo.png';
-	    getDataUri('../images/msf-logo.png', function (dataUri) {                    
+	    let imgData =  publish_github? "images/msf-logo.png" : "../images/msf-logo.png";
+	    getDataUri(imgData, function (dataUri) {                    
 	        doc.image(dataUri, 20, 20, {width: 45});
 	        logoUri = dataUri;
 	        writeHeader();
