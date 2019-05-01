@@ -21,7 +21,7 @@ function dashboardExport() {
 			updateSitRepActivities(colorSitRepMap);
 	    	printer.options.hideClasses.push(['maplegend'])
 		    printer.printMap('A4Landscape','fname', function(sitrep_dataUrl) {
-		    	//console.log(sitrep_dataUrl)
+		    	//console.log('sitrep_dataUrl: ', sitrep_dataUrl)
 		    	if ((sitrep_dataUrl=='') || ($('#btnCancel').hasClass('cancel'))) {
 					console.log('Error printing map');
 					cancelDownload();
@@ -452,16 +452,34 @@ function writeExportFiles(mappng, sitreppng) {
 		}
 	  
 
-	    //list of images to add for kml icons:
-		let imageIcons = [
-		        "../images/alerte_focus.png",
-		        "../images/alerte_alarme.png",
-		        "../images/alerte_suivi_actif.png",
-		        "../images/alerte_ferme.png",
-		        "../images/alerte_NA.png",
-		        "../images/evaluation.png",
-		        "../images/intervention.png"
+	    //list of images to add for kml icons:  
+	    //console.log('PUBLISH_GITHUB? ', publish_github)
+		let imageIcons = publish_github? [
+			"images/alerte_focus.png",
+	        "images/alerte_alarme.png",
+	        "images/alerte_suivi_actif.png",
+	        "images/alerte_ferme.png",
+	        "images/alerte_NA.png",
+	        "images/evaluation.png",
+	        "images/intervention.png"
+		] : [
+	        "../images/alerte_focus.png",
+	        "../images/alerte_alarme.png",
+	        "../images/alerte_suivi_actif.png",
+	        "../images/alerte_ferme.png",
+	        "../images/alerte_NA.png",
+	        "../images/evaluation.png",
+	        "../images/intervention.png"
 		    ],
+		/*let imageIcons = [
+	        "../images/alerte_focus.png",
+	        "../images/alerte_alarme.png",
+	        "../images/alerte_suivi_actif.png",
+	        "../images/alerte_ferme.png",
+	        "../images/alerte_NA.png",
+	        "../images/evaluation.png",
+	        "../images/intervention.png"
+		    ],*/
 		    index = 0;  
 
 		//load each image
@@ -469,7 +487,8 @@ function writeExportFiles(mappng, sitreppng) {
 		    if (index < imageIcons.length) {
 		    	try {
 			        loadAsArrayBuffer(imageIcons[index++], function(buffer, url) {
-			            let filename = url.substr(10); //getFilename(url);
+			            //let filename = url.substr(10); //getFilename(url);
+			            let filename = publish_github? url.substr(7) : url.substr(10); //getFilename from url
 			            zip.folder('kmls').folder('images').file(filename, buffer); // image has loaded, add to archive
 			            load();                        // load next image
 			        })

@@ -76,53 +76,124 @@ moment.locale('fr');
 
 window.onresize = resize;
 
-
+//const publish_github = true;
 /*********************/
 /****  LOAD DATA  ****/
 /*********************/
 
-//DATA LOAD FOR APP:
-/*let fetchedData = []
 
-//0 IDS DATA
-let apiRequest1 = fetch('getIDS').then(function(response) {
-    return response.json()
-});
-fetchedData.push(apiRequest1)
+/*if (!publish_github) {      //DATA LOAD FOR APP:
 
-// 1 2 3 4 5 = GIS DATA
-GISLayers.forEach(lyr => {
-    fetchedData.push(
-        fetch('getGISData/' + lyr.fname).then(function(response)
-        {
-            return response.text()
-        })
-    )
-})
+    let fetchedData = []
 
-console.log("Loading....")
+    //0 IDS DATA
+    let apiRequest1 = fetch('getIDS').then(function(response) {
+        return response.json()
+    });
+    fetchedData.push(apiRequest1)
 
-//loading spinner
-document.getElementById("load_text").innerHTML = 'Chargement en cours...';
-document.getElementById("spinner_container").style.display = 'inline-block';
-document.getElementById("spinner").classList.add('epLoader');
+    // 1 2 3 4 5 = GIS DATA
+    GISLayers.forEach(lyr => {
+        fetchedData.push(
+            fetch('getGISData/' + lyr.fname).then(function(response)
+            {
+                return response.text()
+            })
+        )
+    })
+
+    console.log("Loading....")
+
+    //loading spinner
+    document.getElementById("load_text").innerHTML = 'Chargement en cours...';
+    document.getElementById("spinner_container").style.display = 'inline-block';
+    document.getElementById("spinner").classList.add('epLoader');
 
 
-Promise.all(fetchedData).then(function(apiData) {
+    Promise.all(fetchedData).then(function(apiData) {
 
-    console.log("Loaded data");
-    let [mdata, ...geoData] = apiData;
-    //console.log(mdata)
-    //console.time('ADD EPITIME')
-    data = addEpitimeToData(mdata);  //temporary function - date to be sent from database as timestamp
-    //createEpitime(mdata)           //Note: will need this after function above removed - needs testing
-    //console.timeEnd('ADD EPITIME');
+        console.log("Loaded data");
+        let [mdata, ...geoData] = apiData;
+        //console.log(mdata)
+        //console.time('ADD EPITIME')
+        data = addEpitimeToData(mdata);  //temporary function - date to be sent from database as timestamp
+        //createEpitime(mdata)           //Note: will need this after function above removed - needs testing
+        //console.timeEnd('ADD EPITIME');
 
+
+        //add crossfilter dimensions & groups
+        cf = crossfilter(data);
+        //console.log('data: ', data)
+        //console.time('ADD CROSSFILTER DIMS ALL')
+        cf.epiDateDim = cf.dimension(function(d) {    
+            return d.epitimestamp
+        });
+        cf.malDim = cf.dimension(function(d) { 
+            return d.mal
+        });
+        cf.provDim = cf.dimension(function(d) {
+            return d.prov_pc
+        });
+        cf.zsDim = cf.dimension(function(d) {
+            return d.zs_pc
+        });
+        //console.timeEnd('ADD CROSSFILTER DIMS ALL')
+        cf.statsByEpiDateGroup = cf.epiDateDim.group().reduce(reduceAdd, reduceRemove, reduceInitial); 
+        cf.statsByZsGroup = cf.zsDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
+        cf.statsByProvGroup = cf.provDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
+
+        createDiseaseList();
+        initCurrentVars();
+
+        map = createMap('#map', [], ...geoData);
+        geonames = geozs.features.map(a => ({'prov': a.properties.lvl3_name, 'prov_pcode': a.properties.lvl3_pcode, 'zs': a.properties.name, 'zs_pcode': a.properties.pcode}))
+
+        createTimeRangeButtons();
+        createTimeSeriesCharts(); 
+        updateMapInfo();
+
+        initSelectivity();
+        initDiseaseDropDown();
+        initStatsDropDown();
+        changeDiseaseSelection(0);
+        changeStatSelection(0);
+        addMenuToggle();
+
+        btn_act('all');
+        console.log("ready");
+        document.getElementById("loader").innerHTML = '';
+    });
+
+
+} else { */       //DATA LOAD FOR GITHUB:
+
+    //loading spinner
+    document.getElementById("load_text").innerHTML = 'Chargement en cours...';
+    document.getElementById("spinner_container").style.display = 'inline-block';
+    document.getElementById("spinner").classList.add('epLoader');
+
+
+
+    var mdata = (function() {
+        var json = null;
+        $.ajax({
+            'async': false,
+            'global': false,
+            'url': "data/data.js",    //replace with axios endpoint
+            'dataType': "json",
+            'success': function (data) {
+                json = data;
+            }
+        });
+        return json;
+    })();  
+
+    data = addEpitimeToData(mdata); 
 
     //add crossfilter dimensions & groups
     cf = crossfilter(data);
     //console.log('data: ', data)
-    console.time('ADD CROSSFILTER DIMS ALL')
+    //console.time('ADD CROSSFILTER DIMS ALL')
     cf.epiDateDim = cf.dimension(function(d) {    
         return d.epitimestamp
     });
@@ -135,173 +206,103 @@ Promise.all(fetchedData).then(function(apiData) {
     cf.zsDim = cf.dimension(function(d) {
         return d.zs_pc
     });
-    console.timeEnd('ADD CROSSFILTER DIMS ALL')
+    //console.timeEnd('ADD CROSSFILTER DIMS ALL')
     cf.statsByEpiDateGroup = cf.epiDateDim.group().reduce(reduceAdd, reduceRemove, reduceInitial); 
     cf.statsByZsGroup = cf.zsDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
     cf.statsByProvGroup = cf.provDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
 
-    createDiseaseList();
-    initCurrentVars();
-
-    map = createMap('#map', [], ...geoData);
-    geonames = geozs.features.map(a => ({'prov': a.properties.lvl3_name, 'prov_pcode': a.properties.lvl3_pcode, 'zs': a.properties.name, 'zs_pcode': a.properties.pcode}))
-
-    createTimeRangeButtons();
-    createTimeSeriesCharts(); 
-    updateMapInfo();
-
-    initSelectivity();
-    initDiseaseDropDown();
-    initStatsDropDown();
-    changeDiseaseSelection(0);
-    changeStatSelection(0);
-    addMenuToggle();
-
-    btn_act('all');
-    console.log("ready");
-    document.getElementById("loader").innerHTML = '';
-});*/
 
 
+    window.onload = function () {
+        //console.log("site.js: window.onload");
+        var req = new XMLHttpRequest();
+        var url_zs = 'data/rdc_zs.json'   
+            req.open('GET', url_zs, true);
+            req.onreadystatechange = handler;
+            req.send();
+        var topoob = {};
+        geozs = {};
+
+        var prov_geoms;
+        var req2 = new XMLHttpRequest();
+        var url_prov = 'data/rdc_prov.json'   
+            req2.open('GET', url_prov, true);
+            req2.onreadystatechange = handler;
+            req2.send();
+        var topoob2 = {};
+        geoprov = {};
+
+        var prov_bound_geoms;
+        var req3 = new XMLHttpRequest();
+        var url_prov_bound = 'data/rdc_prov_bound.json'   
+            req3.open('GET', url_prov_bound, true);
+            req3.onreadystatechange = handler;
+            req3.send();
+        var topoob3 = {};
+        geoprovbound = {};
+
+        var riv_geoms;
+        var req4 = new XMLHttpRequest();
+        var url_riv = 'data/rdc_rivers.json'   
+            req4.open('GET', url_riv, true);
+            req4.onreadystatechange = handler;
+            req4.send();
+        var topoob4 = {};
+        georiv = {};
+
+        //var lak_geoms;
+        var req5 = new XMLHttpRequest();
+        var url_lak = 'data/rdc_lakes.json'   
+            req5.open('GET', url_lak, true);
+            req5.onreadystatechange = handler;
+            req5.send();
+        var topoob5 = {};
+        geolak = {};
+
+        //var act_geoms;
+        /*var req6 = new XMLHttpRequest();
+        //var url_act = 'data/rdc_prov_cntr.json'   
+            req6.open('GET', url_act, true);
+            req6.onreadystatechange = handler;
+            req6.send();
+        var topoob6 = {};
+        geoact = {};*/
 
 
-//DATA LOAD FOR GITHUB:
+        function handler(){
+            //console.log("site.js: in handler");
+            if ((req.readyState === XMLHttpRequest.DONE) && (req2.readyState === XMLHttpRequest.DONE) && (req3.readyState === XMLHttpRequest.DONE) && (req4.readyState === XMLHttpRequest.DONE)) {// && (req5.readyState === XMLHttpRequest.DONE))  {
+                //console.log("site.js: in handler, xmlhttprequests done");
 
-//loading spinner
-document.getElementById("load_text").innerHTML = 'Chargement en cours...';
-document.getElementById("spinner_container").style.display = 'inline-block';
-document.getElementById("spinner").classList.add('epLoader');
+                createDiseaseList();
+                initCurrentVars();
 
+                let geoData = [req.responseText, req2.responseText, req3.responseText, req4.responseText, req5.responseText];
 
+                map = createMap('#map', [], ...geoData);
+                geonames = geozs.features.map(a => ({'prov': a.properties.lvl3_name, 'prov_pcode': a.properties.lvl3_pcode, 'zs': a.properties.name, 'zs_pcode': a.properties.pcode}))
 
-var mdata = (function() {
-    var json = null;
-    $.ajax({
-        'async': false,
-        'global': false,
-        'url': "data/data.js",    //replace with axios endpoint
-        'dataType': "json",
-        'success': function (data) {
-            json = data;
-        }
-    });
-    return json;
-})();  
+                createTimeRangeButtons();
+                createTimeSeriesCharts(); 
+                updateMapInfo();
 
-data = addEpitimeToData(mdata); 
+                initSelectivity();
+                initDiseaseDropDown();
+                initStatsDropDown();
+                changeDiseaseSelection(0);
+                changeStatSelection(0);
+                addMenuToggle();
 
-//add crossfilter dimensions & groups
-cf = crossfilter(data);
-//console.log('data: ', data)
-//console.time('ADD CROSSFILTER DIMS ALL')
-cf.epiDateDim = cf.dimension(function(d) {    
-    return d.epitimestamp
-});
-cf.malDim = cf.dimension(function(d) { 
-    return d.mal
-});
-cf.provDim = cf.dimension(function(d) {
-    return d.prov_pc
-});
-cf.zsDim = cf.dimension(function(d) {
-    return d.zs_pc
-});
-//console.timeEnd('ADD CROSSFILTER DIMS ALL')
-cf.statsByEpiDateGroup = cf.epiDateDim.group().reduce(reduceAdd, reduceRemove, reduceInitial); 
-cf.statsByZsGroup = cf.zsDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
-cf.statsByProvGroup = cf.provDim.group().reduce(reduceAdd, reduceRemove, reduceInitial);
+                btn_act('all');
+                console.log("ready");
+                document.getElementById("loader").innerHTML = '';
+            }
 
-
-
-window.onload = function () {
-    //console.log("site.js: window.onload");
-    var req = new XMLHttpRequest();
-    var url_zs = 'data/rdc_zs.json'   
-        req.open('GET', url_zs, true);
-        req.onreadystatechange = handler;
-        req.send();
-    var topoob = {};
-    geozs = {};
-
-    var prov_geoms;
-    var req2 = new XMLHttpRequest();
-    var url_prov = 'data/rdc_prov.json'   
-        req2.open('GET', url_prov, true);
-        req2.onreadystatechange = handler;
-        req2.send();
-    var topoob2 = {};
-    geoprov = {};
-
-    var prov_bound_geoms;
-    var req3 = new XMLHttpRequest();
-    var url_prov_bound = 'data/rdc_prov_bound.json'   
-        req3.open('GET', url_prov_bound, true);
-        req3.onreadystatechange = handler;
-        req3.send();
-    var topoob3 = {};
-    geoprovbound = {};
-
-    var riv_geoms;
-    var req4 = new XMLHttpRequest();
-    var url_riv = 'data/rdc_rivers.json'   
-        req4.open('GET', url_riv, true);
-        req4.onreadystatechange = handler;
-        req4.send();
-    var topoob4 = {};
-    georiv = {};
-
-    //var lak_geoms;
-    var req5 = new XMLHttpRequest();
-    var url_lak = 'data/rdc_lakes.json'   
-        req5.open('GET', url_lak, true);
-        req5.onreadystatechange = handler;
-        req5.send();
-    var topoob5 = {};
-    geolak = {};
-
-    //var act_geoms;
-    /*var req6 = new XMLHttpRequest();
-    //var url_act = 'data/rdc_prov_cntr.json'   
-        req6.open('GET', url_act, true);
-        req6.onreadystatechange = handler;
-        req6.send();
-    var topoob6 = {};
-    geoact = {};*/
-
-
-    function handler(){
-        //console.log("site.js: in handler");
-        if ((req.readyState === XMLHttpRequest.DONE) && (req2.readyState === XMLHttpRequest.DONE) && (req3.readyState === XMLHttpRequest.DONE) && (req4.readyState === XMLHttpRequest.DONE)) {// && (req5.readyState === XMLHttpRequest.DONE))  {
-            //console.log("site.js: in handler, xmlhttprequests done");
-
-            createDiseaseList();
-            initCurrentVars();
-
-            let geoData = [req.responseText, req2.responseText, req3.responseText, req4.responseText, req5.responseText];
-
-            map = createMap('#map', [], ...geoData);
-            geonames = geozs.features.map(a => ({'prov': a.properties.lvl3_name, 'prov_pcode': a.properties.lvl3_pcode, 'zs': a.properties.name, 'zs_pcode': a.properties.pcode}))
-
-            createTimeRangeButtons();
-            createTimeSeriesCharts(); 
-            updateMapInfo();
-
-            initSelectivity();
-            initDiseaseDropDown();
-            initStatsDropDown();
-            changeDiseaseSelection(0);
-            changeStatSelection(0);
-            addMenuToggle();
-
-            btn_act('all');
-            console.log("ready");
-            document.getElementById("loader").innerHTML = '';
         }
 
     }
 
-}
-
+//}
 
 
 
@@ -956,11 +957,13 @@ function createMap(id, data, ...responseTexts) {
         }
     }
 
-    var baselayer = L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png',
+    //var baselayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+    var baselayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
         attribution: "<img class='logo' src='images/msf-logo.png'/>"
     });
 
+    //console.log('PUBLISH_GITHUB? ', publish_github)
     map = L.map('map',
     {
         center: defaultMapCenter, 
@@ -1001,13 +1004,15 @@ function createMap(id, data, ...responseTexts) {
             callback: toggleDrawZoom
         },*/ {
             text: 'Full screen', 
-            //icon: '../images/fullscreen.png',
-            icon: 'images/fullscreen.png',
+            //icon: '../images/fullscreen.png',  //for local server
+            //icon: 'images/fullscreen.png',
+            icon: publish_github? 'images/fullscreen.png' : '../images/fullscreen.png',
             callback: fullScreen
         }, {
             text: 'Exit full screen', 
-            //icon: '../images/exit_fullscreen.png',
-            icon: 'images/exit_fullscreen.png',
+            //icon: '../images/exit_fullscreen.png',    //for local server
+            //icon: 'images/exit_fullscreen.png',
+            icon: publish_github? 'images/exit_fullscreen.png' : '../images/exit_fullscreen.png',
             callback: fullScreen
         }]
     });
@@ -1132,6 +1137,7 @@ function createMap(id, data, ...responseTexts) {
 
     printer = L.easyPrint({
             tileLayer: baselayer,
+            tileWait: 5000,
             sizeModes: ['A4Landscape'], 
             exportOnly: true,
             customSpinnerClass: 'epLoader',
