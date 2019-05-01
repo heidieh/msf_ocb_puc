@@ -132,14 +132,14 @@ L.Control.EasyPrint = L.Control.extend({
   _createImagePlaceholder: function (sizeMode, callback) {
     
     var plugin = this;
-    console.log('this.mapContainer: ', this.mapContainer)
-    console.log('this.originalState: ', this.originalState)
+    //console.log('this.mapContainer: ', this.mapContainer)
+    //console.log('this.originalState: ', this.originalState)
     domtoimage.toPng(this.mapContainer, {
         width: parseInt(this.originalState.mapWidth.replace('px')),
         height: parseInt(this.originalState.mapHeight.replace('px'))
       })
       .then(function (dataUrl) {
-        console.log('createImagePlaceholder ', dataUrl)
+        //console.log('createImagePlaceholder ', dataUrl)
         plugin.blankDiv = document.createElement("div");
         var blankDiv = plugin.blankDiv;
         plugin.outerContainer.parentElement.insertBefore(blankDiv, plugin.outerContainer);
@@ -159,7 +159,7 @@ L.Control.EasyPrint = L.Control.extend({
   },
 
   _resizeAndPrintMap: function (sizeMode, callback) {
-    
+    //console.log('in resizeAndPrintMap')
     this.outerContainer.style.opacity = 0;
     var pageSize = this.options.sizeModes.filter(function (item) {
       return item.className.indexOf(sizeMode) > -1;
@@ -175,6 +175,7 @@ L.Control.EasyPrint = L.Control.extend({
     this._map.setView(this.originalState.center);
     this._map.setZoom(this.originalState.zoom);
     this._map.invalidateSize();
+    //console.log('this.options.tileLayer: ', this.options.tileLayer)
     if (this.options.tileLayer) {
       this._pausePrint(sizeMode, callback)
     } else {

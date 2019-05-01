@@ -1,3 +1,5 @@
+const publish_github = true;
+
 let map;
 
 var geoprov, geozs, geoprovbound, georiv, geolak, geoacts;
