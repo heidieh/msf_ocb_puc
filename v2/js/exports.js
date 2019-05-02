@@ -453,42 +453,26 @@ function writeExportFiles(mappng, sitreppng) {
 	  
 
 	    //list of images to add for kml icons:  
-	    //console.log('PUBLISH_GITHUB? ', publish_github)
-		let imageIcons = publish_github? [
-			"images/alerte_focus.png",
-	        "images/alerte_alarme.png",
-	        "images/alerte_suivi_actif.png",
-	        "images/alerte_ferme.png",
-	        "images/alerte_NA.png",
-	        "images/evaluation.png",
-	        "images/intervention.png"
-		] : [
-	        "../images/alerte_focus.png",
-	        "../images/alerte_alarme.png",
-	        "../images/alerte_suivi_actif.png",
-	        "../images/alerte_ferme.png",
-	        "../images/alerte_NA.png",
-	        "../images/evaluation.png",
-	        "../images/intervention.png"
-		    ],
-		/*let imageIcons = [
-	        "../images/alerte_focus.png",
-	        "../images/alerte_alarme.png",
-	        "../images/alerte_suivi_actif.png",
-	        "../images/alerte_ferme.png",
-	        "../images/alerte_NA.png",
-	        "../images/evaluation.png",
-	        "../images/intervention.png"
-		    ],*/
-		    index = 0;  
+		let imageIcons = [
+			imageUrl.alerte_focus[publish_to],
+			imageUrl.alerte_alarme[publish_to],
+			imageUrl.alerte_suivi_actif[publish_to],
+			imageUrl.alerte_ferme[publish_to],
+			imageUrl.alerte_NA[publish_to],
+			imageUrl.evaluation[publish_to],
+			imageUrl.intervention[publish_to]
+		],
+		index = 0;
+
+
+		//console.log(imageIcons,newImageIcons)
 
 		//load each image
 		(function load() {
 		    if (index < imageIcons.length) {
 		    	try {
 			        loadAsArrayBuffer(imageIcons[index++], function(buffer, url) {
-			            //let filename = url.substr(10); //getFilename(url);
-			            let filename = publish_github? url.substr(7) : url.substr(10); //getFilename from url
+			            let filename = imageFileName(url)
 			            zip.folder('kmls').folder('images').file(filename, buffer); // image has loaded, add to archive
 			            load();                        // load next image
 			        })

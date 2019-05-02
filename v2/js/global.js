@@ -1,4 +1,26 @@
-const publish_github = true;
+const publish_to = 'github';  //local or github - affects image paths
+
+const imageUrl = {
+    alerte_alarme: {local: "../images/alerte_alarme.png", github: "images/alerte_alarme.png"},
+    alerte_focus: {local: "../images/alerte_focus.png", github: "images/alerte_focus.png"},
+    alerte_suivi_actif: {local: "../images/alerte_suivi_actif.png", github: "images/alerte_suivi_actif.png"},
+    alerte_ferme: {local: "../images/alerte_ferme.png", github: "images/alerte_ferme.png"},
+    alerte_NA: {local: "../images/alerte_NA.png", github: "images/alerte_NA.png"},
+    evaluation: {local: "../images/evaluation.png", github: "images/evaluation.png"},
+    intervention: {local: "../images/intervention.png", github: "images/intervention.png"},
+    msf_logo: {local: "../images/msf-logo.png", github: "images/msf-logo.png"},
+    fullscreen: {local: "../images/fullscreen.png", github: "images/fullscreen.png"},
+    exit_fullscreen: {local: "../images/exit_fullscreen.png", github: "images/exit_fullscreen.png"},
+}
+function imageFileName(url) {
+    switch (publish_to) {
+        case 'local': return url.substr(10);
+        case 'github': return url.substr(7);
+        default: return url.substr(10);
+    }
+
+};
+
 
 let map;
 
