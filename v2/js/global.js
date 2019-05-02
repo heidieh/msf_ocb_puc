@@ -1,4 +1,4 @@
-const publish_to = 'local';  //local or github - affects image paths
+const publish_to = 'github';  //local or github - affects image paths
 
 const imageUrl = {
     alerte_alarme: {local: "../images/alerte_alarme.png", github: "images/alerte_alarme.png"},

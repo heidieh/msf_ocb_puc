@@ -18,7 +18,6 @@
 // - Check d3 modularity - include only as needed
 // - Normalize CSS - to remove browser inconsistencies
 // - Add logger tool
-// - Catch errors if icon images not available
 // - Loader - add progress bar e.g. https://github.com/samundrak/fetch-progress/ ?
 //
 //
