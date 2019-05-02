@@ -76,13 +76,13 @@ moment.locale('fr');
 
 window.onresize = resize;
 
-//const publish_github = true;
+
 /*********************/
 /****  LOAD DATA  ****/
 /*********************/
 
 
-/*if (!publish_github) {      //DATA LOAD FOR APP:
+/*//DATA LOAD FOR APP:
 
     let fetchedData = []
 
@@ -162,10 +162,10 @@ window.onresize = resize;
         btn_act('all');
         console.log("ready");
         document.getElementById("loader").innerHTML = '';
-    });
+    });*/
 
 
-} else { */       //DATA LOAD FOR GITHUB:
+//LOCAL DATA LOAD:
 
     //loading spinner
     document.getElementById("load_text").innerHTML = 'Chargement en cours...';
@@ -302,7 +302,6 @@ window.onresize = resize;
 
     }
 
-//}
 
 
 
@@ -957,13 +956,13 @@ function createMap(id, data, ...responseTexts) {
         }
     }
 
-    //var baselayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+
     var baselayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     {
         attribution: "<img class='logo' src='images/msf-logo.png'/>"
     });
 
-    //console.log('PUBLISH_GITHUB? ', publish_github)
+
     map = L.map('map',
     {
         center: defaultMapCenter, 
@@ -1004,15 +1003,11 @@ function createMap(id, data, ...responseTexts) {
             callback: toggleDrawZoom
         },*/ {
             text: 'Full screen', 
-            //icon: '../images/fullscreen.png',  //for local server //check if also for github - below doesn't work
-            //icon: 'images/fullscreen.png',
-            icon: publish_github? 'images/fullscreen.png' : '../images/fullscreen.png',
+            icon: imageUrl.fullscreen[publish_to],
             callback: fullScreen
         }, {
             text: 'Exit full screen', 
-            //icon: '../images/exit_fullscreen.png',    //for local server  //check if also for github - below doesn't work
-            //icon: 'images/exit_fullscreen.png',
-            icon: publish_github? 'images/exit_fullscreen.png' : '../images/exit_fullscreen.png',
+            icon: imageUrl.exit_fullscreen[publish_to],
             callback: fullScreen
         }]
     });
@@ -1115,22 +1110,20 @@ function createMap(id, data, ...responseTexts) {
         map.toggleFullscreen();
     }
 
-    map.on('fullscreenchange', function () {
-        
+
+    map.on('fullscreenchange', function () {      
         if (map.isFullscreen()) {
             map.contextmenu.removeItem(idxFull);
             map.contextmenu.insertItem({
                 text: 'Exit full screen', 
-                //icon: '../images/exit_fullscreen.png',
-                icon: publish_github? 'images/exit_fullscreen.png' : '../images/exit_fullscreen.png',
+                icon: imageUrl.exit_fullscreen[publish_to],
                 callback: fullScreen
             }, idxExit);
         } else {
             map.contextmenu.removeItem(idxExit-1);
             map.contextmenu.insertItem({
                 text: 'Full screen', 
-                //icon: '../images/fullscreen.png',
-                icon: publish_github? 'images/fullscreen.png' : '../images/fullscreen.png',
+                icon: imageUrl.fullscreen[publish_to],
                 callback: fullScreen
             }, idxFull);
         }
