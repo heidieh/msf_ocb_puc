@@ -125,7 +125,7 @@ function writeExportFiles(mappng, sitreppng) {
 		    const context = canvas.getContext("2d");
 			let dataURL = '';
 
-		    const new_width = width;
+		    let new_width = width;
 		    const new_height = height;
 		    if (width > max_pdf_width) {
 		  		new_width = max_pdf_width;
