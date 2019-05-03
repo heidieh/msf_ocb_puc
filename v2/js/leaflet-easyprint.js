@@ -208,7 +208,6 @@ L.Control.EasyPrint = L.Control.extend({
           var blob = plugin._dataURItoBlob(dataUrl);
           if (plugin.options.exportOnly) {
             var export_dataUrl = dataUrl;
-
           } else {
             plugin._sendToBrowserPrint(dataUrl, plugin.orientation);
           }
@@ -222,7 +221,7 @@ L.Control.EasyPrint = L.Control.extend({
               plugin.mapContainer.style.width = plugin.originalState.percentageWidth
             }
             else {
-              plugin.mapContainer.style.width = plugin.originalState.mapWidth;              
+              plugin.mapContainer.style.width = plugin.originalState.mapWidth;            
             }
             plugin.mapContainer.style.height = plugin.originalState.mapHeight;
             plugin._removeOuterContainer(plugin.mapContainer, plugin.outerContainer, plugin.blankDiv)
@@ -230,9 +229,7 @@ L.Control.EasyPrint = L.Control.extend({
             plugin._map.setView(plugin.originalState.center);
             plugin._map.setZoom(plugin.originalState.zoom);
           }        
-          
           plugin._map.fire("easyPrint-finished");
-
           if (callback) {callback(export_dataUrl)}
           else {return export_dataUrl};
 
