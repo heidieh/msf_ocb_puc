@@ -195,7 +195,7 @@ hr.menu_style{
   margin-bottom: 20px;
 }
 
-.intro-tooltip {
+.intro-wide {
   margin-top: 0px;
   min-width: 400px;
   max-width: 600px;
@@ -208,11 +208,19 @@ hr.menu_style{
   font: 12px sans-serif;
 }
 
-.intro-timeseries {
+.intro-medium {
   min-width: 400px;
   max-width: 500px;
   font: 12px sans-serif;
 }
+
+.intro-narrow {
+  margin-top: 0px;
+  min-width: 250px;
+  max-width: 350px;
+  font: 12px sans-serif;
+}
+
 
 .logo{
 	margin-top: 5px;
@@ -349,6 +357,12 @@ hr.menu_style{
 	margin-top: 0px;
 	margin-left: 0px;
 	margin-bottom: 1px;
+  display: inline;
+}
+
+.info_text {
+  font: 12px 'helvetica neue','open sans','sans-serif';
+  font-weight: 400;
   display: inline;
 }
 
