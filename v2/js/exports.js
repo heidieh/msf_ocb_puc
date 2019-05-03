@@ -41,7 +41,7 @@ function dashboardExport() {
 
 function writeExportFiles(mappng, sitreppng) {
 
-    const now = 'fictive_' + moment().format('YYYYMMDDHHmmss');
+    const now = moment().format('YYYYMMDDHHmmss');
     const zip = new JSZip();
 	
 

@@ -6,19 +6,15 @@
 //     - bars for no data could state 'no data' on mouseover instead of not existing?
 // - Map:
 //     - sometimes map zooms to feature when attempting to select feature - annoying
-//     - full screen toggle - add to context menu
 //     - leaflet side panel could be put into map? - e.g. see hotosm    https://github.com/Turbo87/leaflet-sidebar/   https://codepen.io/leemark/pen/vOrXWE
 // - User interface:
 //   - Improve side panel UI?
-//   - Restore contact link ***Q - who should it be?
 // - responsive design
-// - Update Help tour
-// - Code clean-up/ES6 - remove all vars & for loops
 //
 // - Check d3 modularity - include only as needed
 // - Normalize CSS - to remove browser inconsistencies
 // - Add logger tool
-// - Loader - add progress bar e.g. https://github.com/samundrak/fetch-progress/ ?
+// - Loader - add progress bar? e.g. https://github.com/samundrak/fetch-progress/ ?
 //
 //
 // Recently completed updates:
@@ -32,6 +28,7 @@
 // - removed dependence on geonames.js file - instead now reads this data from zone geojson layer -> reads object properties name, pcode, lvl3_name, lvl3_pcode (as zs, zs_pcode, prov, prov_pcode)
 // - reset buttons - reset all button - added user confirm alert
 //                 - added reset map button - resets to full province layer (all selected), zooms to full DRC
+// - Updated Help tour for v2.2
 // - Barchart:
 //   - highlight bars on hover for whole height of chart (not only height of bars)
 //   - fixed bar spacing issue
